@@ -11,7 +11,8 @@
     { title: "Neon Spores", src: "audio/8_neon_spores.flac" },
     { title: "Infernal Heartbeat", src: "audio/9_infernal_heartbeat.flac" },
     { title: "Apex Confrontation", src: "audio/10_apex_confrontation.mp3" },
-    { title: "Sands of Time", src: "audio/11_sands_of_time.mp3" }
+    { title: "Sands of Time", src: "audio/11_sands_of_time.mp3" },
+    { title: "Hurry Up", src: "audio/12_hurry_up.flac" }    
   ];
 
   const audio = document.getElementById("bgMusic");
