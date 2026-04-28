@@ -2,7 +2,7 @@
   const MUSIC_KEY = "temps-music-state-v1";
   const VOLUME_STEPS = [0, 0.33, 0.67];
   const VOLUME_ICONS = ["🔇", "🔉", "🔊"];
-  const VOLUME_LABELS = ["Muted", "33% Volume", "67% Volume"];
+  const VOLUME_LABELS = ["0", "33", "67"];
 
   const musicPlaylist = [
     { title: "Emerald Canopy", src: "audio/1_emerald_canopy.flac" },
@@ -91,7 +91,8 @@
     toggleBtn.textContent = VOLUME_ICONS[volumeStep];
     toggleBtn.setAttribute("aria-pressed", String(isMusicEnabled()));
     toggleBtn.setAttribute("aria-label", `Music volume: ${VOLUME_LABELS[volumeStep]}`);
-    toggleBtn.title = `Music ${VOLUME_LABELS[volumeStep]} (${Math.round(vol * 100)}%)`;
+    toggleBtn.title = `Volume ${VOLUME_LABELS[volumeStep]}%`;
+    toggleBtn.setAttribute("aria-label", `Volume ${VOLUME_LABELS[volumeStep]}%`);
 
     if (status) status.textContent = isMusicEnabled()
       ? `Playing: ${trackIndex + 1} (${VOLUME_LABELS[volumeStep]})`
