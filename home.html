@@ -263,15 +263,36 @@
     .bad { color: var(--bad); }
     .muted { color: var(--subtle); }
 
-    .music-note {
-      margin: 0.6rem auto 0;
-      text-align: center;
-      font-size: 0.84rem;
-      color: var(--subtle);
-      min-height: 1.05rem;
-      max-width: 420px;
-      line-height: 1.35;
-      word-break: break-word;
+    /* Shared music hook styles (matches daily/hourly) */
+    #musicToggle {
+      position: fixed;
+      top: 12px;
+      right: 60px;
+      z-index: 10002;
+      width: 32px;
+      height: 32px;
+      border: 0;
+      border-radius: 10px;
+      background: #ffffff;
+      color: #0f172a;
+      font-size: 1rem;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.25);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    #musicToggle:hover {
+      transform: translateY(-1px);
+      background: #f8fafc;
+      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.3);
+    }
+
+    #musicToggle:active {
+      transform: scale(0.96);
     }
 
     .daily-button-wrap {
@@ -321,6 +342,10 @@
         top: 10px;
         right: 10px;
       }
+      #musicToggle {
+        top: 10px;
+        right: 58px;
+      }
     }
   </style>
 </head>
@@ -347,20 +372,18 @@
     <div class="daily-button-wrap">
       <a id="daily-button" href="daily" aria-label="Go to Daily"> Go to Daily </a>
     </div>
-    
-    <div class="field">
-      <label for="music-volume">
-        Music volume: <span id="music-volume-label"> 50% </span>
-      </label>
-      <input id="music-volume" type="range" min="0" max="1" step="0.25" value="0.5" />
-    </div>
-
-    <button id="start-music-btn" type="button" class="music-icon-btn" aria-label="Play background music" title="Play background music">
-      🔊
-    </button>
-    
-    <p id="music-note" class="music-note" aria-live="polite"></p>
   </div>
+
+  <!-- Shared music UI hooks -->
+  <button
+    id="musicToggle"
+    type="button"
+    aria-label="Toggle background music"
+    title="Toggle background music">
+    🔇
+  </button>
+  <span id="musicStatus" aria-live="polite" style="display:none;"></span>
+  <audio id="bgMusic" preload="none" aria-label="Background music"></audio>
 
   <!-- Floating top-right settings gear -->
   <button
@@ -399,8 +422,7 @@
     </div>
   </div>
 
-  <!-- Background music player (no controls visible) -->
-  <audio id="bgMusic" preload="auto" aria-label="Background music"></audio>
+  <script src="music.js"></script>
 
   <script>
     const SUPABASE_URL = 'https://ckyqknlxmjqlkqnxhgef.supabase.co';
@@ -428,190 +450,6 @@
 
     let currentUser = null;
     let originalProfile = { username: "", email: "" };
-
-    const musicPlaylist = [
-      { title: "Emerald Canopy", src: "audio/1_emerald_canopy.flac" },
-      { title: "Frostbound Echoes", src: "audio/2_frostbound_echoes.flac" },
-      { title: "Verdant Labyrinth", src: "audio/3_verdant_labyrinth.flac" },
-      { title: "Abyssal Dreams", src: "audio/4_abyssal_dreams.flac" },
-      { title: "Crimson Decay", src: "audio/5_crimson_decay.flac" },
-      { title: "Celestial Radiance", src: "audio/6_celestial_radiance.flac" },
-      { title: "Stone Whispers", src: "audio/7_stone_whispers.flac" },
-      { title: "Neon Spores", src: "audio/8_neon_spores.flac" },
-      { title: "Infernal Heartbeat", src: "audio/9_infernal_heartbeat.flac" },
-      { title: "Apex Confrontation", src: "audio/10_apex_confrontation.mp3" },
-      { title: "Sands of Time", src: "audio/11_sands_of_time.mp3" }
-    ];
-    
-    const bgMusic = document.getElementById("bgMusic");
-    const musicNote = document.getElementById("music-note");
-    const musicVolume = document.getElementById("music-volume");
-    const musicVolumeLabel = document.getElementById("music-volume-label");
-    const startMusicBtn = document.getElementById("start-music-btn");
-    
-    let musicTrackIndex = 0;
-    let musicStarted = false;
-    let switchingTrack = false;
-    let attempts = 0;
-    const MAX_ATTEMPTS = musicPlaylist.length * 2;
-    
-    function supportsTrackSource(src) {
-      if (!src) return false;
-      const lower = src.toLowerCase();
-      if (lower.endsWith(".mp3")) return true;
-      if (lower.endsWith(".flac")) {
-        return (
-          bgMusic.canPlayType("audio/flac") === "probably" ||
-          bgMusic.canPlayType("audio/flac") === "maybe" ||
-          bgMusic.canPlayType("audio/x-flac") === "probably" ||
-          bgMusic.canPlayType("audio/x-flac") === "maybe"
-        );
-      }
-      return false;
-    }
-    
-    function setTrack(index) {
-      if (!musicPlaylist.length) return null;
-      musicTrackIndex = ((index % musicPlaylist.length) + musicPlaylist.length) % musicPlaylist.length;
-      const track = musicPlaylist[musicTrackIndex];
-      bgMusic.src = track.src;
-      bgMusic.loop = musicPlaylist.length === 1;
-      bgMusic.load();
-      musicNote.textContent = `Loaded: ${track.title || `Track ${musicTrackIndex + 1}`}`;
-      return track;
-    }
-    
-    async function playCurrentTrack() {
-      if (switchingTrack) return false;
-      switchingTrack = true;
-    
-      const track = musicPlaylist[musicTrackIndex];
-      if (!track) {
-        switchingTrack = false;
-        return false;
-      }
-    
-      const label = track.title || `Track ${musicTrackIndex + 1}`;
-      musicNote.textContent = `Trying: ${label}`;
-    
-      if (!supportsTrackSource(track.src)) {
-        musicNote.textContent = `Unsupported format, skipping: ${label}`;
-        switchingTrack = false;
-        return playNextTrack();
-      }
-    
-      try {
-        await bgMusic.play();
-        musicStarted = true;
-        attempts = 0;
-        musicNote.textContent = "Background music playing";
-        if (startMusicBtn) startMusicBtn.style.display = "none";
-        return true;
-      } catch (err) {
-        musicStarted = false;
-    
-        if (err.name === "NotAllowedError") {
-          musicNote.textContent = "Browser blocked autoplay. Click the music button.";
-          return false;
-        }
-    
-        if (err.name === "NotSupportedError") {
-          musicNote.textContent = `Skipped (unsupported): ${label}`;
-        } else {
-          musicNote.textContent = `Skipped (${err.name || "error"}): ${label}`;
-        }
-    
-        return playNextTrack();
-      } finally {
-        switchingTrack = false;
-      }
-    }
-    
-    function playNextTrack() {
-      attempts++;
-      if (attempts >= MAX_ATTEMPTS) {
-        musicNote.textContent = "No playable tracks available";
-        return false;
-      }
-      setTrack(musicTrackIndex + 1);
-      return playCurrentTrack();
-    }
-    
-    bgMusic.addEventListener("error", () => {
-      const idx = musicTrackIndex;
-      const track = musicPlaylist[idx];
-      const err = bgMusic.error;
-      const codeMap = {
-        1: "MEDIA_ERR_ABORTED",
-        2: "MEDIA_ERR_NETWORK",
-        3: "MEDIA_ERR_DECODE",
-        4: "MEDIA_ERR_SRC_NOT_SUPPORTED"
-      };
-    
-      console.error(
-        "Audio load/play error:",
-        track?.title || `Track ${idx + 1}`,
-        track?.src,
-        "code:",
-        err?.code,
-        "named:",
-        codeMap[err?.code] || "unknown",
-        "message:",
-        err?.message
-      );
-    
-      if (err?.code === 4) {
-        musicNote.textContent = `Skipping unsupported file: ${track?.title || "track"} (${codeMap[err?.code] || "unsupported"})`;
-      } else {
-        musicNote.textContent = `Track error (${err?.code || "unknown"}), skipping...`;
-      }
-      playNextTrack();
-    });
-    
-    bgMusic.addEventListener("ended", playNextTrack);
-    
-    function startMusicAfterUserGesture() {
-      if (!musicStarted) {
-        setTrack(musicTrackIndex); // ensure current src is set
-        playCurrentTrack();
-      }
-    }
-    
-    if (startMusicBtn) {
-      startMusicBtn.addEventListener("click", startMusicAfterUserGesture);
-    }
-    
-    ["pointerdown", "touchstart", "keydown"].forEach((evt) => {
-      document.addEventListener(evt, startMusicAfterUserGesture, { once: true });
-    });
-    
-    if (musicVolume) {
-      bgMusic.volume = Number(musicVolume.value);
-      musicVolumeLabel.textContent = `${Math.round(bgMusic.volume * 100)}%`;
-    
-      musicVolume.addEventListener("input", (e) => {
-        const v = Number(e.target.value);
-        bgMusic.volume = v;
-        musicVolumeLabel.textContent = `${Math.round(v * 100)}%`;
-      });
-    }
-    
-    bgMusic.volume = 0.5;
-    bgMusic.playsInline = true;
-        
-    document.addEventListener("DOMContentLoaded", async () => {
-      accountBackdrop.style.pointerEvents = "none";
-    
-      if (musicPlaylist.length > 0) {
-        const track = setTrack(0);
-        musicNote.textContent = `Ready: Press speaker button to start music${track?.title ? ` (${track.title})` : ""}`;
-      } else {
-        musicNote.textContent = "No music tracks configured";
-      }
-    
-      await handleRecoveryCallback();
-      await syncAuthStateUI();
-    });
 
     function setStatus(el, msg, tone = "muted") {
       el.className = tone;
@@ -904,17 +742,8 @@
 
     saveAccountBtn.addEventListener("click", handleSaveAccount);
 
-    document.addEventListener("DOMContentLoaded", async () => {  // init auto music playback on load
+    document.addEventListener("DOMContentLoaded", async () => {
       accountBackdrop.style.pointerEvents = "none";
-
-      if (musicPlaylist.length > 0) {
-        const first = setTrack(0);
-        if (musicNote && first) musicNote.textContent = `Loaded: ${first}`;
-        playCurrentTrack();
-      } else {
-        if (musicNote) musicNote.textContent = "No music tracks configured";
-      }
-
       await handleRecoveryCallback();
       await syncAuthStateUI();
     });
