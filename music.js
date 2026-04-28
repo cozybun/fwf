@@ -1,5 +1,9 @@
 (() => {
   const MUSIC_KEY = "temps-music-state-v1";
+  const VOLUME_STEPS = [0, 0.33, 0.67];
+  const VOLUME_ICONS = ["🔇", "🔉", "🔊"];
+  const VOLUME_LABELS = ["Muted", "33% Volume", "67% Volume"];
+
   const musicPlaylist = [
     { title: "Emerald Canopy", src: "audio/1_emerald_canopy.flac" },
     { title: "Frostbound Echoes", src: "audio/2_frostbound_echoes.flac" },
@@ -12,7 +16,7 @@
     { title: "Infernal Heartbeat", src: "audio/9_infernal_heartbeat.flac" },
     { title: "Apex Confrontation", src: "audio/10_apex_confrontation.mp3" },
     { title: "Sands of Time", src: "audio/11_sands_of_time.mp3" },
-    { title: "Hurry Up", src: "audio/12_hurry_up.flac" }    
+    { title: "Hurry Up", src: "audio/12_hurry_up.flac" }
   ];
 
   const audio = document.getElementById("bgMusic");
@@ -21,22 +25,27 @@
 
   if (!audio) return;
 
-  const saved = (() => {
+  const safeReadStorage = () => {
     try {
       return JSON.parse(localStorage.getItem(MUSIC_KEY)) || {};
     } catch {
       return {};
     }
-  })();
+  };
+  const saved = safeReadStorage();
 
   const clampIndex = (i) => ((i % musicPlaylist.length) + musicPlaylist.length) % musicPlaylist.length;
 
   let trackIndex = Number.isInteger(saved.trackIndex) ? saved.trackIndex : 0;
-  let musicEnabled = !!saved.enabled;
-  let hasUserGesture = false;
-
   const savedTrackIndex = Number.isInteger(saved.trackIndex) ? saved.trackIndex : 0;
   const savedTime = Number.isFinite(saved.time) ? saved.time : 0;
+
+  const fallbackStep = 2;  // default 67% volume
+  // use saved step if valid, otherwise fall back to default
+  let volumeStep = (Number.isInteger(saved.volumeStep) && saved.volumeStep >= 0 && saved.volumeStep < VOLUME_STEPS.length) ? saved.volumeStep : fallbackStep;
+
+  let hasUserGesture = false;
+  let isApplyingSavedTime = true;
 
   const setTrack = (i, restoreProgress = false) => {
     trackIndex = clampIndex(i);
@@ -44,59 +53,95 @@
     if (!track || !track.src) return;
 
     audio.src = track.src;
-    audio.volume = 0.5;
+    applyVolume();
     audio.load();
 
-    if (restoreProgress && trackIndex === clampIndex(savedTrackIndex) && savedTime > 0) {
-      audio.currentTime = savedTime;
+    if (restoreProgress && isApplyingSavedTime && trackIndex === clampIndex(savedTrackIndex) && savedTime > 0) {
+      audio.currentTime = Math.max(0, savedTime);
     } else {
       audio.currentTime = 0;
     }
+    isApplyingSavedTime = false;
   };
 
+  const applyVolume = () => {
+    const vol = VOLUME_STEPS[volumeStep];
+    audio.volume = vol;
+    audio.muted = vol === 0;
+  };
+
+  const isMusicEnabled = () => volumeStep > 0;
+
   const saveState = () => {
-    localStorage.setItem(
-      MUSIC_KEY,
-      JSON.stringify({
-        enabled: musicEnabled,
-        trackIndex,
-        time: Number.isFinite(audio.currentTime) ? audio.currentTime : 0
-      })
-    );
+    try {
+      localStorage.setItem(
+        MUSIC_KEY,
+        JSON.stringify({
+          trackIndex,
+          volumeStep,
+          time: Number.isFinite(audio.currentTime) ? audio.currentTime : 0
+        })
+      );
+    } catch {}
   };
 
   const updateUi = () => {
     if (!toggleBtn) return;
-    toggleBtn.textContent = musicEnabled ? "🔊" : "🔇";
-    toggleBtn.setAttribute("aria-pressed", String(musicEnabled));
-    if (status) status.textContent = musicEnabled ? `Playing: ${trackIndex + 1}` : "Music Off";
+    const vol = VOLUME_STEPS[volumeStep];
+    toggleBtn.textContent = VOLUME_ICONS[volumeStep];
+    toggleBtn.setAttribute("aria-pressed", String(isMusicEnabled()));
+    toggleBtn.setAttribute("aria-label", `Music volume: ${VOLUME_LABELS[volumeStep]}`);
+    toggleBtn.title = `Music ${VOLUME_LABELS[volumeStep]} (${Math.round(vol * 100)}%)`;
+
+    if (status) status.textContent = isMusicEnabled()
+      ? `Playing: ${trackIndex + 1} (${VOLUME_LABELS[volumeStep]})`
+      : "Music Off";
   };
 
   const tryPlay = async () => {
-    if (!musicEnabled || !hasUserGesture) return;
+    if (!isMusicEnabled() || !hasUserGesture) return;
     try {
       await audio.play();
       if (status) status.textContent = "Playing";
     } catch (err) {
       console.error("Playback failed:", err);
-      musicEnabled = false;
+      volumeStep = 0;  // keep enabled state as muted fallback when autoplay blocked
+      applyVolume();
       if (status) status.textContent = "Tap again to enable";
       updateUi();
+      saveState();
     }
+  };
+
+  const cycleVolume = () => {
+    volumeStep = (volumeStep + 1) % VOLUME_STEPS.length;
+    applyVolume();
+    updateUi();
+
+    if (isMusicEnabled()) {
+      hasUserGesture = true;
+      tryPlay();
+    } else {
+      audio.pause();
+      if (status) status.textContent = "Music Off";
+    }
+
+    saveState();
   };
 
   const onFirstGesture = () => {
     if (!hasUserGesture) {
       hasUserGesture = true;
-      if (musicEnabled) tryPlay();
+      if (isMusicEnabled()) tryPlay();
     }
   };
 
-  setTrack(trackIndex, true);  // set source on load
+  setTrack(trackIndex, true);
+  applyVolume();
   updateUi();
 
   audio.addEventListener("ended", () => {
-    setTrack(trackIndex + 1, false);  // avoid stale time carryover to next track
+    setTrack(trackIndex + 1, false);
     saveState();
     tryPlay();
   });
@@ -104,17 +149,12 @@
   audio.addEventListener("timeupdate", saveState);
 
   if (toggleBtn) {
-    toggleBtn.addEventListener("click", async () => {
-      musicEnabled = !musicEnabled;
-      hasUserGesture = true;
-      if (musicEnabled) {
-        await tryPlay();
-      } else {
-        audio.pause();
-        if (status) status.textContent = "Music Off";
+    toggleBtn.addEventListener("click", cycleVolume);
+    toggleBtn.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        cycleVolume();
       }
-      saveState();
-      updateUi();
     });
   }
 
