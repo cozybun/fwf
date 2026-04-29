@@ -595,10 +595,14 @@
     }
 
     .top-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: nowrap;
+      display: grid !important;
+      grid-template-columns: 1fr auto auto !important;
+      align-items: center !important;
+    }
+    
+    .top-row .menu-btn:first-child {
+      grid-column: 2 !important;
+      justify-self: center !important;
     }
     
     .music-wrap {
@@ -606,11 +610,10 @@
       align-items: center;
     }
 
-    #musicToggle.menu-icon-btn {
-      min-width: 40px;
-      width: 40px;
-      padding: 0;
-      flex: 0 0 auto;
+    #musicToggle.menu-icon-btn,
+    .top-row .menu-icon-btn {
+      grid-column: 3 !important;
+      justify-self: start !important;
     }
     
     @media (max-width: 700px) {
