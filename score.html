@@ -689,13 +689,33 @@
         padding-top: 9px;
         white-space: nowrap;
       }
+      
+      .top-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      
+      .music-wrap {
+        display: inline-flex;
+        align-items: center;
+      }
     }
   </style>
 </head>
 <body>
   <div class="page-controls">
-    <a href="home" class="menu-btn home-btn"> Home </a>
-  
+
+    <div class="top-row">
+      <a href="home" class="menu-btn home-btn">Home</a>
+    
+      <div class="music-wrap">
+        <audio id="bgMusic" preload="none"></audio>
+        <button id="musicToggle" class="menu-btn" type="button" aria-label="Toggle background music">🔇</button>
+        <span id="musicStatus" aria-live="polite" style="display:none;"></span>
+      </div>
+    </div>
+      
     <nav class="top-nav">
       <a href="stats" class="menu-btn"> My Stats </a>
       <a href="history" class="menu-btn"> History </a>
@@ -706,7 +726,6 @@
       <div id="modeSwitch" class="mode-switch" role="tablist" aria-label="Score mode">
         <button id="modeDailyBtn" type="button" class="mode-switch-btn active" aria-pressed="true"> Daily </button>
         <button id="modeHourlyBtn" type="button" class="mode-switch-btn" aria-pressed="false"> Hourly </button>
-        <button id="musicBtn" type="button" aria-label="Toggle background music">🔇</button>
       </div>
     </div>
     <button id="scoreFaqBtn" type="button" class="menu-btn score-faq-btn"> Score FAQ </button>
@@ -1902,7 +1921,7 @@
       if (scoreFaqBtn) scoreFaqBtn.addEventListener("click", openScoreFaqModal);
       if (scoreFaqClose) scoreFaqClose.addEventListener("click", closeScoreFaqModal);
   
-      const musicBtn = document.getElementById("musicBtn");
+      const musicBtn = document.getElementById("musicToggle");
       if (musicBtn) {
         musicBtn.type = "button";
         musicBtn.addEventListener("click", handleMusicClick);
