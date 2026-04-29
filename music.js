@@ -19,6 +19,18 @@
     { title: "Hurry Up", src: "audio/12_hurry_up.flac" }
   ];
 
+  const SCORE_LOOPS = {
+    good: [
+      "audio/vivaldi_winter_mvt1_john_harrison.mp3",
+      "audio/vivaldi_winter_mvt2_john_harrison.mp3",
+      "audio/vivaldi_winter_mvt3_john_harrison.mp3"
+    ],
+    bad: [
+      "audio/chopin_prelude_opus28n4_ivan_ilić.ogg",
+      "audio/gluck_melodie_jan_kubelik.mp3"
+    ]
+  };
+
   const audio = document.getElementById("bgMusic");
   const toggleBtn = document.getElementById("musicToggle");
   const status = document.getElementById("musicStatus");
@@ -46,8 +58,11 @@
 
   let hasUserGesture = false;
   let isApplyingSavedTime = true;
+  let scoreMode = null;
+  let scoreTrackIndex = 0;
 
   const setTrack = (i, restoreProgress = false) => {
+    scoreMode = null;
     trackIndex = clampIndex(i);
     const track = musicPlaylist[trackIndex];
     if (!track || !track.src) return;
@@ -62,6 +77,25 @@
       audio.currentTime = 0;
     }
     isApplyingSavedTime = false;
+  };
+
+  const setScoreTrack = () => {
+    const list = SCORE_LOOPS[scoreMode];
+    if (!list || !list.length) return;
+    const track = list[scoreTrackIndex];
+    audio.src = track;
+    applyVolume();
+    audio.load();
+    audio.currentTime = 0;
+  };
+
+  const startScoreLoop = (mode) => {
+    if (!SCORE_LOOPS[mode]) return;
+    scoreMode = mode;
+    scoreTrackIndex = 0;
+    setScoreTrack();
+    hasUserGesture = true;
+    if (isMusicEnabled()) tryPlay();
   };
 
   const applyVolume = () => {
@@ -91,7 +125,7 @@
     toggleBtn.textContent = VOLUME_ICONS[volumeStep];
     toggleBtn.setAttribute("aria-pressed", String(isMusicEnabled()));
     toggleBtn.setAttribute("aria-label", `Music volume: ${VOLUME_LABELS[volumeStep]}`);
-    toggleBtn.title = `Volume ${VOLUME_LABELS[volumeStep]}%`;
+    toggleBtn.title = `Volume ${VOLUME_LABELS[volumeStep]}`;
     toggleBtn.setAttribute("aria-label", `Volume ${VOLUME_LABELS[volumeStep]}%`);
 
     if (status) status.textContent = isMusicEnabled()
@@ -142,6 +176,17 @@
   updateUi();
 
   audio.addEventListener("ended", () => {
+    if (scoreMode) {
+      const list = SCORE_LOOPS[scoreMode];
+      if (list && list.length) {
+        scoreTrackIndex = (scoreTrackIndex + 1) % list.length;
+        setScoreTrack();
+        tryPlay();
+        return;
+      }
+      scoreMode = null;
+    }
+
     setTrack(trackIndex + 1, false);
     saveState();
     tryPlay();
@@ -158,6 +203,13 @@
       }
     });
   }
+
+  window.playGoodScoreMusic = () => startScoreLoop("good");
+  window.playBadScoreMusic = () => startScoreLoop("bad");
+  window.stopScoreMusicLoop = () => {
+    scoreMode = null;
+    setTrack(trackIndex, false);
+  };
 
   document.addEventListener("pointerdown", onFirstGesture, { once: true, capture: true });
   document.addEventListener("keydown", onFirstGesture, { once: true, capture: true });
