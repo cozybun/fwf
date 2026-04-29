@@ -305,6 +305,7 @@
       </div>
       <div class="toolbar">
         <button id="refreshBtn" type="button"> Go Home </button>
+        <button id="musicBtn" type="button" data-mode="ambient" aria-label="Music mode status">🔊 Music</button>
       </div>
     </section>
 
@@ -328,6 +329,7 @@
     </section>
   </main>
 
+  <script src="music.js"></script>
   <script>
     const SUPABASE_URL = "https://ckyqknlxmjqlkqnxhgef.supabase.co";
     const SUPABASE_PUB_KEY = "sb_publishable_lQ27fzzwJf27dUWPEW8UQA_NTY7naO6";
@@ -336,8 +338,12 @@
     const rowsEl = document.getElementById("rows");
     const refreshBtn = document.getElementById("refreshBtn");
     const monthLabelEl = document.getElementById("monthLabel");
+    const musicBtn = document.getElementById("musicBtn");
 
     const MONTH_NAMES = [ "Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec" ];
+
+    // Shared key for cross-page score music intent
+    const MUSIC_SESSION_KEY = "twf_music_score_session_v1";
 
     const headers = {
       apikey: SUPABASE_PUB_KEY,
@@ -364,6 +370,111 @@
     function sanitizeUsername(username) {
       const u = (username || "").trim();
       return u ? u : "Anon";
+    }
+
+    function getMusicSessionFromStorage() {
+      const fallback = { mode: "ambient", source: "none", ts: 0, expiresAt: 0 };
+    
+      try {
+        const raw = localStorage.getItem(MUSIC_SESSION_KEY);
+        if (!raw) return fallback;
+    
+        if (raw === "good" || raw === "bad" || raw === "ambient") {
+          return {
+            mode: raw,
+            source: "legacy",
+            ts: Date.now(),
+            expiresAt: Date.now() + 24 * 60 * 60 * 1000
+          };
+        }
+    
+        const parsed = JSON.parse(raw);
+        if (!parsed || !parsed.mode) return fallback;
+    
+        const parsedExpires = Number(parsed.expiresAt);
+        if (!Number.isFinite(parsedExpires)) return fallback;
+    
+        if (parsedExpires < Date.now()) {
+          localStorage.removeItem(MUSIC_SESSION_KEY);
+          return fallback;
+        }
+    
+        return {
+          mode: String(parsed.mode),
+          source: parsed.source || "unknown",
+          ts: Number(parsed.ts) || Date.now(),
+          expiresAt: parsedExpires   // ✅ keep original 24h window
+        };
+      } catch {
+        return fallback;
+      }
+    }
+
+    function setMusicSessionInStorage(mode, source) {
+    const payload = {
+      mode: String(mode || "ambient"),
+      source: source || "unknown",
+      ts: Date.now(),
+      expiresAt: Date.now() + 24 * 60 * 60 * 1000  // set once when saving
+    };
+    localStorage.setItem(MUSIC_SESSION_KEY, JSON.stringify(payload));
+  }
+    
+    function clearMusicSessionFromStorage(source = "leaderboard") {
+      localStorage.removeItem(MUSIC_SESSION_KEY);
+      window.stopScoreMusicLoop?.();
+    }
+
+    function musicModeLabel(mode) {
+      if (mode === "good") return "🎉 Good Score";
+      if (mode === "bad") return "⚠️ Bad Score";
+      return "🔊 Music";
+    }
+
+    function syncMusicButtonLabel(mode) {
+      const currentMode = mode === "good" || mode === "bad" ? mode : "ambient";
+      if (!musicBtn) return;
+      musicBtn.dataset.mode = currentMode;
+      musicBtn.textContent = musicModeLabel(currentMode);
+      musicBtn.title = `Current music mode: ${currentMode}`;
+    }
+
+    function initMusicModeForLeaderboard() {
+      const session = getMusicSessionFromStorage();
+      const mode = session.mode;
+
+      if (mode === "good" && typeof window.playGoodScoreMusic === "function") {
+        window.playGoodScoreMusic();
+      } else if (mode === "bad" && typeof window.playBadScoreMusic === "function") {
+        window.playBadScoreMusic();
+      }
+
+      syncMusicButtonLabel(mode);
+    }
+
+    function wireMusicButton() {
+      if (!musicBtn) return;
+
+      musicBtn.addEventListener("click", () => {
+        const toggleFn =
+          window.toggleMusic ||
+          window.toggleMusicPlayback ||
+          window.toggleMusicMute ||
+          window.toggleMute ||
+          window.toggleSound;
+
+        if (typeof toggleFn === "function") {
+          toggleFn();
+          return;
+        }
+
+        const session = getMusicSessionFromStorage();  // fallback for score-mode consistency: music button stops good/bad score loop when active
+        if (session.mode === "good" || session.mode === "bad") {
+          clearMusicSessionFromStorage("leaderboard-button");
+        }
+        const refreshed = getMusicSessionFromStorage();
+        syncMusicButtonLabel(refreshed.mode);
+      });
     }
 
     function decodeJwtSub(token) {
@@ -621,9 +732,13 @@
       window.location.href = "home";
     });
 
-    if (monthLabelEl) {
+    if (monthLabelEl) {  // init page
       monthLabelEl.textContent = getMonthLabel();
     }
+
+    wireMusicButton();  // keep music state sync across score & leaderboard pages
+    initMusicModeForLeaderboard();
+
     fetchLeaderboard();
   </script>
 </body>
