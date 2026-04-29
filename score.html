@@ -309,12 +309,17 @@
       border-color: color-mix(in srgb, var(--brand-blue-soft-border) 55%, #111827);
     }
     
-    .top-nav{
+    .top-nav, .button-row {
       display: flex;
+      align-items: center;
       gap: 8px;
       flex-wrap: wrap;
-      align-items: center;
-      justify-content: center;
+      width: min(100%, 436px);
+      margin-inline: auto;
+    }
+
+    .top-nav {
+      justify-content: flex-start;
     }
 
     .top-nav .menu-btn {
@@ -592,7 +597,7 @@
     .top-row {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 8px;
       flex-wrap: nowrap;
     }
     
