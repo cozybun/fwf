@@ -6,7 +6,6 @@
   <title> My Score </title>
 
   <link rel="stylesheet" href="style.css" />
-  <script src="music.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.10/dist/umd/supabase.min.js"></script>
 
   <style>
@@ -708,7 +707,6 @@
         <button id="modeDailyBtn" type="button" class="mode-switch-btn active" aria-pressed="true"> Daily </button>
         <button id="modeHourlyBtn" type="button" class="mode-switch-btn" aria-pressed="false"> Hourly </button>
         <button id="musicBtn" type="button" aria-label="Toggle background music">🔇</button>
-
       </div>
     </div>
     <button id="scoreFaqBtn" type="button" class="menu-btn score-faq-btn"> Score FAQ </button>
@@ -1931,5 +1929,7 @@
     });
   })();
 </script>
+<audio id="bgMusic" preload="none"></audio>
+<script src="music.js"></script>
 </body>
 </html>
