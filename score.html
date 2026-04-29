@@ -6,6 +6,7 @@
   <title> My Score </title>
 
   <link rel="stylesheet" href="style.css" />
+  <script src="music.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.10/dist/umd/supabase.min.js"></script>
 
   <style>
@@ -709,6 +710,7 @@
       </div>
     </div>
     <button id="scoreFaqBtn" type="button" class="menu-btn score-faq-btn"> Score FAQ </button>
+    <button id="musicBtn" type="button" class="menu-btn"> 🔇 </button>
   </div>
 
   <h1> My Score </h1>
@@ -799,6 +801,7 @@
   let totalMood = 0;
   let shareTimer = null;
   let bannerTimer = null;
+  let scoreMusicState = "none";
 
   if (!SUPABASE_PUB_KEY) {
     console.error("Missing Supabase publishable key");
@@ -845,6 +848,23 @@
     scoreFaqModal.classList.remove("is-open");
     scoreFaqModal.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
+  }
+
+  function setMusicStateFromDaily(scores = []) {
+    const forecastRows = Array.isArray(scores) ? scores.filter(hasForecast) : [];
+    if (!forecastRows.length) {
+      scoreMusicState = "none";
+      return;
+    }
+  
+    const circlesByCity = CITY_ORDER.map((id) => {
+      const row = forecastRows.find((r) => Number(r?.city_id) === Number(id)) || {};
+      return resultCircle(row);
+    });
+  
+    scoreMusicState = circlesByCity.some((c) => c === "🟢" || c === "🟡")
+      ? "good"
+      : "bad";
   }
 
   function setShareEnabled(canShare, reason = "No score due to no forecasts") {
@@ -957,6 +977,7 @@
   function updateModeUI(mode) {
     const isDaily = mode === "daily";
     const summaryblock = document.querySelector(".score-summary");
+    if (!isDaily) { scoreMusicState = "none"; }
     if (summaryblock) { summaryblock.style.display = isDaily ? "grid" : "none"; }
   
     if (modeDailyBtn) {
@@ -991,6 +1012,7 @@
 
   function setMode(mode) {
     activeMode = mode === "hourly" ? "hourly" : "daily";
+    if (activeMode === "hourly") scoreMusicState = "none";
     updateModeUI(activeMode);
     loadScore();
   }
@@ -1582,13 +1604,7 @@
           cityCirclesEl.insertAdjacentElement("afterend", fallback);
         }
         return fallback;
-      })();
-    const getCityIdsForSummary = (rows = []) => {
-      if (Array.isArray(CITY_ORDER) && CITY_ORDER.length > 0) return CITY_ORDER;
-      return rows
-        .map((r) => r?.city_id)
-        .filter((v, i, a) => v != null && a.indexOf(v) === i);
-    };
+      })();;
 
     const buildCitySummary = (rows = []) => {
       const cityRows = Array.isArray(rows) ? rows : [];
@@ -1714,12 +1730,14 @@
       scoreListEl.innerHTML = `<p class="msg no-score-msg"> No ${isHourly ? "hourly" : "daily"} score yet. <br> Keep forecasting & check back. </p>`;
 
       if (isHourly) {
+        scoreMusicState = "none";
         if (moodTotalEl) moodTotalEl.textContent = "—";
         if (streakEl) streakEl.textContent = "—";
         if (coinTotalEl) coinTotalEl.textContent = "0";
         renderScoreRatioLine(null, false);
         revealRows(0, true, 0, 0, 0);
       } else {
+        setMusicStateFromDaily([]);
         const dailySummary = buildCitySummary([]);
         renderCityCircles([]);
         renderScoreRatioLine(dailySummary, true);
@@ -1753,6 +1771,7 @@
     }
 
     const dailySummary = buildCitySummary(scores);
+    setMusicStateFromDaily(scores);
 
     scores.forEach((s) => {
       const row = document.createElement("div");
@@ -1867,6 +1886,29 @@
       }
     });
     setMode(getInitialMode());
+    const musicBtn = document.getElementById("musicBtn");
+    if (musicBtn) {
+      musicBtn.addEventListener("click", () => {
+        if (activeMode === "hourly") {
+          if (typeof window.playMusicPlaylist === "function") window.playMusicPlaylist();
+          else if (typeof window.playMusic === "function") window.playMusic();
+          else console.warn("No default music function found");
+          return;
+        }
+    
+        if (scoreMusicState === "good" && typeof window.playGoodScoreMusic === "function") {
+          window.playGoodScoreMusic();
+          return;
+        }
+        if (scoreMusicState === "bad" && typeof window.playBadScoreMusic === "function") {
+          window.playBadScoreMusic();
+          return;
+        }
+    
+        if (typeof window.playMusicPlaylist === "function") window.playMusicPlaylist();
+        else if (typeof window.playMusic === "function") window.playMusic();
+      });
+    }
   }
 
   initApp().catch((err) => {
