@@ -211,6 +211,15 @@
     setTrack(trackIndex, false);
   };
 
+  window.playMusic = () => {
+    hasUserGesture = true;
+    setTrack(trackIndex, false);
+    if (isMusicEnabled()) tryPlay();
+  };
+  window.playMusicPlaylist = window.playMusic;
+  window.playMusicGood = window.playGoodScoreMusic;
+  window.playMusicBad = window.playBadScoreMusic;
+
   document.addEventListener("pointerdown", onFirstGesture, { once: true, capture: true });
   document.addEventListener("keydown", onFirstGesture, { once: true, capture: true });
   window.addEventListener("beforeunload", saveState);
