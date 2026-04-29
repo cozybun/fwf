@@ -46,8 +46,7 @@
       font-weight: 600;
       display: block;
       margin: 0 auto;
-      width: min(92vw, 240px);
-      max-width: 220px;
+      width: min(92vw, 220px);
       text-align: center;
       cursor: pointer;
     }
@@ -264,10 +263,23 @@
     .muted { color: var(--subtle); }
 
     /* Shared music hook styles (matches daily/hourly) */
+    .home-navbar {
+      max-width: 680px;
+      margin: 0 auto 0.5rem;
+      padding: 0 0.5rem;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 0.45rem;
+    }
+    
+    .music-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+    
     #musicToggle {
-      position: fixed;
-      top: 12px;
-      right: 12px;
       width: 1.8rem;
       height: 1.8rem;
       border: 1px solid #888;
@@ -281,15 +293,20 @@
       align-items: center;
       justify-content: center;
     }
-
+    
     #musicToggle:hover {
       transform: translateY(-1px);
       background: #f8fafc;
       box-shadow: 0 8px 22px rgba(15, 23, 42, 0.3);
     }
-
     #musicToggle:active {
       transform: scale(0.96);
+    }
+    
+    #musicStatus {
+      font-size: 12px;
+      opacity: 0.8;
+      white-space: nowrap;
     }
 
     .daily-button-wrap {
@@ -337,16 +354,35 @@
       }
       #open-account-settings {
         top: 10px;
-        right: 10px;
+        left: 10px;
       }
+      .home-navbar {
+        padding: 0 0.45rem;
+      }    
       #musicToggle {
-        top: 10px;
-        right: 12px;
+        width: 1.75rem;
+        height: 1.75rem;
+        font-size: 0.95rem;
       }
     }
   </style>
 </head>
 <body>
+    <header class="home-navbar" aria-label="Page controls">
+    <span aria-hidden="true"></span>
+    <div class="music-wrap">
+      <audio id="bgMusic" preload="none" aria-label="Background music"></audio>
+      <button
+        id="musicToggle"
+        type="button"
+        aria-label="Toggle background music"
+        title="Toggle background music"
+      >
+        🔇
+      </button>
+      <span id="musicStatus" aria-live="polite" style="display:none;"></span>
+    </div>
+  </header>
   <div class="page">
     <div class="restore-wrap" id="restore-wrap">
       <button id="restore-btn" type="button"> Restore My Account </button>
@@ -370,17 +406,6 @@
       <a id="daily-button" href="daily" aria-label="Go to Daily"> Go to Daily </a>
     </div>
   </div>
-
-  <!-- Shared music UI hooks -->
-  <button
-    id="musicToggle"
-    type="button"
-    aria-label="Toggle background music"
-    title="Toggle background music">
-    🔇
-  </button>
-  <span id="musicStatus" aria-live="polite" style="display:none;"></span>
-  <audio id="bgMusic" preload="none" aria-label="Background music"></audio>
 
   <!-- Floating top-right settings gear -->
   <button
