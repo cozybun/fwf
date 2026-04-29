@@ -694,11 +694,19 @@
         display: flex;
         align-items: center;
         gap: 0.75rem;
+        flex-wrap: nowrap;
       }
       
       .music-wrap {
-        display: inline-flex;
+        display: flex;
         align-items: center;
+      }
+
+      #musicToggle.menu-icon-btn {
+        min-width: 40px;
+        width: 40px;
+        padding: 0;
+        flex: 0 0 auto;
       }
     }
   </style>
@@ -708,10 +716,9 @@
 
     <div class="top-row">
       <a href="home" class="menu-btn home-btn">Home</a>
-    
       <div class="music-wrap">
         <audio id="bgMusic" preload="none"></audio>
-        <button id="musicToggle" class="menu-btn" type="button" aria-label="Toggle background music">🔇</button>
+        <button id="musicToggle" class="menu-btn menu-icon-btn" type="button" aria-label="Toggle background music">🔇</button>
         <span id="musicStatus" aria-live="polite" style="display:none;"></span>
       </div>
     </div>
