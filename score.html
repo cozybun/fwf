@@ -587,6 +587,25 @@
       font-size: 1rem;
       line-height: 1.5;
     }
+
+    .top-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: nowrap;
+    }
+    
+    .music-wrap {
+      display: flex;
+      align-items: center;
+    }
+
+    #musicToggle.menu-icon-btn {
+      min-width: 40px;
+      width: 40px;
+      padding: 0;
+      flex: 0 0 auto;
+    }
     
     @media (max-width: 700px) {
       body {
@@ -688,25 +707,6 @@
         text-align: center;
         padding-top: 9px;
         white-space: nowrap;
-      }
-      
-      .top-row {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        flex-wrap: nowrap;
-      }
-      
-      .music-wrap {
-        display: flex;
-        align-items: center;
-      }
-
-      #musicToggle.menu-icon-btn {
-        min-width: 40px;
-        width: 40px;
-        padding: 0;
-        flex: 0 0 auto;
       }
     }
   </style>
