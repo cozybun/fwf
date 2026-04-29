@@ -707,10 +707,11 @@
       <div id="modeSwitch" class="mode-switch" role="tablist" aria-label="Score mode">
         <button id="modeDailyBtn" type="button" class="mode-switch-btn active" aria-pressed="true"> Daily </button>
         <button id="modeHourlyBtn" type="button" class="mode-switch-btn" aria-pressed="false"> Hourly </button>
+        <button id="musicToggle" type="button" aria-label="Toggle background music">🔇</button>
+
       </div>
     </div>
     <button id="scoreFaqBtn" type="button" class="menu-btn score-faq-btn"> Score FAQ </button>
-    <button id="musicBtn" type="button" class="menu-btn"> 🔇 </button>
   </div>
 
   <h1> My Score </h1>
@@ -1857,65 +1858,78 @@
     }
   });
 
-  async function initApp() {
-    if (scoreDateEl) scoreDateEl.textContent = ydayLabel;
-
-    const ok = await checkAuth();
-    if (!ok) {
-      if (scoreListEl) {
-        scoreListEl.classList.remove("is-hourly");
-        scoreListEl.removeAttribute("data-cols");
-        scoreListEl.innerHTML = "<p> No active session. Save a daily forecast to create session. </p>";
-      }
-      return;
-    }
-
-    if (modeDailyBtn) modeDailyBtn.addEventListener("click", () => setMode("daily"));
-    if (modeHourlyBtn) modeHourlyBtn.addEventListener("click", () => setMode("hourly"));
-
-    if (scoreFaqBtn) scoreFaqBtn.addEventListener("click", openScoreFaqModal);
-    if (scoreFaqClose) scoreFaqClose.addEventListener("click", closeScoreFaqModal);
-    if (scoreFaqModal) {
-      scoreFaqModal.addEventListener("click", (e) => {
-        if (e.target === scoreFaqModal) closeScoreFaqModal();
-      });
-    }
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && scoreFaqModal && scoreFaqModal.classList.contains("is-open")) {
-        closeScoreFaqModal();
-      }
-    });
-    setMode(getInitialMode());
-    const musicBtn = document.getElementById("musicBtn");
-    if (musicBtn) {
-      musicBtn.addEventListener("click", () => {
-        if (activeMode === "hourly") {
-          if (typeof window.playMusicPlaylist === "function") window.playMusicPlaylist();
-          else if (typeof window.playMusic === "function") window.playMusic();
-          else console.warn("No default music function found");
-          return;
-        }
-    
-        if (scoreMusicState === "good" && typeof window.playGoodScoreMusic === "function") {
-          window.playGoodScoreMusic();
-          return;
-        }
-        if (scoreMusicState === "bad" && typeof window.playBadScoreMusic === "function") {
-          window.playBadScoreMusic();
-          return;
-        }
-    
-        if (typeof window.playMusicPlaylist === "function") window.playMusicPlaylist();
-        else if (typeof window.playMusic === "function") window.playMusic();
-      });
-    }
+    function getMusicState() {
+    return activeMode === "hourly" ? "none" : scoreMusicState;
   }
 
-  initApp().catch((err) => {
-    console.error(err);
-    showBanner("Initialization failed. " + (err.message || "unknown error"), true);
-  });
-})();
+  function playFallbackMusic() {
+    const fallbackFn = window.playMusicPlaylist || window.playMusic;
+    if (typeof fallbackFn === "function") return fallbackFn();
+    console.warn("[music] No default music function found (playMusicPlaylist / playMusic)");
+  }
+
+  function handleMusicClick(e) {
+    if (e && typeof e.preventDefault === "function") e.preventDefault();
+
+    const state = getMusicState();
+    if (state === "good") {
+      const fn = window.playGoodScoreMusic || window.playMusicGood;
+      return typeof fn === "function" ? fn() : playFallbackMusic();
+    }
+
+    if (state === "bad") {
+      const fn = window.playBadScoreMusic || window.playMusicBad;
+      return typeof fn === "function" ? fn() : playFallbackMusic();
+    }
+
+    return playFallbackMusic();
+  }
+  
+    async function initApp() {
+      if (scoreDateEl) scoreDateEl.textContent = ydayLabel;
+  
+      const ok = await checkAuth();
+      if (!ok) {
+        if (scoreListEl) {
+          scoreListEl.classList.remove("is-hourly");
+          scoreListEl.removeAttribute("data-cols");
+          scoreListEl.innerHTML = "<p> No active session. Save a daily forecast to create session. </p>";
+        }
+        return;
+      }
+  
+      // event wiring
+      if (modeDailyBtn) modeDailyBtn.addEventListener("click", () => setMode("daily"));
+      if (modeHourlyBtn) modeHourlyBtn.addEventListener("click", () => setMode("hourly"));
+      if (scoreFaqBtn) scoreFaqBtn.addEventListener("click", openScoreFaqModal);
+      if (scoreFaqClose) scoreFaqClose.addEventListener("click", closeScoreFaqModal);
+  
+      const musicBtn = document.getElementById("musicBtn");
+      if (musicBtn) {
+        musicBtn.type = "button";
+        musicBtn.addEventListener("click", handleMusicClick);
+      }
+  
+      if (scoreFaqModal) {
+        scoreFaqModal.addEventListener("click", (e) => {
+          if (e.target === scoreFaqModal) closeScoreFaqModal();
+        });
+      }
+  
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && scoreFaqModal?.classList.contains("is-open")) {
+          closeScoreFaqModal();
+        }
+      });
+  
+      setMode(getInitialMode());
+    }
+  
+    initApp().catch((err) => {
+      console.error(err);
+      showBanner("Initialization failed. " + (err.message || "unknown error"), true);
+    });
+  })();
 </script>
 </body>
 </html>
