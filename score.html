@@ -283,43 +283,33 @@
       gap: 10px;
       align-items: center;
     }
-    
-    .menu-btn{
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      height: 40px;
-      min-width: 140px;
-      padding: 0 14px;
-      font-size: 16px;
-      font-weight: 700;
-      border: 1px solid var(--brand-blue-soft-border);
-      border-radius: 10px;
-      background: #f9fafb;
-      color: #111827;
-      text-decoration: none;
-      box-sizing: border-box;
-      text-align: center;
-      white-space: nowrap;
-      transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+
+    .menu-shell{
+      width: min(100%, 436px);
+      margin-inline: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
     }
-    
-    .menu-btn:hover {
-      filter: none;
-      border-color: color-mix(in srgb, var(--brand-blue-soft-border) 55%, #111827);
-    }
-    
-    .top-nav, .button-row {
+
+    .top-row,
+    .top-nav {
       display: flex;
       align-items: center;
       gap: 8px;
       flex-wrap: wrap;
-      width: min(100%, 436px);
-      margin-inline: auto;
+      width: 100%;
+      margin: 0;
+      justify-content: flex-start;
     }
 
-    .top-nav {
-      justify-content: flex-start;
+    .top-row{
+      flex-wrap: nowrap;
+    }
+
+    .top-nav{
+      flex-wrap: wrap;
     }
 
     .top-nav .menu-btn {
@@ -331,6 +321,18 @@
     .top-nav .menu-btn:hover {
       background: var(--brand-purple-hover);
       border-color: var(--brand-purple-hover);
+    }
+
+    .music-wrap {
+      display: flex;
+      align-items: center;
+    }
+
+    #musicToggle.menu-icon-btn {
+      min-width: 40px;
+      width: 40px;
+      padding: 0;
+      flex: 0 0 auto;
     }
 
     .mode-switch-wrap {
@@ -593,25 +595,6 @@
       font-size: 1rem;
       line-height: 1.5;
     }
-
-    .top-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: nowrap;
-    }
-    
-    .music-wrap {
-      display: flex;
-      align-items: center;
-    }
-
-    #musicToggle.menu-icon-btn {
-      min-width: 40px;
-      width: 40px;
-      padding: 0;
-      flex: 0 0 auto;
-    }
     
     @media (max-width: 700px) {
       body {
@@ -720,20 +703,22 @@
 <body>
   <div class="page-controls">
 
-    <div class="top-row">
-      <a href="home" class="menu-btn home-btn">Home</a>
-      <div class="music-wrap">
-        <audio id="bgMusic" preload="none"></audio>
-        <button id="musicToggle" class="menu-btn menu-icon-btn" type="button" aria-label="Toggle background music">🔇</button>
-        <span id="musicStatus" aria-live="polite" style="display:none;"></span>
+    <div class="menu-shell">
+      <div class="top-row">
+        <a href="home" class="menu-btn home-btn">Home</a>
+        <div class="music-wrap">
+          <audio id="bgMusic" preload="none"></audio>
+          <button id="musicToggle" class="menu-btn menu-icon-btn" type="button" aria-label="Toggle background music">🔇</button>
+          <span id="musicStatus" aria-live="polite" style="display:none;"></span>
+        </div>
       </div>
+  
+      <nav class="top-nav">
+        <a href="stats" class="menu-btn">My Stats</a>
+        <a href="history" class="menu-btn">History</a>
+        <a href="leaderboard" class="menu-btn">Leaderboard</a>
+      </nav>
     </div>
-      
-    <nav class="top-nav">
-      <a href="stats" class="menu-btn"> My Stats </a>
-      <a href="history" class="menu-btn"> History </a>
-      <a href="leaderboard" class="menu-btn"> Leaderboard </a>
-    </nav>
     <div class="mode-switch-wrap">
       <div id="modeSwitch" class="mode-switch" role="tablist" aria-label="Score mode">
         <button id="modeDailyBtn" type="button" class="mode-switch-btn active" aria-pressed="true"> Daily </button>
