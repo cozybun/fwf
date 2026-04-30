@@ -216,7 +216,15 @@
     setTrack(trackIndex, false);
     if (isMusicEnabled()) tryPlay();
   };
-  window.playMusicPlaylist = window.playMusic;
+  window.playMusicPlaylist = (state = "none") => {
+    if (state === "good") {
+      window.playGoodScoreMusic();
+    } else if (state === "bad") {
+      window.playBadScoreMusic();
+    } else {
+      window.playMusic();
+    }
+  };
   window.playMusicGood = window.playGoodScoreMusic;
   window.playMusicBad = window.playBadScoreMusic;
   window.cycleVolume = cycleVolume;
