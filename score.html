@@ -1915,9 +1915,10 @@
   }
 
   function playFallbackMusic() {
-    const fallbackFn = window.playMusicPlaylist || window.playMusic;
-    if (typeof fallbackFn === "function") return fallbackFn();
-    console.warn("[music] No default music function found (playMusicPlaylist / playMusic)");
+    const state = getMusicState();
+    const fallbackFn = window.playMusicPlaylist;
+    if (typeof fallbackFn === "function") return fallbackFn(state);
+    console.warn("[music] No default music function found (playMusicPlaylist)");
   }
 
   function handleMusicClick(e) {
