@@ -52,7 +52,7 @@
   const savedTrackIndex = Number.isInteger(saved.trackIndex) ? saved.trackIndex : 0;
   const savedTime = Number.isFinite(saved.time) ? saved.time : 0;
 
-  const fallbackStep = 2;  // default 67% volume
+  const fallbackStep = 1;  // default 33% volume
   // use saved step if valid, otherwise fall back to default
   let volumeStep = (Number.isInteger(saved.volumeStep) && saved.volumeStep >= 0 && saved.volumeStep < VOLUME_STEPS.length) ? saved.volumeStep : fallbackStep;
 
