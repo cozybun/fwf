@@ -1916,6 +1916,7 @@
 
   function playFallbackMusic() {
     const state = getMusicState();
+    console.log("[score] Music state:", state);  // debug log
     const fallbackFn = window.playMusicPlaylist;
     if (typeof fallbackFn === "function") return fallbackFn(state);
     console.warn("[music] No default music function found (playMusicPlaylist)");
