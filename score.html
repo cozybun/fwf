@@ -1791,6 +1791,7 @@
         revealRows(0, true, 0, 0, 0);
       } else {
         setMusicStateFromDaily([]);
+        playFallbackMusic();
         const dailySummary = buildCitySummary([]);
         renderCityCircles([]);
         renderScoreRatioLine(dailySummary, true);
@@ -1825,6 +1826,7 @@
 
     const dailySummary = buildCitySummary(scores);
     setMusicStateFromDaily(scores);
+    playFallbackMusic();
 
     scores.forEach((s) => {
       const row = document.createElement("div");
@@ -1981,7 +1983,6 @@
     console.error(err);
     showBanner("Initialization failed. " + (err.message || "unknown error"), true);
   });
-  playFallbackMusic();
 })();
 </script>
 <script src="music.js"></script>
