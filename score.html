@@ -1922,13 +1922,19 @@
 
   function handleMusicClick(e) {
     if (e && typeof e.preventDefault === "function") e.preventDefault();
-    
-    const cycleFn = window.cycleVolume || (() => {  // trigger volume cycling from music.js as cycleVolume already handles resuming from where it left off
-      const btn = document.getElementById("musicToggle");
-      if (btn) btn.click();
-    });
-    
-    if (typeof cycleFn === "function") cycleFn();
+
+    const state = getMusicState();
+    if (state === "good") {
+      const fn = window.playGoodScoreMusic || window.playMusicGood;
+      return typeof fn === "function" ? fn() : playFallbackMusic();
+    }
+
+    if (state === "bad") {
+      const fn = window.playBadScoreMusic || window.playMusicBad;
+      return typeof fn === "function" ? fn() : playFallbackMusic();
+    }
+
+    return playFallbackMusic();
   }
   
     async function initApp() {
@@ -1951,8 +1957,9 @@
       if (scoreFaqClose) scoreFaqClose.addEventListener("click", closeScoreFaqModal);
   
       const musicBtn = document.getElementById("musicToggle");
-      if (musicBtn) {  // do not override the click as music.js already handles it
+      if (musicBtn) {
         musicBtn.type = "button";
+        musicBtn.addEventListener("click", handleMusicClick);
       }
   
       if (scoreFaqModal) {
@@ -1976,5 +1983,7 @@
     });
   })();
 </script>
+<audio id="bgMusic" preload="none"></audio>
+<script src="music.js"></script>
 </body>
 </html>
