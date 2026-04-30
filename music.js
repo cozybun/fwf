@@ -219,6 +219,7 @@
   window.playMusicPlaylist = window.playMusic;
   window.playMusicGood = window.playGoodScoreMusic;
   window.playMusicBad = window.playBadScoreMusic;
+  window.cycleVolume = cycleVolume;
 
   document.addEventListener("pointerdown", onFirstGesture, { once: true, capture: true });
   document.addEventListener("keydown", onFirstGesture, { once: true, capture: true });
