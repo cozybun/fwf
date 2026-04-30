@@ -1910,7 +1910,7 @@
     }
   });
 
-    function getMusicState() {
+  function getMusicState() {
     return activeMode === "hourly" ? "none" : scoreMusicState;
   }
 
@@ -1922,68 +1922,64 @@
 
   function handleMusicClick(e) {
     if (e && typeof e.preventDefault === "function") e.preventDefault();
-
-    const state = getMusicState();
-    if (state === "good") {
-      const fn = window.playGoodScoreMusic || window.playMusicGood;
-      return typeof fn === "function" ? fn() : playFallbackMusic();
+    
+    if (typeof window.cycleVolume === "function") {
+      window.cycleVolume();
     }
-
-    if (state === "bad") {
-      const fn = window.playBadScoreMusic || window.playMusicBad;
-      return typeof fn === "function" ? fn() : playFallbackMusic();
-    }
-
-    return playFallbackMusic();
   }
   
-    async function initApp() {
-      if (scoreDateEl) scoreDateEl.textContent = ydayLabel;
+  const musicBtn = document.getElementById("musicToggle");
+  if (musicBtn) {
+    musicBtn.type = "button";
+    musicBtn.addEventListener("click", handleMusicClick);
+  }
   
-      const ok = await checkAuth();
-      if (!ok) {
-        if (scoreListEl) {
-          scoreListEl.classList.remove("is-hourly");
-          scoreListEl.removeAttribute("data-cols");
-          scoreListEl.innerHTML = "<p> No active session. Save a daily forecast to create session. </p>";
-        }
-        return;
+  async function initApp() {
+    if (scoreDateEl) scoreDateEl.textContent = ydayLabel;
+  
+    const ok = await checkAuth();
+    if (!ok) {
+      if (scoreListEl) {
+        scoreListEl.classList.remove("is-hourly");
+        scoreListEl.removeAttribute("data-cols");
+        scoreListEl.innerHTML = "<p> No active session. Save a daily forecast to create session. </p>";
       }
-  
-      // event wiring
-      if (modeDailyBtn) modeDailyBtn.addEventListener("click", () => setMode("daily"));
-      if (modeHourlyBtn) modeHourlyBtn.addEventListener("click", () => setMode("hourly"));
-      if (scoreFaqBtn) scoreFaqBtn.addEventListener("click", openScoreFaqModal);
-      if (scoreFaqClose) scoreFaqClose.addEventListener("click", closeScoreFaqModal);
-  
-      const musicBtn = document.getElementById("musicToggle");
-      if (musicBtn) {
-        musicBtn.type = "button";
-        musicBtn.addEventListener("click", handleMusicClick);
-      }
-  
-      if (scoreFaqModal) {
-        scoreFaqModal.addEventListener("click", (e) => {
-          if (e.target === scoreFaqModal) closeScoreFaqModal();
-        });
-      }
-  
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && scoreFaqModal?.classList.contains("is-open")) {
-          closeScoreFaqModal();
-        }
-      });
-  
-      setMode(getInitialMode());
+      return;
     }
   
-    initApp().catch((err) => {
-      console.error(err);
-      showBanner("Initialization failed. " + (err.message || "unknown error"), true);
+    // event wiring
+    if (modeDailyBtn) modeDailyBtn.addEventListener("click", () => setMode("daily"));
+    if (modeHourlyBtn) modeHourlyBtn.addEventListener("click", () => setMode("hourly"));
+    if (scoreFaqBtn) scoreFaqBtn.addEventListener("click", openScoreFaqModal);
+    if (scoreFaqClose) scoreFaqClose.addEventListener("click", closeScoreFaqModal);
+  
+    const musicBtn = document.getElementById("musicToggle");
+    if (musicBtn) {
+      musicBtn.type = "button";
+      musicBtn.addEventListener("click", handleMusicClick);
+    }
+  
+    if (scoreFaqModal) {
+      scoreFaqModal.addEventListener("click", (e) => {
+        if (e.target === scoreFaqModal) closeScoreFaqModal();
+      });
+    }
+  
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && scoreFaqModal?.classList.contains("is-open")) {
+        closeScoreFaqModal();
+      }
     });
-  })();
+  
+    setMode(getInitialMode());
+  }
+  
+  initApp().catch((err) => {
+    console.error(err);
+    showBanner("Initialization failed. " + (err.message || "unknown error"), true);
+  });
+})();
 </script>
-<audio id="bgMusic" preload="none"></audio>
 <script src="music.js"></script>
 </body>
 </html>
