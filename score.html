@@ -596,13 +596,13 @@
 
     .top-row {
       display: grid !important;
-      grid-template-columns: 1fr auto auto !important;
+      grid-template-columns: repeat(3, 1fr) !important;
       align-items: center !important;
     }
     
     .top-row .menu-btn:first-child {
       grid-column: 2 !important;
-      justify-self: center !important;
+      justify-self: start !important;
     }
     
     .music-wrap {
@@ -613,7 +613,15 @@
     #musicToggle.menu-icon-btn,
     .top-row .menu-icon-btn {
       grid-column: 3 !important;
-      justify-self: start !important;
+      justify-self: end !important;
+      width: 40px !important;
+      min-width: 40px !important;
+      max-width: 40px !important;
+      height: 40px !important;
+      min-height: 40px !important;
+      max-height: 40px !important;
+      padding: 0 !important;
+      flex: 0 0 auto !important;
     }
     
     @media (max-width: 700px) {
