@@ -104,13 +104,13 @@
     }
 
     button.music-toggle {
-      width: 56px;
-      height: 56px;
+      width: 48px;
+      height: 48px;
       padding: 0;
       border-radius: 16px;
       background: linear-gradient(145deg, #ffffff, #f4edff);
       color: var(--ink);
-      font-size: 1.4rem;
+      font-size: 1.35rem;
       font-weight: 700;
       box-shadow: 0 12px 24px rgba(78, 56, 128, 0.25);
       border: 1px solid #e0d2ff;
@@ -385,8 +385,8 @@
     const rowsEl = document.getElementById("rows");
     const refreshBtn = document.getElementById("refreshBtn");
     const monthLabelEl = document.getElementById("monthLabel");
-    const musicBtn = document.getElementById("musicToggle");
     const musicModeLabelEl = document.getElementById("musicModeLabel");
+    const musicBtn = document.getElementById("musicToggle");
 
     const MONTH_NAMES = [ "Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec" ];
 
@@ -399,7 +399,6 @@
       "Content-Type": "application/json"
     };
 
-    // Fetch all needed fields for ranking logic
     const LEADERBOARD_URL = `${SUPABASE_URL}/rest/v1/leaderboard?select=user_id,username,coins,current_streak,mood,created_at,rank`;
     const SOURCE_LABEL = "leaderboard view";
 
@@ -420,13 +419,19 @@
       return u ? u : "Anon";
     }
 
+    function normalizeMusicMode(mode) {
+      const candidate = (String(mode || "ambient").toLowerCase() || "ambient");
+      if (candidate === "good" || candidate === "bad") return candidate;
+      return "ambient";
+    }
+
     function getMusicSessionFromStorage() {
       const fallback = { mode: "ambient", source: "none", ts: 0, expiresAt: 0 };
-    
+
       try {
         const raw = localStorage.getItem(MUSIC_SESSION_KEY);
         if (!raw) return fallback;
-    
+
         if (raw === "good" || raw === "bad" || raw === "ambient") {
           return {
             mode: raw,
@@ -435,23 +440,24 @@
             expiresAt: Date.now() + 24 * 60 * 60 * 1000
           };
         }
-    
+
         const parsed = JSON.parse(raw);
         if (!parsed || !parsed.mode) return fallback;
-    
+
+        const normalizedMode = normalizeMusicMode(parsed.mode);
         const parsedExpires = Number(parsed.expiresAt);
-        if (!Number.isFinite(parsedExpires)) return fallback;
-    
-        if (parsedExpires < Date.now()) {
+        if (Number.isFinite(parsedExpires) && parsedExpires < Date.now()) {
           localStorage.removeItem(MUSIC_SESSION_KEY);
           return fallback;
         }
-    
+
         return {
-          mode: String(parsed.mode),
+          mode: normalizedMode,
           source: parsed.source || "unknown",
           ts: Number(parsed.ts) || Date.now(),
-          expiresAt: parsedExpires   // ✅ keep original 24h window
+          expiresAt: Number.isFinite(parsedExpires)
+            ? parsedExpires
+            : Date.now() + 24 * 60 * 60 * 1000
         };
       } catch {
         return fallback;
@@ -466,11 +472,6 @@
         expiresAt: Date.now() + 24 * 60 * 60 * 1000
       };
       localStorage.setItem(MUSIC_SESSION_KEY, JSON.stringify(payload));
-    }
-    
-    function clearMusicSessionFromStorage(source = "leaderboard") {
-      localStorage.removeItem(MUSIC_SESSION_KEY);
-      window.stopScoreMusicLoop?.();
     }
 
     function musicModeLabel(mode) {
@@ -489,31 +490,28 @@
       }
     }
 
-    function initMusicModeForLeaderboard() {
-      const session = getMusicSessionFromStorage();
-      const mode = session.mode;
+    let currentMusicMode = "ambient";
 
-      if (mode === "good" && typeof window.playGoodScoreMusic === "function") {
+    function applyMusicSessionState() {
+      const session = getMusicSessionFromStorage();
+      const normalizedMode = normalizeMusicMode(session.mode);
+      syncMusicButtonLabel(normalizedMode);
+
+      if (normalizedMode === currentMusicMode) return;
+      currentMusicMode = normalizedMode;
+
+      if (normalizedMode === "good" && typeof window.playGoodScoreMusic === "function") {
         window.playGoodScoreMusic();
-      } else if (mode === "bad" && typeof window.playBadScoreMusic === "function") {
+      } else if (normalizedMode === "bad" && typeof window.playBadScoreMusic === "function") {
         window.playBadScoreMusic();
       }
-
-      syncMusicButtonLabel(mode);
     }
 
-    function wireMusicButton() {
-      if (!musicBtn) return;
-
-      musicBtn.addEventListener("click", () => {
-        const session = getMusicSessionFromStorage();
-        if (session.mode === "good" || session.mode === "bad") {
-          clearMusicSessionFromStorage("leaderboard-button");
-          const refreshed = getMusicSessionFromStorage();
-          syncMusicButtonLabel(refreshed.mode);
-        }
-      });
-    }
+    window.addEventListener("storage", (event) => {
+      if (event.key === MUSIC_SESSION_KEY) {
+        applyMusicSessionState();
+      }
+    });
 
     function decodeJwtSub(token) {
       try {
@@ -773,9 +771,7 @@
       monthLabelEl.textContent = getMonthLabel();
     }
 
-    wireMusicButton();
-    initMusicModeForLeaderboard();
-
+    applyMusicSessionState();
     fetchLeaderboard();
   </script>
 </body>
