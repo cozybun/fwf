@@ -21,7 +21,6 @@
 
   const SCORE_LOOPS = {
     good: [
-      "audio/.mp3",
       "audio/elgar_salut_casan_salvador.mp3",
       "audio/massenet_meditation_spalding.mp3"
     ],
