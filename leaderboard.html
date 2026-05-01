@@ -78,10 +78,11 @@
     .toolbar {
       display: flex;
       justify-content: center;
-      gap: 8px;
+      gap: 12px;
       flex-wrap: wrap;
       margin-top: 8px;
       width: 100%;
+      align-items: center;
     }
 
     button {
@@ -100,6 +101,42 @@
     button:hover {
       transform: translateY(-1px);
       filter: brightness(1.03);
+    }
+
+    button.music-toggle {
+      width: 56px;
+      height: 56px;
+      padding: 0;
+      border-radius: 16px;
+      background: linear-gradient(145deg, #ffffff, #f4edff);
+      color: var(--ink);
+      font-size: 1.4rem;
+      font-weight: 700;
+      box-shadow: 0 12px 24px rgba(78, 56, 128, 0.25);
+      border: 1px solid #e0d2ff;
+    }
+
+    button.music-toggle:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+      box-shadow: 0 14px 28px rgba(78, 56, 128, 0.3);
+    }
+
+    button.music-toggle:focus-visible {
+      outline: 3px solid #8c7cff;
+      outline-offset: 2px;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      padding: 0;
+      border: 0;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
     }
 
     .board {
@@ -297,6 +334,7 @@
   </style>
 </head>
 <body>
+  <audio id="bgMusic" preload="auto"></audio>
   <main class="app">
     <section class="header">
       <div class="title-box">
@@ -305,7 +343,16 @@
       </div>
       <div class="toolbar">
         <button id="refreshBtn" type="button"> Go Home </button>
-        <button id="musicBtn" type="button" data-mode="ambient" aria-label="Music mode status">🔊 Music</button>
+        <button
+          id="musicToggle"
+          class="music-toggle"
+          type="button"
+          data-mode="ambient"
+          aria-label="Toggle music modes"
+        >
+          🔊
+          <span id="musicModeLabel" class="sr-only" aria-live="polite">Music</span>
+        </button>
       </div>
     </section>
 
@@ -338,7 +385,8 @@
     const rowsEl = document.getElementById("rows");
     const refreshBtn = document.getElementById("refreshBtn");
     const monthLabelEl = document.getElementById("monthLabel");
-    const musicBtn = document.getElementById("musicBtn");
+    const musicBtn = document.getElementById("musicToggle");
+    const musicModeLabelEl = document.getElementById("musicModeLabel");
 
     const MONTH_NAMES = [ "Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec" ];
 
@@ -403,7 +451,7 @@
           mode: String(parsed.mode),
           source: parsed.source || "unknown",
           ts: Number(parsed.ts) || Date.now(),
-          expiresAt: parsedExpires  // keep original 24h window
+          expiresAt: parsedExpires   // ✅ keep original 24h window
         };
       } catch {
         return fallback;
@@ -411,14 +459,14 @@
     }
 
     function setMusicSessionInStorage(mode, source) {
-    const payload = {
-      mode: String(mode || "ambient"),
-      source: source || "unknown",
-      ts: Date.now(),
-      expiresAt: Date.now() + 24 * 60 * 60 * 1000  // set once when saving
-    };
-    localStorage.setItem(MUSIC_SESSION_KEY, JSON.stringify(payload));
-  }
+      const payload = {
+        mode: String(mode || "ambient"),
+        source: source || "unknown",
+        ts: Date.now(),
+        expiresAt: Date.now() + 24 * 60 * 60 * 1000
+      };
+      localStorage.setItem(MUSIC_SESSION_KEY, JSON.stringify(payload));
+    }
     
     function clearMusicSessionFromStorage(source = "leaderboard") {
       localStorage.removeItem(MUSIC_SESSION_KEY);
@@ -435,8 +483,10 @@
       const currentMode = mode === "good" || mode === "bad" ? mode : "ambient";
       if (!musicBtn) return;
       musicBtn.dataset.mode = currentMode;
-      musicBtn.textContent = musicModeLabel(currentMode);
       musicBtn.title = `Current music mode: ${currentMode}`;
+      if (musicModeLabelEl) {
+        musicModeLabelEl.textContent = musicModeLabel(currentMode);
+      }
     }
 
     function initMusicModeForLeaderboard() {
@@ -456,26 +506,12 @@
       if (!musicBtn) return;
 
       musicBtn.addEventListener("click", () => {
-        const toggleFn =
-          window.toggleMusic ||
-          window.toggleMusicPlayback ||
-          window.toggleMusicMute ||
-          window.toggleMute ||
-          window.toggleSound ||
-          window.cycleVolume ||
-          window.playMusicPlaylist;
-
-        if (typeof toggleFn === "function") {
-          toggleFn();
-          return;
-        }
-
-        const session = getMusicSessionFromStorage();  // fallback for score-mode consistency: music button stops good/bad score loop when active
+        const session = getMusicSessionFromStorage();
         if (session.mode === "good" || session.mode === "bad") {
           clearMusicSessionFromStorage("leaderboard-button");
+          const refreshed = getMusicSessionFromStorage();
+          syncMusicButtonLabel(refreshed.mode);
         }
-        const refreshed = getMusicSessionFromStorage();
-        syncMusicButtonLabel(refreshed.mode);
       });
     }
 
@@ -589,7 +625,6 @@
       return `${month} ${year}`;
     }
 
-    // Ranking system: coins desc, current streak desc, mood desc, created_at asc
     function rankComparator(a, b) {
       if (b.coins !== a.coins) return b.coins - a.coins;
       if (b.current_streak !== a.current_streak) return b.current_streak - a.current_streak;
@@ -600,7 +635,7 @@
       const aValid = Number.isFinite(aTime);
       const bValid = Number.isFinite(bTime);
 
-      if (aValid && bValid && aTime !== bTime) return aTime - bTime; // older first
+      if (aValid && bValid && aTime !== bTime) return aTime - bTime;
       if (aValid !== bValid) return aValid ? -1 : 1;
 
       return a.name.localeCompare(b.name);
@@ -734,11 +769,11 @@
       window.location.href = "home";
     });
 
-    if (monthLabelEl) {  // init page
+    if (monthLabelEl) {
       monthLabelEl.textContent = getMonthLabel();
     }
 
-    wireMusicButton();  // keep music state sync across score & leaderboard pages
+    wireMusicButton();
     initMusicModeForLeaderboard();
 
     fetchLeaderboard();
