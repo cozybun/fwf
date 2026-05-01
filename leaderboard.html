@@ -403,7 +403,7 @@
           mode: String(parsed.mode),
           source: parsed.source || "unknown",
           ts: Number(parsed.ts) || Date.now(),
-          expiresAt: parsedExpires   // ✅ keep original 24h window
+          expiresAt: parsedExpires  // keep original 24h window
         };
       } catch {
         return fallback;
@@ -461,7 +461,9 @@
           window.toggleMusicPlayback ||
           window.toggleMusicMute ||
           window.toggleMute ||
-          window.toggleSound;
+          window.toggleSound ||
+          window.cycleVolume ||
+          window.playMusicPlaylist;
 
         if (typeof toggleFn === "function") {
           toggleFn();
