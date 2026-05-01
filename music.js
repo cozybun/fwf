@@ -21,9 +21,9 @@
 
   const SCORE_LOOPS = {
     good: [
-      "audio/vivaldi_winter_mvt1_john_harrison.mp3",
-      "audio/vivaldi_winter_mvt2_john_harrison.mp3",
-      "audio/vivaldi_winter_mvt3_john_harrison.mp3"
+      "audio/.mp3",
+      "audio/elgar_salut_casan_salvador.mp3",
+      "audio/massenet_meditation_spalding.mp3"
     ],
     bad: [
       "audio/chopin_prelude_opus28n4_ivan_ilić.ogg",
