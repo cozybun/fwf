@@ -347,11 +347,9 @@
           id="musicToggle"
           class="music-toggle"
           type="button"
-          data-mode="ambient"
-          aria-label="Toggle music modes"
+          aria-label="Toggle background music"
         >
-          🔊
-          <span id="musicModeLabel" class="sr-only" aria-live="polite">Music</span>
+          🔇
         </button>
       </div>
     </section>
@@ -385,13 +383,11 @@
     const rowsEl = document.getElementById("rows");
     const refreshBtn = document.getElementById("refreshBtn");
     const monthLabelEl = document.getElementById("monthLabel");
-    const musicModeLabelEl = document.getElementById("musicModeLabel");
     const musicBtn = document.getElementById("musicToggle");
 
     const MONTH_NAMES = [ "Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec" ];
 
-    // Shared key for cross-page score music intent
-    const MUSIC_SESSION_KEY = "twf_music_score_session_v1";
+    const MUSIC_SESSION_KEY = "twf_music_score_session_v1";  // shared key for cross-page score music intent
 
     const headers = {
       apikey: SUPABASE_PUB_KEY,
@@ -418,6 +414,15 @@
       const u = (username || "").trim();
       return u ? u : "Anon";
     }
+
+    function handleMusicClick(event) {
+      if (event && typeof event.preventDefault === "function") event.preventDefault();
+      if (typeof window.cycleVolume === "function") {
+        window.cycleVolume();
+      }
+    }
+
+    musicBtn?.addEventListener("click", handleMusicClick);
 
     function normalizeMusicMode(mode) {
       const candidate = (String(mode || "ambient").toLowerCase() || "ambient");
@@ -464,23 +469,11 @@
       }
     }
 
-    function handleMusicClick(event) {
-      if (event && typeof event.preventDefault === "function") event.preventDefault();
-      if (typeof window.cycleVolume === "function") {
-        window.cycleVolume();
-      }
-    }
-
-    musicBtn?.addEventListener("click", handleMusicClick);
-
     function syncMusicButtonLabel(mode) {
       const currentMode = mode === "good" || mode === "bad" ? mode : "ambient";
       if (!musicBtn) return;
       musicBtn.dataset.mode = currentMode;
       musicBtn.title = `Current music mode: ${currentMode}`;
-      if (musicModeLabelEl) {
-        musicModeLabelEl.textContent = musicModeLabel(currentMode);
-      }
     }
 
     let currentMusicMode = "ambient";
