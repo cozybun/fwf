@@ -215,7 +215,7 @@
     setTrack(trackIndex, false);
     if (isMusicEnabled()) tryPlay();
   };
-  window.playMusicPlaylist = (state = "none") => {
+  window.playMusicPlaylist = (state = "ambient") => {
     if (state === "good") {
       window.playGoodScoreMusic();
     } else if (state === "bad") {
