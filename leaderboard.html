@@ -464,21 +464,14 @@
       }
     }
 
-    function setMusicSessionInStorage(mode, source) {
-      const payload = {
-        mode: String(mode || "ambient"),
-        source: source || "unknown",
-        ts: Date.now(),
-        expiresAt: Date.now() + 24 * 60 * 60 * 1000
-      };
-      localStorage.setItem(MUSIC_SESSION_KEY, JSON.stringify(payload));
+    function handleMusicClick(event) {
+      if (event && typeof event.preventDefault === "function") event.preventDefault();
+      if (typeof window.cycleVolume === "function") {
+        window.cycleVolume();
+      }
     }
 
-    function musicModeLabel(mode) {
-      if (mode === "good") return "🎉 Good Score";
-      if (mode === "bad") return "⚠️ Bad Score";
-      return "🔊 Music";
-    }
+    musicBtn?.addEventListener("click", handleMusicClick);
 
     function syncMusicButtonLabel(mode) {
       const currentMode = mode === "good" || mode === "bad" ? mode : "ambient";
