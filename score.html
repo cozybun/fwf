@@ -746,9 +746,9 @@
     <div class="top-row">
       <a href="home" class="menu-btn home-btn">Home</a>
       <div class="music-wrap">
-        <audio id="bgMusic" preload="none"></audio>
+        <audio id="bgMusic" preload="ambient"></audio>
         <button id="musicToggle" class="menu-btn menu-icon-btn" type="button" aria-label="Toggle background music">🔇</button>
-        <span id="musicStatus" aria-live="polite" style="display:none;"></span>
+        <span id="musicStatus" aria-live="polite" style="display:ambient;"></span>
       </div>
     </div>
       
@@ -854,7 +854,7 @@
   let totalMood = 0;
   let shareTimer = null;
   let bannerTimer = null;
-  let scoreMusicState = "none";
+  let scoreMusicState = "ambient";
 
   if (!SUPABASE_PUB_KEY) {
     console.error("Missing Supabase publishable key");
@@ -886,7 +886,7 @@
     if (!scoreRatioEl) return;
   
     const hasText = scoreRatioEl.textContent.trim().length > 0;
-    scoreRatioEl.style.display = isDailyMode && hasText ? "block" : "none";
+    scoreRatioEl.style.display = isDailyMode && hasText ? "block" : "ambient";
   }
 
   function openScoreFaqModal() {
@@ -906,7 +906,7 @@
   function setMusicStateFromDaily(scores = []) {
     const forecastRows = Array.isArray(scores) ? scores.filter(hasForecast) : [];
     if (!forecastRows.length) {
-      scoreMusicState = "none";
+      scoreMusicState = "ambient";
       return;
     }
   
@@ -1030,8 +1030,8 @@
   function updateModeUI(mode) {
     const isDaily = mode === "daily";
     const summaryblock = document.querySelector(".score-summary");
-    if (!isDaily) { scoreMusicState = "none"; }
-    if (summaryblock) { summaryblock.style.display = isDaily ? "grid" : "none"; }
+    if (!isDaily) { scoreMusicState = "ambient"; }
+    if (summaryblock) { summaryblock.style.display = isDaily ? "grid" : "ambient"; }
   
     if (modeDailyBtn) {
       modeDailyBtn.classList.toggle("active", isDaily);
@@ -1044,28 +1044,28 @@
     }
   
     if (shareBtn) {  // show/hide controls & blocks depending on mode
-      shareBtn.style.display = isDaily ? "inline-block" : "none";
+      shareBtn.style.display = isDaily ? "inline-block" : "ambient";
     }
   
     if (cityCirclesEl) {
-      cityCirclesEl.style.display = isDaily ? "flex" : "none";
+      cityCirclesEl.style.display = isDaily ? "flex" : "ambient";
     }
   
     const scoreRatioEl = document.getElementById("scoreRatio");
     if (scoreRatioEl) {
-      scoreRatioEl.style.display = isDaily ? "block" : "none";
+      scoreRatioEl.style.display = isDaily ? "block" : "ambient";
     }
   
     const hourlyStatsRow = document.querySelector("#stats .stat-row");
     if (hourlyStatsRow) {
-      hourlyStatsRow.style.display = isDaily ? "flex" : "none";
+      hourlyStatsRow.style.display = isDaily ? "flex" : "ambient";
     }
     toggleScoreRatioIfReady(isDaily);
   }
 
   function setMode(mode) {
     activeMode = mode === "hourly" ? "hourly" : "daily";
-    if (activeMode === "hourly") scoreMusicState = "none";
+    if (activeMode === "hourly") scoreMusicState = "ambient";
     updateModeUI(activeMode);
     loadScore();
   }
@@ -1783,7 +1783,7 @@
       scoreListEl.innerHTML = `<p class="msg no-score-msg"> No ${isHourly ? "hourly" : "daily"} score yet. <br> Keep forecasting & check back. </p>`;
 
       if (isHourly) {
-        scoreMusicState = "none";
+        scoreMusicState = "ambient";
         if (moodTotalEl) moodTotalEl.textContent = "—";
         if (streakEl) streakEl.textContent = "—";
         if (coinTotalEl) coinTotalEl.textContent = "0";
@@ -1913,7 +1913,7 @@
   });
 
   function getMusicState() {
-    return activeMode === "hourly" ? "none" : scoreMusicState;
+    return activeMode === "hourly" ? "ambient" : scoreMusicState;
   }
 
   function playFallbackMusic() {
