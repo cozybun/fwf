@@ -10,8 +10,8 @@ let selectedHour = null;
 let hourlyCurrentDateKey = '';
 let isDailyPage = false;
 let isHourlyPage = false;
-const BACKUP_EMAIL_STREAK = 7;
-const BACKUP_EMAIL_INTERVAL_MS = 7 * 24 * 60 * 60 * 1000;
+const BACKUP_EMAIL_STREAK = 5;
+const BACKUP_EMAIL_INTERVAL_MS = 3 * 24 * 60 * 60 * 1000;
 
 const HOURLY_LABELS = [
   "1 PM",    // "Noon",
@@ -115,7 +115,7 @@ async function recoverByResettingAuth({ allowAnonymous = false } = {}) {    // a
   return createAnonymousSession();
 }
 
-const BACKUP_USERNAME_INPUT_HINT = "Your 7+ day streak unlocked a backup account option. " + "This helps protect your streak and score across devices.\n\n" +
+const BACKUP_USERNAME_INPUT_HINT = "Your 5+ day streak unlocked a backup account option. " + "This helps protect your streak and score across devices.\n\n" +
   "Username: alphanumeric only, 3-16 chars.";
 
 function getBackupUsernameFromMetadata(user) {
@@ -196,10 +196,10 @@ async function claimBackupUsername(uid, rawUsername) {
   if (!raw) return { ok: false, message: "Username cannot be empty" };
 
   const normalized = raw.toLowerCase();
-  if (!/^[a-zA-Z0-9_]{3,16}$/.test(normalized)) {
+  if (!/^[a-zA-Z0-9]{3,16}$/.test(normalized)) {
     return {
       ok: false,
-      message: "Username must be 3-16 characters and contain letters, numbers, or underscores"
+      message: "Username must be 3-16 characters and contain letters or numbers"
     };
   }
 
@@ -288,7 +288,7 @@ async function promptAndSaveBackupEmail(currentStreak) {
 
   if (needsEmail) {
     const raw = window.prompt(
-      "🎉 7+ day streak! Save a backup email to recover your account across devices:"
+      "🎉 5+ day streak! Save a backup email to recover your account across devices:"
     );
 
     if (!raw) {
