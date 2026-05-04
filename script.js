@@ -655,7 +655,7 @@ async function upsertWithSessionRecovery({
     activeUserId = session?.user?.id;
 
     if (!allowAnonymous && !activeUserId) {
-      return { data: null, error: new Error("No active user session.") };
+      return { data: null, error: new Error("No active user session yet.") };
     }
 
     if (!allowAnonymous) {
@@ -1963,7 +1963,7 @@ async function handleDailySubmit(e) {
 
   const preSaveSession = await ensureSessionForDailySave();
   if (!preSaveSession?.user?.id) {
-    setStatus('<span style="color:red;"> No active session. Please try again. </span>');
+    setStatus('<span style="color:red;"> No active session yet. Your first daily save will create a guest session. </span>');
     return;
   }
 
