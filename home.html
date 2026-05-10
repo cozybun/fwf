@@ -679,13 +679,15 @@
         if (authErr) throw new Error(`Auth update failed: ${authErr.message}`);
 
         const { data: session } = await client.auth.getSession();
-        console.log("session before upsert", session);
+        const userId = session?.user?.id;
+        if (!userId) throw new Error("Could not get authenticated user ID before saving profile");
         
         const { error: profileErr } = await client
           .from("users")
-          .update({
-            username: nextUsername, email: nextEmail })
-          .eq("id", currentUser.id);
+          .upsert(
+            { id: userId, username: nextUsername, email: nextEmail },
+            { onConflict: "id" }
+          );
         if (profileErr) throw new Error(`Profile update failed: ${profileErr.message}`);
 
         if (changedEmail) {
