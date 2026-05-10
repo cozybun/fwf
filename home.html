@@ -678,6 +678,9 @@
         );
         if (authErr) throw new Error(`Auth update failed: ${authErr.message}`);
 
+        const { data: session } = await client.auth.getSession();
+        console.log("session before upsert", session);
+        
         const { error: profileErr } = await client
           .from("users")
           .upsert(
