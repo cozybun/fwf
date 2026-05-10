@@ -680,7 +680,6 @@
 
         const { data } = await client.auth.getSession();
         const userId = data?.session?.user?.id;
-        console.log(session);
         console.log(userId);
         if (!userId) throw new Error("Could not get authenticated user ID before saving profile");
         
