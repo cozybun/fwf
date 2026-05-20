@@ -684,9 +684,9 @@
         if (!userId) throw new Error("Could not get authenticated user ID before saving profile"); */
 
         if (changedEmail) {
-          setStatus(accountStatus, "Saved. Check your inbox to confirm the new email.", "ok");
-        } else {
-          setStatus(accountStatus, "Saved.", "ok");
+          setStatus(accountStatus, "Username saved successfully. Check your inbox to confirm the new email.", "ok");
+        } else {  // if username changed
+          setStatus(accountStatus, "Username saved successfully.", "ok");
         }
 
         await syncAuthStateUI();
