@@ -31,6 +31,8 @@ const MESOWEST_STATIONS_BY_CITY = {
   "New York City": "KNYC",
 };
 
+const CITY_STREAK_THRESHOLD = Object.keys(MESOWEST_STATIONS_BY_CITY).length;  // get number of cities for streak threshold
+
 function normalizeCityKey(value) {
   return String(value || '')
     .toLowerCase()
@@ -754,8 +756,8 @@ async function checkIncrementDailyStreak(payload, forecastDate, explicitUserId =
   const countBefore = existingSet.size;
   const countAfter = new Set([...existingSet, ...newHighCityIds]).size;
 
-  if (countBefore >= 2) return { ok: false, reason: 'ALREADY_REACHED_THRESHOLD', countBefore, countAfter };
-  if (countAfter < 2) return { ok: false, reason: 'RESULT_STILL_UNDER_THRESHOLD', countBefore, countAfter };
+  if (countBefore >= CITY_STREAK_THRESHOLD) return { ok: false, reason: 'ALREADY_REACHED_THRESHOLD', countBefore, countAfter };
+  if (countAfter < CITY_STREAK_THRESHOLD) return { ok: false, reason: 'RESULT_STILL_UNDER_THRESHOLD', countBefore, countAfter };
 
   const { data: stats, error: statsErr } = await client
     .from('user_stats')
@@ -890,11 +892,11 @@ async function incrementDailyStreak(client, userId, forecastDate = null) {
 
       const sameDayCityCount = new Set((sameDayRes.data || []).map((r) => Number(r.city_id))).size;
 
-      if (sameDayCityCount < 2) {  // wait after first save of the date
+      if (sameDayCityCount < CITY_STREAK_THRESHOLD) {  // wait after first save of the date
         return {
           ok: false,
-          reason: "WAITING_FOR_SECOND_FORECAST",
-          message: `No streak change: ${targetYMD} has ${sameDayCityCount} city forecast(s); needs 2.`,
+          reason: "WAITING_FOR_THIRd_FORECAST",
+          message: `No streak change: ${targetYMD} has ${sameDayCityCount} city forecast(s); needs 3.`,
           data: {
             current_streak: currentStreak,
             record_streak: recordStreak,
@@ -905,11 +907,11 @@ async function incrementDailyStreak(client, userId, forecastDate = null) {
         };
       }
 
-      if (sameDayCityCount > 2) {  // 3rd+ forecast for same date does not increment streak additionally
+      if (sameDayCityCount >= CITY_STREAK_THRESHOLD) {  // 4th+ forecast for same date does not increment streak additionally
         return {
           ok: false,
           reason: "NO_CHANGE_ALREADY_REWARDED_FOR_DATE",
-          message: `No streak change: ${targetYMD} already had threshold reached.`,
+          message: `No streak change: ${targetYMD} already had threshold reached and your streak already grew +1.`,
           data: {
             current_streak: currentStreak,
             record_streak: recordStreak,
@@ -991,7 +993,7 @@ async function incrementDailyStreak(client, userId, forecastDate = null) {
       reason: nextReason,
       message:
         nextReason === "INCREMENT"
-          ? `Streak increased to ${nextStreak}, mood +1.`
+          ? `Streak increased +1 to ${nextStreak}, mood +1.`
           : nextReason === "RESET"
           ? `Streak reset to 1, mood +1.`
           : `Streak initialized to 1, mood +1.`,
