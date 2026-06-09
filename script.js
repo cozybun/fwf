@@ -2004,7 +2004,7 @@ async function handleDailySubmit(e) {
     await promptAndSaveBackupEmail(streakResult.data.current_streak);
     setStatus(`<span style="color:#16a34a;">${streakResult.message}</span>`, true);
   } else if (
-    streakResult.reason === "WAITING_FOR_SECOND_FORECAST" ||
+    streakResult.reason === "WAITING_FOR_THIRD_FORECAST" ||
     streakResult.reason === "NO_CHANGE_ALREADY_REWARDED_FOR_DATE" ||
     streakResult.reason === "NO_CHANGE"
   ) {
