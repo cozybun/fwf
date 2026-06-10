@@ -891,7 +891,10 @@ async function incrementDailyStreak(client, userId, forecastDate = null) {
 
     const sameDayCityCount = new Set((sameDayRes.data || []).map((r) => Number(r.city_id))).size;
 
-    if (sameDayCityCount < CITY_STREAK_THRESHOLD) {  // always enforce city threshold for the submitted date, even if it is not latest date yet
+    const isFirstForecastEver = !latest;
+
+    // allow first forecast through to create guest session, but enforce the streak threshold for each subsequent date
+    if (!isFirstForecastEver && sameDayCityCount < CITY_STREAK_THRESHOLD) {
       return {
         ok: false,
         reason: "WAITING_FOR_THIRD_FORECAST",
