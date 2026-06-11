@@ -721,10 +721,22 @@ async function loadUserScopedDataOrEmpty(queryBuilder) {
   return queryBuilder().eq("user_id", userId);
 }
 
-// Predict if this submit will reach daily streak threshold
+// Predict if current submit will reach daily streak threshold
 async function checkIncrementDailyStreak(payload, forecastDate, explicitUserId = null) {
   const uid = explicitUserId || userId;
   if (!uid) return { ok: false, reason: 'NO_USER_ID' };
+
+  const { count: priorForecastCount, error: countErr } = await client
+    .from("daily_forecasts")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", uid)
+    .limit(1);
+
+  if (countErr) {
+    return { ok: false, reason: "COUNT_FORECASTS_FAILED", error: countErr.message };
+  }
+
+  const isFirstForecastEver = !priorForecastCount;
 
   const newHighCityIds = new Set(
     payload
@@ -756,8 +768,13 @@ async function checkIncrementDailyStreak(payload, forecastDate, explicitUserId =
   const countBefore = existingSet.size;
   const countAfter = new Set([...existingSet, ...newHighCityIds]).size;
 
-  if (countBefore >= CITY_STREAK_THRESHOLD) return { ok: false, reason: 'ALREADY_REACHED_THRESHOLD', countBefore, countAfter };
-  if (countAfter < CITY_STREAK_THRESHOLD) return { ok: false, reason: 'RESULT_STILL_UNDER_THRESHOLD', countBefore, countAfter };
+  if (countBefore >= CITY_STREAK_THRESHOLD) {
+    return { ok: false, reason: 'ALREADY_REACHED_THRESHOLD', countBefore, countAfter };
+  }
+
+  if (!isFirstForecastEver && countAfter < CITY_STREAK_THRESHOLD) {
+    return { ok: false, reason: 'RESULT_STILL_UNDER_THRESHOLD', countBefore, countAfter };
+  }
 
   const { data: stats, error: statsErr } = await client
     .from('user_stats')
