@@ -1859,6 +1859,16 @@ document.addEventListener("click", (e) => {
 async function handleDailySubmit(e) {
   e.preventDefault();
 
+  const session = await ensureSessionForDailySave();
+  if (!session?.user?.id) {
+    setStatus(
+      "<span style='color:red;'>No active session yet. Your first daily save will create a guest session.</span>"
+    );
+    return;
+  }
+
+  userId = session.user.id;
+
   const forecastDaySelect = document.getElementById("forecastDay");
   if (!forecastDaySelect) return;
 
@@ -1884,7 +1894,7 @@ async function handleDailySubmit(e) {
   inputs.forEach((input) => {
     if (input.disabled) return;
     const raw = input.value.trim();
-    if (raw === "") return;  // allow empty, treat as not entered
+    if (raw === "") return;
 
     hasAnyInput = true;
 
@@ -1906,7 +1916,7 @@ async function handleDailySubmit(e) {
     if (forecastDay === "today") {
       const localNow = getTzDate(city.timezone || "UTC");
       const cutoff = new Date(localNow.getTime());
-      cutoff.setUTCHours(12, 0, 0, 0);  // noon local cutoff for each city
+      cutoff.setUTCHours(12, 0, 0, 0);
       if (localNow >= cutoff) {
         isLocked = true;
       }
@@ -1914,7 +1924,7 @@ async function handleDailySubmit(e) {
 
     if (isLocked) {
       lockedCityNames.add(getCityName(city, cityId));
-      return;  // skip locked city value
+      return;
     }
 
     const dateValue = forecastDate;
@@ -1971,7 +1981,9 @@ async function handleDailySubmit(e) {
 
   if (lowOnlyCities.length) {
     setStatus(
-      `<span style="color:red;"> A Low requires a High in the same city. Save High forecast for: ${lowOnlyCities.join(", ")}</span>`
+      `<span style="color:red;"> A Low requires a High in the same city. Save High forecast for: ${lowOnlyCities.join(
+        ", "
+      )}</span>`
     );
     return;
   }
@@ -1982,15 +1994,6 @@ async function handleDailySubmit(e) {
     setStatus('<span style="color:red;"> Enter at least 1 valid forecast! </span>');
     return;
   }
-
-  const preSaveSession = await ensureSessionForDailySave();
-  if (!preSaveSession?.user?.id) {
-    setStatus('<span style="color:red;"> No active session yet. Your first daily save will create a guest session. </span>');
-    return;
-  }
-
-  const activeUserId = preSaveSession.user.id;
-  userId = activeUserId;
 
   const result = await upsertWithSessionRecovery({
     table: "daily_forecasts",
@@ -2006,15 +2009,17 @@ async function handleDailySubmit(e) {
     return;
   }
 
-  const finalUserId = result.userId || activeUserId;
+  const finalUserId = result.userId || session.user.id;
   if (finalUserId) userId = finalUserId;
 
   const lockedMsg = lockedCityNames.size > 0
-      ? ` (Past cutoff: ${[...lockedCityNames].join(", ")})`
-      : "";
+    ? ` (Past cutoff: ${[...lockedCityNames].join(", ")})`
+    : "";
 
   setStatus(
-    `<span style="color:green;"> Saved ${payload.length} forecast${payload.length === 1 ? "" : "s"}! 🐰 ${lockedMsg}</span>`
+    `<span style="color:green;"> Saved ${payload.length} forecast${
+      payload.length === 1 ? "" : "s"
+    }! 🐰 ${lockedMsg}</span>`
   );
   await buildDailyGrid();
 
@@ -2035,7 +2040,8 @@ async function handleDailySubmit(e) {
   } else {
     console.warn("Daily streak increment write failed:", streakResult.error);
     setStatus(
-      `<span style="color:orange;"> Saved, but streak update failed: ${streakResult.error?.message || "Unknown error"}</span>`,
+      `<span style="color:orange;"> Saved, but streak update failed: ${streakResult.error?.message ||
+        "Unknown error"}</span>`,
       true
     );
   }
