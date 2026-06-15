@@ -2318,10 +2318,10 @@ document.addEventListener('DOMContentLoaded', async () => {  // main init
   const session = await ensureSessionForDailySave();
   if (!session?.user?.id) {
     setStatus("<span style='color:orange;'> No active session yet… </span>");
-    return;
+  } else {
+    userId = session.user.id;
+    setStatus("");  // once session exists before any form logic runs, the first forecast save succeeds, and the warning clears
   }
-  userId = session.user.id;
-  setStatus("");  // once session exists before any form logic runs, the first forecast save succeeds, and the warning clears
 
   await loadCities();
   if (document.getElementById('hourSelector')) {
