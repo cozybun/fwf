@@ -10,6 +10,7 @@ let selectedHour = null;
 let hourlyCurrentDateKey = '';
 let isDailyPage = false;
 let isHourlyPage = false;
+let createAnonSessionPromise = null;  // session promise-tracking with global scope
 const BACKUP_EMAIL_STREAK = 5;
 const BACKUP_EMAIL_INTERVAL_MS = 3 * 24 * 60 * 60 * 1000;
 
