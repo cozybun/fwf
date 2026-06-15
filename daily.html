@@ -185,6 +185,49 @@
       opacity: 0.8;
       white-space: nowrap;
     }
+
+    .lazy-forecast-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .lazy-forecast-btn {
+      background: #D2042D;
+      color: white;
+      border: 1px solid #991b1b;
+      border-radius: 8px;
+      font-weight: 600;
+      padding: 0.6rem 1rem;
+      font-size: 1rem;
+      line-height: 1.1;
+      min-height: 2.6rem;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lazy-forecast-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .lazy-forecast-badge {
+      padding: 0.2rem 0.65rem;
+      border-radius: 999px;
+      background: #EC5800;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .lazy-forecast-badge.hidden {
+      display: none;
+    }
     
     @media (max-width: 560px) {
       .daily-navbar {
