@@ -494,8 +494,17 @@ async function refreshAndRecoverSession(currentSession = null, options = {}) {
   };
 }
 
+// Helper to normalize whatever shape createAnonymousSession() returns so it always return an object that has .user.id
+function normalizeSessionResult(sessionResult) {
+  return (
+    sessionResult?.data?.session ||
+    sessionResult?.session ||
+    sessionResult ||
+    null
+  );
+}
+
 // Helper to ensure session exists for daily save; reuse current session if present, but create one anon session if not
-let createAnonSessionPromise = null;
 async function ensureSessionForDailySave() {
   const initialRecovery = popAuthRecoveryState();
   if (initialRecovery?.needsReauth) {
@@ -503,7 +512,7 @@ async function ensureSessionForDailySave() {
     return null;
   }
 
-  const session = await ensureSession(false, { allowAnonymous: false });  // get/recover session
+  const session = await ensureSession(false, { allowAnonymous: false }); // get/recover session
 
   const recovery = popAuthRecoveryState();
   if (recovery?.needsReauth) {
@@ -520,9 +529,12 @@ async function ensureSessionForDailySave() {
   if (!createAnonSessionPromise) {
     createAnonSessionPromise = (
       async () => {
-        const anonSession = await createAnonymousSession();
+        const anonResult = await createAnonymousSession();
+        const anonSession = normalizeSessionResult(anonResult);
         if (anonSession?.user?.id) {
-          userId = anonSession.user.id;  // keep global userId in sync for guest sessions
+          userId = anonSession.user.id;  // keep the global userId in sync for guest sessions
+        } else {
+          console.warn("Anonymous session response contained no user", anonResult);
         }
         return anonSession;
       }
@@ -1867,7 +1879,7 @@ async function handleDailySubmit(e) {
   const session = await ensureSessionForDailySave();
   if (!session?.user?.id) {
     setStatus(
-      "<span style='color:red;'>No active session yet. Your first daily save will create a guest session.</span>"
+      "<span style='color:red;'> No active session yet. Your first daily save will create a guest session. </span>"
     );
     return;
   }
