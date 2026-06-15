@@ -362,10 +362,7 @@ async function createAnonymousSession() {
       return null;
     }
 
-    const syncRows = [
-      { id: uid, is_anonymous: true, created_at: new Date().toISOString() },    // optional columns
-      { id: uid }    // guaranteed fallback
-    ];
+    const syncRows = [{ id: uid, created_at: new Date().toISOString() }];
 
     let usersError = null;
     for (const row of syncRows) {
