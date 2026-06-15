@@ -2315,10 +2315,13 @@ document.addEventListener('DOMContentLoaded', async () => {  // main init
     initDailyHelpModal();
   }
 
-  const session = await ensureSession();
+  const session = await ensureSessionForDailySave();
   if (!session?.user?.id) {
-    setStatus('<span style="color:orange;"> No active session yet. Your first daily save will create a guest session. </span>');
+    setStatus("<span style='color:orange;'> No active session yet… </span>");
+    return;
   }
+  userId = session.user.id;
+  setStatus("");  // once session exists before any form logic runs, the first forecast save succeeds, and the warning clears
 
   await loadCities();
   if (document.getElementById('hourSelector')) {
