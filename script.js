@@ -494,7 +494,7 @@ async function refreshAndRecoverSession(currentSession = null, options = {}) {
   };
 }
 
-// Helper to ensure session exists for daily save. reuse current session if present; if none, create one anon session
+// Helper to ensure session exists for daily save; reuse current session if present, but create one anon session if not
 let createAnonSessionPromise = null;
 async function ensureSessionForDailySave() {
   const initialRecovery = popAuthRecoveryState();
@@ -503,10 +503,10 @@ async function ensureSessionForDailySave() {
     return null;
   }
 
-  const session = await ensureSession(false, { allowAnonymous: false });    // get/recover session
+  const session = await ensureSession(false, { allowAnonymous: false });  // get/recover session
 
-  const recovery = popAuthRecoveryState();    // check if verify & stale-token reauth is needed
-  if (recovery?.needsReauth) {    // ensure no silent guest fallback for verified users
+  const recovery = popAuthRecoveryState();
+  if (recovery?.needsReauth) {
     setStatus(`<span style="color:orange;">${recovery.message}</span>`);
     return null;
   }
@@ -516,15 +516,20 @@ async function ensureSessionForDailySave() {
     return session;
   }
 
+  // when a guest session is created, immediately write its user.id into userId, ensuring downstream logic sees that a session already exists
   if (!createAnonSessionPromise) {
-    createAnonSessionPromise = (async () => {
-      const anonSession = await createAnonymousSession();
-      return anonSession;
-    })().finally(() => {
+    createAnonSessionPromise = (
+      async () => {
+        const anonSession = await createAnonymousSession();
+        if (anonSession?.user?.id) {
+          userId = anonSession.user.id;  // keep global userId in sync for guest sessions
+        }
+        return anonSession;
+      }
+    )().finally(() => {
       createAnonSessionPromise = null;
     });
   }
-
   return createAnonSessionPromise;
 }
 
