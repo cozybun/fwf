@@ -14,6 +14,17 @@ let createAnonSessionPromise = null;  // session promise-tracking with global sc
 const BACKUP_EMAIL_STREAK = 5;
 const BACKUP_EMAIL_INTERVAL_MS = 3 * 24 * 60 * 60 * 1000;
 
+const LAZY_FORECAST_SOURCES = {
+  "Los Angeles": "https://forecast.weather.gov/MapClick.php?lat=33.9425&lon=-118.409",
+  "Houston": "https://forecast.weather.gov/MapClick.php?lat=29.6524&lon=-95.2772",
+  "New York City": "https://forecast.weather.gov/MapClick.php?lat=40.7833546&lon=-73.9649732",
+};
+let lazyModeActive = false;
+let lazyTouched = false;
+let lazyPenaltyAppliedForDate = new Set();
+let lazyPendingContinuation = null;
+let lazyPendingForecastDate = null;
+
 const HOURLY_LABELS = [
   "1 PM",    // "Noon",
   "2 PM",
@@ -40,6 +51,42 @@ function normalizeCityKey(value) {
     .replace(/[^a-z0-9\s]/g, '')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+async function fetchLazyForecasts() {
+  const parser = (text) => {
+    const highMatch = text.match(/High[:\s]+(\d{1,3})/i);
+    const lowMatch = text.match(/Low[:\s]+(\d{1,3})/i);
+    return {
+      high: highMatch ? Number(highMatch[1]) : null,
+      low: lowMatch ? Number(lowMatch[1]) : null,
+    };
+  };
+
+  const results = {};
+  for (const [city, url] of Object.entries(LAZY_FORECAST_SOURCES)) {
+    try {
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error(`Failed to fetch ${city} data`);
+      const html = await resp.text();
+      results[city] = parser(html);
+    } catch (err) {
+      console.warn("Lazy forecast fetch error:", city, err);
+      results[city] = { high: null, low: null };
+    }
+  }
+  return results;
+}
+
+function toggleLazyBadge(show) {
+  const badge = document.getElementById("lazyForecastBadge");
+  if (!badge) return;
+  badge.classList.toggle("hidden", !show);
+}
+
+function markLazyTouched() {
+  lazyTouched = true;
+  toggleLazyBadge(false);
 }
 
 // Helper to return full obs URL for a city object
@@ -1532,6 +1579,14 @@ async function buildDailyGrid() {
     guessesByCityDate.set(key, g);
   }
 
+  const hasSavedForecasts = guessesByCityDate.size > 0;
+  const lazyBtn = document.getElementById("lazyForecastBtn");
+  if (lazyBtn) { lazyBtn.disabled = hasSavedForecasts; }
+  if (hasSavedForecasts) {
+    lazyModeActive = false;
+    toggleLazyBadge(false);
+  }  // ensure Lazy Forecast button stays disabled & badge stays hidden once a forecast exists for the selected day
+
   const PTNow = getPTNow();
   const PTCutoff = new Date(PTNow);
   PTCutoff.setUTCHours(12, 0, 0, 0);
@@ -2010,56 +2065,83 @@ async function handleDailySubmit(e) {
     return;
   }
 
-  const result = await upsertWithSessionRecovery({
-    table: "daily_forecasts",
-    rows: payload,
-    onConflict: "user_id,city_id,date",
-    allowAnonymous: false,
-  });
+  const attemptSave = async () => {
+    const result = await upsertWithSessionRecovery({
+      table: "daily_forecasts",
+      rows: payload,
+      onConflict: "user_id,city_id,date",
+      allowAnonymous: false,
+    });
 
-  if (!result || result.error) {
-    const errMsg = result?.error?.message ? `: ${result.error.message}` : "";
-    console.error("Forecast save failed:", result?.error);
-    setStatus(`<span style="color:red;"> Save failed ${errMsg}</span>`);
+    if (!result || result.error) {
+      const errMsg = result?.error?.message ? `: ${result.error.message}` : "";
+      console.error("Forecast save failed:", result?.error);
+      setStatus(`<span style="color:red;"> Save failed ${errMsg}</span>`);
+      return;
+    }
+
+    const finalUserId = result.userId || session.user.id;
+    if (finalUserId) userId = finalUserId;
+
+    const lockedMsg = lockedCityNames.size > 0
+      ? ` (Past cutoff: ${[...lockedCityNames].join(", ")})`
+      : "";
+
+    setStatus(
+      `<span style="color:green;"> Saved ${payload.length} forecast${
+        payload.length === 1 ? "" : "s"
+      }! 🐰 ${lockedMsg}</span>`
+    );
+    await buildDailyGrid();
+
+    const streakResult = await incrementDailyStreak(client, finalUserId, forecastDate);
+
+    if (streakResult.ok) {
+      await promptAndSaveBackupEmail(streakResult.data.current_streak);
+      setStatus(`<span style="color:#16a34a;">${streakResult.message}</span>`, true);
+    } else if (
+      streakResult.reason === "WAITING_FOR_THIRD_FORECAST" ||
+      streakResult.reason === "NO_CHANGE_ALREADY_REWARDED_FOR_DATE" ||
+      streakResult.reason === "NO_CHANGE"
+    ) {
+      setStatus(
+        `<span style="color:#64748b;">${streakResult.message || "Streak unchanged"}</span>`,
+        true
+      );
+    } else {
+      console.warn("Daily streak increment write failed:", streakResult.error);
+      setStatus(
+        `<span style="color:orange;"> Saved, but streak update failed: ${streakResult.error?.message ||
+          "Unknown error"}</span>`,
+        true
+      );
+    }
+
+    // Only reset lazy state and clear pending pointers after a successful save
+    lazyModeActive = false;
+    lazyTouched = false;
+    toggleLazyBadge(false);
+    lazyPendingContinuation = null;
+    lazyPendingForecastDate = null;
+  };
+
+  if (  // check lazy state before save attempt
+    lazyModeActive &&
+    !lazyTouched &&
+    lazyPendingForecastDate === forecastDate &&
+    !lazyPenaltyAppliedForDate.has(forecastDate)
+  ) {
+    lazyPendingContinuation = attemptSave;
+    // modal's Continue handler adds forecastDate to lazyPenaltyAppliedForDate before invoking continuation, so it avoids prompting again for same day
+    const modal = document.getElementById("lazyWarningModal");
+    if (modal) {
+      modal.classList.remove("hidden");
+      modal.setAttribute("aria-hidden", "false");
+    }
     return;
   }
 
-  const finalUserId = result.userId || session.user.id;
-  if (finalUserId) userId = finalUserId;
-
-  const lockedMsg = lockedCityNames.size > 0
-    ? ` (Past cutoff: ${[...lockedCityNames].join(", ")})`
-    : "";
-
-  setStatus(
-    `<span style="color:green;"> Saved ${payload.length} forecast${
-      payload.length === 1 ? "" : "s"
-    }! 🐰 ${lockedMsg}</span>`
-  );
-  await buildDailyGrid();
-
-  const streakResult = await incrementDailyStreak(client, finalUserId, forecastDate);
-
-  if (streakResult.ok) {
-    await promptAndSaveBackupEmail(streakResult.data.current_streak);
-    setStatus(`<span style="color:#16a34a;">${streakResult.message}</span>`, true);
-  } else if (
-    streakResult.reason === "WAITING_FOR_THIRD_FORECAST" ||
-    streakResult.reason === "NO_CHANGE_ALREADY_REWARDED_FOR_DATE" ||
-    streakResult.reason === "NO_CHANGE"
-  ) {
-    setStatus(
-      `<span style="color:#64748b;">${streakResult.message || "Streak unchanged"}</span>`,
-      true
-    );
-  } else {
-    console.warn("Daily streak increment write failed:", streakResult.error);
-    setStatus(
-      `<span style="color:orange;"> Saved, but streak update failed: ${streakResult.error?.message ||
-        "Unknown error"}</span>`,
-      true
-    );
-  }
+  await attemptSave();
 }
 
 async function handleHourlySubmit(e) {
@@ -2273,6 +2355,97 @@ function initBindings() {
   }
 
   initScoreBtn();
+  initLazyForecastUI();
+}
+
+function initLazyForecastUI() {
+  const lazyBtn = document.getElementById("lazyForecastBtn");
+  const lazyModal = document.getElementById("lazyWarningModal");
+  const continueBtn = document.getElementById("lazyWarningContinueBtn");
+  const backBtn = lazyModal?.querySelector('button[data-action="back"]');
+
+  const closeModal = () => {
+    if (!lazyModal) return;
+    lazyModal.classList.add("hidden");
+    lazyModal.setAttribute("aria-hidden", "true");
+  };
+
+  const openModal = () => {
+    if (!lazyModal) return;
+    lazyModal.classList.remove("hidden");
+    lazyModal.setAttribute("aria-hidden", "false");
+  };
+
+  document.addEventListener("input", (event) => {
+    if (!lazyModeActive) return;
+    const target = event.target;
+    if (
+      target &&
+      (target.classList?.contains("daily-high") || target.classList?.contains("daily-low"))
+    ) {
+      markLazyTouched();
+    }
+  });
+
+  lazyBtn?.addEventListener("click", async () => {
+    lazyModeActive = false;
+    lazyTouched = false;
+    setStatus('<span style="color:#0ea5e9;"> Fetching Lazy Forecast… </span>');
+    try {
+      const lazyForecasts = await fetchLazyForecasts();
+
+      document.querySelectorAll(".city-card").forEach((card) => {
+        const titleEl = card.querySelector(".city-title");
+        const cityName = titleEl?.textContent?.trim();
+        if (!cityName) return;
+
+        const forecast = lazyForecasts[cityName];
+        if (!forecast) return;
+
+        const highInput = card.querySelector(".daily-high:not([disabled])");
+        const lowInput = card.querySelector(".daily-low:not([disabled])");
+
+        if (highInput && Number.isFinite(forecast.high)) {
+          highInput.value = forecast.high;
+        }
+        if (lowInput && Number.isFinite(forecast.low)) {
+          lowInput.value = forecast.low;
+        }
+      });
+
+      lazyModeActive = true;
+      lazyTouched = false;
+      const forecastDay = document.getElementById("forecastDay")?.value || "today";
+      lazyPendingForecastDate = getDailyForecastDateISO(forecastDay);
+      toggleLazyBadge(true);
+      setStatus(
+        '<span style="color:#16a34a;"> Auto-filled the grid with latest NWS forecasts. Edit any field to avoid penalty. </span>'
+      );
+    } catch (err) {
+      setStatus(
+        `<span style="color:red;"> Lazy Forecast failed: ${String(err?.message || err)} </span>`
+      );
+    }
+  });
+
+  continueBtn?.addEventListener("click", async () => {
+    if (lazyPendingContinuation && lazyPendingForecastDate) {
+      lazyPenaltyAppliedForDate.add(lazyPendingForecastDate);
+      markLazyTouched();
+      const continuation = lazyPendingContinuation;
+      lazyPendingContinuation = null;
+      lazyPendingForecastDate = null;
+      closeModal();
+      await continuation();
+    } else {
+      closeModal();
+    }
+  });
+
+  backBtn?.addEventListener("click", (event) => {
+    event.preventDefault();
+    closeModal();
+  });
 }
 
 function initDailyHelpModal() {
