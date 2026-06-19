@@ -2361,8 +2361,8 @@ function initBindings() {
 function initLazyForecastUI() {
   const lazyBtn = document.getElementById("lazyForecastBtn");
   const lazyModal = document.getElementById("lazyWarningModal");
-  const continueBtn = document.getElementById("lazyWarningContinueBtn");
-  const backBtn = lazyModal?.querySelector('button[data-action="back"]');
+  const lazySave = document.getElementById("lazyWarningSaveBtn");
+  const lazyBack = lazyModal?.querySelector('button[data-action="back"]');
 
   const closeModal = () => {
     if (!lazyModal) return;
@@ -2419,7 +2419,7 @@ function initLazyForecastUI() {
       lazyPendingForecastDate = getDailyForecastDateISO(forecastDay);
       toggleLazyBadge(true);
       setStatus(
-        '<span style="color:#16a34a;"> Auto-filled the grid with latest NWS forecasts. Edit any field to avoid penalty. </span>'
+        '<span style="color:#16a34a;"> Auto-filled with latest NWS forecasts. Edit any field before save to avoid penalty. </span>'
       );
     } catch (err) {
       setStatus(
@@ -2428,7 +2428,7 @@ function initLazyForecastUI() {
     }
   });
 
-  continueBtn?.addEventListener("click", async () => {
+  lazySave?.addEventListener("click", async () => {  // apply penalty & save lazy forecasts on click
     if (lazyPendingContinuation && lazyPendingForecastDate) {
       lazyPenaltyAppliedForDate.add(lazyPendingForecastDate);
       markLazyTouched();
@@ -2442,7 +2442,7 @@ function initLazyForecastUI() {
     }
   });
 
-  backBtn?.addEventListener("click", (event) => {
+  lazyBack?.addEventListener("click", (event) => {  // exit lazy modal on click
     event.preventDefault();
     closeModal();
   });
