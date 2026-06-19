@@ -2436,7 +2436,10 @@ function initLazyForecastUI() {
       lazyPendingContinuation = null;
       lazyPendingForecastDate = null;
       closeModal();
-      await continuation();
+  
+      await applyLazyPenalty();                     
+      await continuation();  // save lazy forecasts
+      setStatus("-1 Coin & -1 Mood penalty applied for using Lazy Forecast. Forecasts saved!");
     } else {
       closeModal();
     }
@@ -2446,6 +2449,13 @@ function initLazyForecastUI() {
     event.preventDefault();
     closeModal();
   });
+}
+
+async function applyLazyPenalty() {
+  const { error } = await supabase.rpc("apply_lazy_penalty", {
+    user_id: currentUser?.id,
+  });
+  if (error) throw error;
 }
 
 function initDailyHelpModal() {
