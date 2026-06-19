@@ -116,7 +116,7 @@
 
     #dailyHelpModal .daily-help-list {
       margin: 0;
-      padding: 0 1rem 0 1.3rem;  /* right & left side space */
+      padding: 0 1rem 0 1.3rem;
       list-style: disc;
       list-style-position: outside;
       line-height: 1.5;
@@ -228,7 +228,79 @@
     .lazy-forecast-badge.hidden {
       display: none;
     }
-    
+
+    .lazy-warning-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      pointer-events: none;
+    }
+
+    .lazy-warning-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(2px);
+    }
+
+    .lazy-warning-dialog {
+      position: relative;
+      background: #fff;
+      border-radius: 16px;
+      max-width: 28rem;
+      width: 100%;
+      padding: 1.25rem 1.4rem;
+      box-shadow: 0 18px 35px rgba(15, 23, 42, 0.35);
+      pointer-events: auto;
+      text-align: left;
+    }
+
+    .lazy-warning-dialog h2 {
+      margin: 0 0 0.4rem 0;
+      font-size: 1.25rem;
+      color: #111827;
+      text-align: center;
+    }
+
+    .lazy-warning-dialog p {
+      margin: 0 0 1rem 0;
+      line-height: 1.5;
+      color: #374151;
+      text-align: justify;
+    }
+
+    .lazy-warning-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: flex-end;
+    }
+
+    .lazy-warning-actions button {
+      flex: 1;
+      min-width: 9rem;
+      border-radius: 10px;
+      border: none;
+      font-weight: 600;
+      padding: 0.65rem 0.9rem;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+
+    #lazyWarningSaveBtn {
+      background: #EF4444;
+      color: #fff;
+    }
+
+    #lazyWarningBackBtn {
+      background: #E5E7EB;
+      color: #111827;
+    }
+
     @media (max-width: 560px) {
       .daily-navbar {
         margin-top: 0.6rem;
@@ -248,6 +320,14 @@
         width: 1.75rem;
         height: 1.75rem;
         font-size: 0.95rem;
+      }
+
+      .lazy-warning-dialog {
+        padding: 1rem 1.15rem;
+      }
+
+      .lazy-warning-actions button {
+        flex: 1 1 100%;
       }
     }
   </style>
@@ -284,7 +364,7 @@
       <ul class="daily-help-list">
         <li> Choose <strong>Today</strong> or <strong>Tomorrow</strong> from the forecast day selector. </li>
         <li> Enter your forecast for the date's <strong>High</strong> and <strong>Low</strong> before the cutoff times. </li>
-        <li> Feel free to use NWS, AccuWeather, Weather Channel, WU, LLMs, or current weather to help guide your forecasts. </li>
+        <li> Feel free to use NWS, AccuWeather, Weather Channel, WU, or current weather to help guide your forecasts. </li>
         <li> Click <strong>Save</strong> to save your forecasts. You can edit forecasts until the cutoff times for each city. </li>
         <li> Click <strong>View My Score</strong> the next morning to see results verified by NWS/WU and your shareable score. Good luck! </li>
         <li> Repeat with <strong>Hourly Forecasts</strong>, then see your results each hour and all of today's hourlies at 8 PM ET. Have fun 😊 </li>
@@ -292,6 +372,28 @@
 
       <div style="text-align:center; margin-top: 0.9rem;">
         <button id="helpDoneBtn" type="button"> Understood ✅ </button>
+      </div>
+    </div>
+  </div>
+
+  <div
+    id="lazyWarningModal"
+    class="lazy-warning-modal hidden"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="lazyWarningTitle"
+    aria-describedby="lazyWarningText"
+  >
+    <div class="lazy-warning-backdrop"></div>
+    <div class="lazy-warning-dialog">
+      <h2 id="lazyWarningTitle"> Lazy Forecast Penalty </h2>
+      <p id="lazyWarningText">
+        Saving the auto-filled Lazy Forecast temps will apply a <strong> –1 Coin </strong> and <strong> –1 Mood </strong> penalty.
+        Choose <strong> Back </strong>strong> to edit any field or choose <strong> Save </strong>strong> if you accept it.
+      </p>
+      <div class="lazy-warning-actions">
+        <button id="lazyWarningBackBtn" type="button" data-action="back"> Back </button>
+        <button id="lazyWarningSaveBtn" type="button"> Save </button>
       </div>
     </div>
   </div>
@@ -325,7 +427,7 @@
         Lazy Forecast
       </button>
       <span id="lazyForecastBadge" class="lazy-forecast-badge hidden">
-        Lazy Forecast active — edit to avoid penalty
+        Lazy Forecast active — Edit before save to avoid penalty
       </span>
     </div>
 
