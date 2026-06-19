@@ -2361,20 +2361,21 @@ function initBindings() {
 function initLazyForecastUI() {
   const lazyBtn = document.getElementById("lazyForecastBtn");
   const lazyModal = document.getElementById("lazyWarningModal");
+  if (!lazyModal) return;
   const lazySave = document.getElementById("lazyWarningSaveBtn");
-  const lazyBack = lazyModal?.querySelector('button[data-action="back"]');
+  const lazyBack = document.getElementById("lazyWarningBackBtn");
 
   const closeModal = () => {
-    if (!lazyModal) return;
     lazyModal.classList.add("hidden");
     lazyModal.setAttribute("aria-hidden", "true");
   };
 
   const openModal = () => {
-    if (!lazyModal) return;
     lazyModal.classList.remove("hidden");
     lazyModal.setAttribute("aria-hidden", "false");
   };
+
+  closeModal(); // ensure the modal starts out hidden
 
   document.addEventListener("input", (event) => {
     if (!lazyModeActive) return;
@@ -2428,7 +2429,7 @@ function initLazyForecastUI() {
     }
   });
 
-  lazySave?.addEventListener("click", async () => {  // apply penalty & save lazy forecasts on click
+  lazySave?.addEventListener("click", async () => {  // apply penalty & save lazy forecast on click
     if (lazyPendingContinuation && lazyPendingForecastDate) {
       lazyPenaltyAppliedForDate.add(lazyPendingForecastDate);
       markLazyTouched();
@@ -2442,7 +2443,7 @@ function initLazyForecastUI() {
     }
   });
 
-  lazyBack?.addEventListener("click", (event) => {  // exit lazy modal on click
+  lazyBack?.addEventListener("click", (event) => {
     event.preventDefault();
     closeModal();
   });
