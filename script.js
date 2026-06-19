@@ -2374,8 +2374,7 @@ function initLazyForecastUI() {
     lazyModal.classList.remove("hidden");
     lazyModal.setAttribute("aria-hidden", "false");
   };
-
-  closeModal(); // ensure the modal starts out hidden
+  closeModal();  // ensure modal starts out hidden
 
   document.addEventListener("input", (event) => {
     if (!lazyModeActive) return;
