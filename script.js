@@ -20,7 +20,7 @@ const LAZY_FORECAST_SOURCES = {
   "New York City": "https://forecast.weather.gov/MapClick.php?lat=40.7833546&lon=-73.9649732",
 };
 let lazyModeActive = false;
-let lazyTouched = false;
+let lazyEdited = false;
 let lazyPenaltyAppliedForDate = new Set();
 let lazyPendingContinuation = null;
 let lazyPendingForecastDate = null;
@@ -84,8 +84,8 @@ function toggleLazyBadge(show) {
   badge.classList.toggle("hidden", !show);
 }
 
-function markLazyTouched() {
-  lazyTouched = true;
+function markLazyEdited() {
+  lazyEdited = true;
   toggleLazyBadge(false);
 }
 
@@ -2119,7 +2119,7 @@ async function handleDailySubmit(e) {
 
     // Only reset lazy state and clear pending pointers after a successful save
     lazyModeActive = false;
-    lazyTouched = false;
+    lazyEdited = false;
     toggleLazyBadge(false);
     lazyPendingContinuation = null;
     lazyPendingForecastDate = null;
@@ -2127,7 +2127,7 @@ async function handleDailySubmit(e) {
 
   if (  // check lazy state before save attempt
     lazyModeActive &&
-    !lazyTouched &&
+    !lazyEdited &&
     lazyPendingForecastDate === forecastDate &&
     !lazyPenaltyAppliedForDate.has(forecastDate)
   ) {
@@ -2383,13 +2383,13 @@ function initLazyForecastUI() {
       target &&
       (target.classList?.contains("daily-high") || target.classList?.contains("daily-low"))
     ) {
-      markLazyTouched();
+      markLazyEdited();
     }
   });
 
   lazyBtn?.addEventListener("click", async () => {
     lazyModeActive = false;
-    lazyTouched = false;
+    lazyEdited = false;
     setStatus('<span style="color:#0ea5e9;"> Fetching Lazy Forecast… </span>');
     try {
       const lazyForecasts = await fetchLazyForecasts();
@@ -2414,7 +2414,7 @@ function initLazyForecastUI() {
       });
 
       lazyModeActive = true;
-      lazyTouched = false;
+      lazyEdited = false;
       const forecastDay = document.getElementById("forecastDay")?.value || "today";
       lazyPendingForecastDate = getDailyForecastDateISO(forecastDay);
       toggleLazyBadge(true);
@@ -2435,7 +2435,7 @@ function initLazyForecastUI() {
     }
 
     lazyPenaltyAppliedForDate.add(lazyPendingForecastDate);
-    markLazyTouched();
+    markLazyEdited();
     const continuation = lazyPendingContinuation;
     lazyPendingContinuation = null;
     lazyPendingForecastDate = null;
