@@ -2467,7 +2467,7 @@ async function applyLazyPenalty() {
   const {
     data: { user },
     error: authError,
-  } = await supabase.auth.getUser();
+  } = await client.auth.getUser();
 
   if (authError) {
     throw new Error(`Unable to fetch user: ${authError.message}`);
