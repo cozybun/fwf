@@ -2383,13 +2383,13 @@ function initLazyForecastUI() {
       target &&
       (target.classList?.contains("daily-high") || target.classList?.contains("daily-low"))
     ) {
-      markLazyEdited();
+      markLazyTouched();
     }
   });
 
   lazyBtn?.addEventListener("click", async () => {
     lazyModeActive = false;
-    lazyEdited = false;
+    lazyTouched = false;
     setStatus('<span style="color:#0ea5e9;"> Fetching Lazy Forecast… </span>');
     try {
       const lazyForecasts = await fetchLazyForecasts();
@@ -2414,7 +2414,7 @@ function initLazyForecastUI() {
       });
 
       lazyModeActive = true;
-      lazyEdited = false;
+      lazyTouched = false;
       const forecastDay = document.getElementById("forecastDay")?.value || "today";
       lazyPendingForecastDate = getDailyForecastDateISO(forecastDay);
       toggleLazyBadge(true);
@@ -2435,18 +2435,21 @@ function initLazyForecastUI() {
     }
 
     lazyPenaltyAppliedForDate.add(lazyPendingForecastDate);
-    markLazyEdited();
+    markLazyTouched();
     const continuation = lazyPendingContinuation;
     lazyPendingContinuation = null;
     lazyPendingForecastDate = null;
     closeModal();
 
     try {
-      await applyLazyPenalty();  // apply the -1 coin/mood penalty
-      await continuation();  // save lazy forecasts that triggered the modal
-      setStatus(
-        '<span style="color:#16a34a;">-1 Coin & -1 Mood penalty applied for using Lazy Forecast. Forecasts saved!</span>'
-      );
+      await applyLazyPenalty();
+      await continuation();
+
+      requestAnimationFrame(() => {  // re-apply the penalty status after the continuation finishes so it cannot be overwritten
+        setStatus(
+          '<span style="color:#16a34a;">-1 Coin & -1 Mood penalty applied for using Lazy Forecast. Forecasts saved!</span>'
+        );
+      });
     } catch (err) {
       setStatus(
         `<span style="color:red;"> Lazy Forecast penalty failed: ${String(err?.message || err)} </span>`
@@ -2461,10 +2464,20 @@ function initLazyForecastUI() {
 }
 
 async function applyLazyPenalty() {
-  const userId = currentUser?.id;
-  if (!userId) {
-    throw new Error("Unable to apply lazy penalty (user not signed in)");
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError) {
+    throw new Error(`Unable to fetch user: ${authError.message}`);
   }
+
+  const userId = user?.id;
+  if (!userId) {
+    throw new Error("Unable to apply lazy penalty (user not signed in).");
+  }
+
   const { error } = await supabase.rpc("apply_lazy_penalty", {
     p_user_id: userId,
   });
