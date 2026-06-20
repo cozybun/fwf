@@ -2453,7 +2453,7 @@ function initLazyForecastUI() {
 
 async function applyLazyPenalty() {
   const { error } = await supabase.rpc("apply_lazy_penalty", {
-    user_id: currentUser?.id,
+    p_user_id: currentUser?.id,
   });
   if (error) throw error;
 }
