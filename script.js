@@ -2383,13 +2383,13 @@ function initLazyForecastUI() {
       target &&
       (target.classList?.contains("daily-high") || target.classList?.contains("daily-low"))
     ) {
-      markLazyTouched();
+      markLazyEdited();
     }
   });
 
   lazyBtn?.addEventListener("click", async () => {
     lazyModeActive = false;
-    lazyTouched = false;
+    lazyEdited = false;
     setStatus('<span style="color:#0ea5e9;"> Fetching Lazy Forecast… </span>');
     try {
       const lazyForecasts = await fetchLazyForecasts();
@@ -2414,7 +2414,7 @@ function initLazyForecastUI() {
       });
 
       lazyModeActive = true;
-      lazyTouched = false;
+      lazyEdited = false;
       const forecastDay = document.getElementById("forecastDay")?.value || "today";
       lazyPendingForecastDate = getDailyForecastDateISO(forecastDay);
       toggleLazyBadge(true);
@@ -2435,7 +2435,7 @@ function initLazyForecastUI() {
     }
 
     lazyPenaltyAppliedForDate.add(lazyPendingForecastDate);
-    markLazyTouched();
+    markLazyEdited();
     const continuation = lazyPendingContinuation;
     lazyPendingContinuation = null;
     lazyPendingForecastDate = null;
