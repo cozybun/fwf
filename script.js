@@ -2374,7 +2374,7 @@ function initLazyForecastUI() {
     lazyModal.classList.remove("hidden");
     lazyModal.setAttribute("aria-hidden", "false");
   };
-  closeModal();  // ensure modal starts out hidden
+  closeModal();
 
   document.addEventListener("input", (event) => {
     if (!lazyModeActive) return;
@@ -2428,20 +2428,29 @@ function initLazyForecastUI() {
     }
   });
 
-  lazySave?.addEventListener("click", async () => {  // apply penalty & save lazy forecast on click
-    if (lazyPendingContinuation && lazyPendingForecastDate) {
-      lazyPenaltyAppliedForDate.add(lazyPendingForecastDate);
-      markLazyTouched();
-      const continuation = lazyPendingContinuation;
-      lazyPendingContinuation = null;
-      lazyPendingForecastDate = null;
+  lazySave?.addEventListener("click", async () => {
+    if (!(lazyPendingContinuation && lazyPendingForecastDate)) {
       closeModal();
-  
-      await applyLazyPenalty();                     
-      await continuation();  // save lazy forecasts
-      setStatus("-1 Coin & -1 Mood penalty applied for using Lazy Forecast. Forecasts saved!");
-    } else {
-      closeModal();
+      return;
+    }
+
+    lazyPenaltyAppliedForDate.add(lazyPendingForecastDate);
+    markLazyTouched();
+    const continuation = lazyPendingContinuation;
+    lazyPendingContinuation = null;
+    lazyPendingForecastDate = null;
+    closeModal();
+
+    try {
+      await applyLazyPenalty();  // apply the -1 coin/mood penalty
+      await continuation();  // save lazy forecasts that triggered the modal
+      setStatus(
+        '<span style="color:#16a34a;">-1 Coin & -1 Mood penalty applied for using Lazy Forecast. Forecasts saved!</span>'
+      );
+    } catch (err) {
+      setStatus(
+        `<span style="color:red;"> Lazy Forecast penalty failed: ${String(err?.message || err)} </span>`
+      );
     }
   });
 
@@ -2452,8 +2461,12 @@ function initLazyForecastUI() {
 }
 
 async function applyLazyPenalty() {
+  const userId = currentUser?.id;
+  if (!userId) {
+    throw new Error("Unable to apply lazy penalty (user not signed in)");
+  }
   const { error } = await supabase.rpc("apply_lazy_penalty", {
-    p_user_id: currentUser?.id,
+    p_user_id: userId,
   });
   if (error) throw error;
 }
