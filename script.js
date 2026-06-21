@@ -1494,6 +1494,7 @@ async function loadCities() {
   cities = data.map(d => ({ ...d, id: Number(d.id), timezone: d.timezones?.name || d.timezone || "UTC" }));    // ensure numeric id and consistent timezone field
   updateCurrentDate();
   await buildDailyGrid();
+  syncLazyButtonState();
 
   if (isHourlyPage) {
     hourlyCurrentDateKey = updateHourlyCurrentDate();
@@ -1588,7 +1589,6 @@ async function buildDailyGrid() {
     lazyModeActive = false;
     toggleLazyBadge(false);
   }  // ensure Lazy Forecast button stays disabled & badge stays hidden once a forecast exists for the selected day
-  syncLazyButtonState();
 
   const PTNow = getPTNow();
   const PTCutoff = new Date(PTNow);
