@@ -2343,8 +2343,8 @@ function initBindings() {
       }
 
       updateCurrentDate();
-      syncLazyButtonState();
       await buildDailyGrid();
+      syncLazyButtonState();
     });
   }
 
