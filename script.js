@@ -2340,6 +2340,7 @@ function initBindings() {
       }
 
       updateCurrentDate();
+      syncLazyButtonState();
       await buildDailyGrid();
     });
   }
@@ -2547,6 +2548,7 @@ document.addEventListener('DOMContentLoaded', async () => {  // main init
   detectPageMode();
   initBindings();
   applyNoonAutoSelect();
+  syncLazyButtonState();
   refreshForecastDayOptions();
   initDateRolloverWatcher();
 
