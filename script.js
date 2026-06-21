@@ -2364,14 +2364,13 @@ function initBindings() {
 
 function syncLazyButtonState() {  // sync lazy button state with today & tomorrow auto-advance
   const forecastDay = document.getElementById("forecastDay")?.value || "today";
-  const activeDate = getDailyForecastDateISO(forecastDay);
-  const todayDate = getDailyForecastDateISO("today");
-  const isToday = activeDate === todayDate;
   const lazyBtn = document.getElementById("lazyForecastBtn");
+  const hasSavedForecasts = lazyBtn?.dataset?.hasSavedForecasts === "true";
+  const isToday = getDailyForecastDateISO(forecastDay) === getDailyForecastDateISO("today");
+  const shouldEnable = isToday && !hasSavedForecasts;
 
   if (lazyBtn) {  // keep Lazy button enabled only when the selected date equals today’s date
-    const shouldEnable = isToday && !hasSavedForecasts;
-    lazyBtn.disabled = !isToday;
+    lazyBtn.disabled = !shouldEnable;
     lazyBtn.setAttribute("aria-disabled", String(!shouldEnable));
   }
 }
