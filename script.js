@@ -2478,7 +2478,7 @@ async function applyLazyPenalty() {
     throw new Error("Unable to apply lazy penalty (user not signed in).");
   }
 
-  const { error } = await supabase.rpc("apply_lazy_penalty", {
+  const { error } = await client.rpc("apply_lazy_penalty", {
     p_user_id: userId,
   });
   if (error) throw error;
