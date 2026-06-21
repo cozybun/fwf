@@ -2358,6 +2358,19 @@ function initBindings() {
   initLazyForecastUI();
 }
 
+function syncLazyButtonState() {  // sync lazy button state with today & tomorrow auto-advance
+  const forecastDay = document.getElementById("forecastDay")?.value || "today";
+  const activeDate = getDailyForecastDateISO(forecastDay);
+  const todayDate = getDailyForecastDateISO("today");
+  const isToday = activeDate === todayDate;
+  const lazyBtn = document.getElementById("lazyForecastBtn");
+
+  if (lazyBtn) {  // keep Lazy button enabled only when the selected date equals today’s date
+    lazyBtn.disabled = !isToday;
+    lazyBtn.setAttribute("aria-disabled", String(!isToday));
+  }
+}
+
 function initLazyForecastUI() {
   const lazyBtn = document.getElementById("lazyForecastBtn");
   const lazyModal = document.getElementById("lazyWarningModal");
@@ -2375,6 +2388,7 @@ function initLazyForecastUI() {
     lazyModal.setAttribute("aria-hidden", "false");
   };
   closeModal();
+  syncLazyButtonState();
 
   document.addEventListener("input", (event) => {
     if (!lazyModeActive) return;
@@ -2447,7 +2461,7 @@ function initLazyForecastUI() {
 
       requestAnimationFrame(() => {  // re-apply the penalty status after the continuation finishes so it cannot be overwritten
         setStatus(
-          '<span style="color:#16a34a;">-1 Coin & -1 Mood penalty applied for using Lazy Forecast. Forecasts saved!</span>'
+          '<span style="color:#16a34a;">-1 Coin & -1 Mood penalty applied for using Lazy Forecast. No streak increase. Forecasts saved!</span>'
         );
       });
     } catch (err) {
@@ -2524,6 +2538,7 @@ function syncDailyDateUI(force = false) {
 
   refreshForecastDayOptions();
   updateCurrentDate();
+  syncLazyButtonState();  // keep Lazy button in sync with the new date
   return didDateUIChange;
 }
 
