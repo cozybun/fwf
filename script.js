@@ -1581,11 +1581,14 @@ async function buildDailyGrid() {
 
   const hasSavedForecasts = guessesByCityDate.size > 0;
   const lazyBtn = document.getElementById("lazyForecastBtn");
-  if (lazyBtn) { lazyBtn.disabled = hasSavedForecasts; }
+  if (lazyBtn) {
+    lazyBtn.dataset.hasSavedForecasts = String(hasSavedForecasts);
+  }
   if (hasSavedForecasts) {
     lazyModeActive = false;
     toggleLazyBadge(false);
   }  // ensure Lazy Forecast button stays disabled & badge stays hidden once a forecast exists for the selected day
+  syncLazyButtonState();
 
   const PTNow = getPTNow();
   const PTCutoff = new Date(PTNow);
@@ -2367,8 +2370,9 @@ function syncLazyButtonState() {  // sync lazy button state with today & tomorro
   const lazyBtn = document.getElementById("lazyForecastBtn");
 
   if (lazyBtn) {  // keep Lazy button enabled only when the selected date equals today’s date
+    const shouldEnable = isToday && !hasSavedForecasts;
     lazyBtn.disabled = !isToday;
-    lazyBtn.setAttribute("aria-disabled", String(!isToday));
+    lazyBtn.setAttribute("aria-disabled", String(!shouldEnable));
   }
 }
 
