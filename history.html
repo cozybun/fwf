@@ -238,6 +238,16 @@
       flex-wrap: wrap;
     }
 
+    .lazy-forecast {
+      color: #EC5800;
+      font-weight: 500;
+    }
+
+    .lazy-forecast::after {
+      content: " (lazy)";
+      font-weight: 500;
+    }
+
     .mode-toggle {
       width: 100%;
     }
@@ -1245,6 +1255,10 @@
 
         const tdForecast = document.createElement("td");
         tdForecast.textContent = formatRange(row, true);
+        if (row.lazy_flag) {
+          tdForecast.classList.add("forecast-lazy");
+          tdForecast.title = "Lazy penalty applied to this forecast";
+        }
 
         const tdActual = document.createElement("td");
         tdActual.textContent = formatRange(row, false);
@@ -1327,6 +1341,25 @@
       hourlyModeBtn.classList.toggle("secondary", isDaily);
     }
 
+    async function fetchDailyForecastLazyUsed(userId) {
+      const { data, error } = await client
+        .from("daily_forecasts")
+        .select("city_id,date,lazy_flag")
+        .eq("user_id", userId);
+
+      if (error) {
+        console.warn("Unable to load lazy forecast flags", error);
+        return new Map();
+      }
+
+      const map = new Map();
+      (data || []).forEach((entry) => {
+        const key = `${String(entry.city_id ?? "")}:${String(entry.date ?? "")}`;
+        map.set(key, entry.lazy_flag === true);
+      });
+      return map;
+    }
+
     async function resolveAuthUserId() {
       const { data: sessionData, error: sessionError } = await client.auth.getSession();
       if (sessionError) throw new Error(`Session check failed: ${sessionError.message}`);
@@ -1391,10 +1424,19 @@
         cityMap.set(String(c.id), c.name || "Unknown");
       });
 
-      state.rows = (scoreResult.data || []).map((r) => ({
-        ...r,
-        city_name: cityMap.get(String(r.city_id)) || "Unknown"
-      }));
+      let forecastLazyMap = new Map();
+      if (cfg.table === "daily_scores") {
+        forecastLazyMap = await fetchDailyForecastLazyFlags(userId);
+      }
+
+      state.rows = (scoreResult.data || []).map((r) => {
+        const key = `${String(r.city_id ?? "")}:${String(r.date ?? "")}`;
+        return {
+          ...r,
+          city_name: cityMap.get(String(r.city_id)) || "Unknown",
+          lazy_flag: forecastLazyMap.get(key) || false
+        };
+      });  
 
       buildCityOptions();
       state.filteredRows = [...state.rows];
