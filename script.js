@@ -24,6 +24,7 @@ let lazyEdited = false;
 let lazyPenaltyAppliedForDate = new Set();
 let lazyPendingContinuation = null;
 let lazyPendingForecastDate = null;
+let lazyUsed = false;
 
 const HOURLY_LABELS = [
   "1 PM",    // "Noon",
@@ -2061,7 +2062,10 @@ async function handleDailySubmit(e) {
     return;
   }
 
-  const payload = [...rowsByCity.values()].map(({ _hasHigh, _hasLow, ...row }) => row);
+  const payload = [...rowsByCity.values()].map(row => ({
+    ...row,
+    lazyUsed: row.lazyUsed,
+  }));
 
   if (!payload.length) {
     setStatus('<span style="color:red;"> Enter at least 1 valid forecast! </span>');
@@ -2120,10 +2124,10 @@ async function handleDailySubmit(e) {
       );
     }
 
-    // Only reset lazy state and clear pending pointers after a successful save
-    lazyModeActive = false;
+    lazyModeActive = false; // only reset lazy state and clear pending pointers after a successful save
     lazyEdited = false;
     toggleLazyBadge(false);
+    lazyUsed = false;
     lazyPendingContinuation = null;
     lazyPendingForecastDate = null;
   };
@@ -2461,11 +2465,12 @@ function initLazyForecastUI() {
 
     try {
       await applyLazyPenalty();
+      lazyUsed = true;
       await continuation();
 
       requestAnimationFrame(() => {  // re-apply the penalty status after the continuation finishes so it cannot be overwritten
         setStatus(
-          '<span style="color:#16a34a;">-1 Coin & -1 Mood penalty applied for using Lazy Forecast. No streak increase. Forecasts saved!</span>'
+          '<span style="color:#16a34a;"> -1 Coin & -1 Mood penalty applied for using Lazy Forecast. No streak increase. Forecasts saved! </span>'
         );
       });
     } catch (err) {
