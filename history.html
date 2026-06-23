@@ -1426,7 +1426,7 @@
 
       let forecastLazyMap = new Map();
       if (cfg.table === "daily_scores") {
-        forecastLazyMap = await fetchDailyForecastLazyFlags(userId);
+        forecastLazyMap = await fetchDailyForecastLazyUsed(userId);
       }
 
       state.rows = (scoreResult.data || []).map((r) => {
