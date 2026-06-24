@@ -1255,8 +1255,8 @@
 
         const tdForecast = document.createElement("td");
         tdForecast.textContent = formatRange(row, true);
-        if (row.lazy_flag) {
-          tdForecast.classList.add("forecast-lazy");
+        if (row.lazy_used) {
+          tdForecast.classList.add("lazy-forecast");
           tdForecast.title = "Lazy penalty applied to this forecast";
         }
 
@@ -1434,7 +1434,7 @@
         return {
           ...r,
           city_name: cityMap.get(String(r.city_id)) || "Unknown",
-          lazy_flag: forecastLazyMap.get(key) || false
+          lazy_used: forecastLazyMap.get(key) || false
         };
       });  
 
