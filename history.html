@@ -1344,7 +1344,7 @@
     async function fetchDailyForecastLazyUsed(userId) {
       const { data, error } = await client
         .from("daily_forecasts")
-        .select("city_id,date,lazy_flag")
+        .select("city_id,date,lazy_used")
         .eq("user_id", userId);
 
       if (error) {
@@ -1355,7 +1355,7 @@
       const map = new Map();
       (data || []).forEach((entry) => {
         const key = `${String(entry.city_id ?? "")}:${String(entry.date ?? "")}`;
-        map.set(key, entry.lazy_flag === true);
+        map.set(key, entry.lazy_used === true);
       });
       return map;
     }
