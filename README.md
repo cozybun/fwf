@@ -1,5 +1,5 @@
-🐰 Temps With Friends 🔮
+🐰 Forecast With Friends 🔮
 
-A social forecasting strategy game 😊
+A casual social forecasting app 😊
 
-Guess Temps, Help Buns, Cozy Up 👯
+Guess Stuff, Help Buns, Cozy Up 👯
