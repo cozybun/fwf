@@ -2062,11 +2062,12 @@ async function handleDailySubmit(e) {
     return;
   }
 
-  const payload = [...rowsByCity.values()].map(row => ({
-    _hasHigh, _hasLow,
+  const payload = [...rowsByCity.values()].map(
+    ({ _hasHigh, _hasLow, ...row }) => ({
     ...row,
     lazyUsed: row.lazyUsed,
-  }));
+    })
+  );
 
   if (!payload.length) {
     setStatus('<span style="color:red;"> Enter at least 1 valid forecast! </span>');
