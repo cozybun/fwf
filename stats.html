@@ -44,7 +44,7 @@
     }
 
     /* --- EXACT TOP BAR LAYOUT LIKE HOURLY/DAILY --- */
-    .daily-navbar {
+    .temps-navbar {
       width: 100%;
       max-width: 900px;
       margin: 0.75rem 0 0.8rem;
@@ -56,11 +56,11 @@
       position: relative;
     }
 
-    .daily-navbar .nav-spacer {
+    .temos-navbar .nav-spacer {
       justify-self: start;
     }
 
-    .daily-navbar h1 {
+    .temps-navbar h1 {
       margin: 0;
       justify-self: center;
       text-align: center;
@@ -237,7 +237,7 @@
       .title { font-size: 1.4rem; }
       .grid { grid-template-columns: 1fr; }
 
-      .daily-navbar {
+      .temps-navbar {
         margin-top: 0.6rem;
         padding: 0 0.6rem;
       }
@@ -256,7 +256,7 @@
 </head>
 <body data-music-mode="cinematic">
   <div class="wrap">
-    <header class="daily-navbar">
+    <header class="temps-navbar">
       <span class="nav-spacer" aria-hidden="true"></span>
 
       <h1 class="title">🌤️ My Stats</h1>
@@ -301,7 +301,7 @@
         <p class="meta" id="lastForecast"> Last forecast: — </p>
 
         <div class="btn-row">
-          <button id="dailyBtn" class="cozy" type="button"> Go to Daily </button>
+          <button id="tempsBtn" class="cozy" type="button"> Go to Temps </button>
           <button class="secondary" id="historyBtn" type="button"> My History </button>
         </div>
       </div>
@@ -327,7 +327,7 @@
     const currentStreakEl = document.getElementById("currentStreak");
     const moodEl = document.getElementById("mood");
     const lastForecastEl = document.getElementById("lastForecast");
-    const dailyBtn = document.getElementById("dailyBtn");
+    const tempsBtn = document.getElementById("tempsBtn");
     const historyBtn = document.getElementById("historyBtn");
 
     function cleanNumber(v, fallback = 0, decimals = 2) {
@@ -447,8 +447,8 @@
       }
     }
 
-    dailyBtn.addEventListener("click", () => {
-      window.location.href = "daily";
+    tempsBtn.addEventListener("click", () => {
+      window.location.href = "Temps";
     });
 
     historyBtn.addEventListener("click", () => {
