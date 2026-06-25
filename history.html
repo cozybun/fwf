@@ -639,7 +639,7 @@
       <div class="pager">
         <span id="pagerInfo" class="pager-info"> 0 entries </span>
         <div class="pager-bottom">
-          <button id="goDailyBtn" class="button button-brand-purple" type="button"> Go to Daily </button>
+          <button id="goTempsBtn" class="button button-brand-purple" type="button"> Go to Temps </button>
           <div class="pager-actions">
             <button id="prevPage" class="button secondary" type="button"> Previous </button>
             <button id="nextPage" class="button secondary" type="button"> Next </button>
@@ -670,7 +670,7 @@
     const pageSizeInput = document.getElementById("pageSize");
     const clearBtn = document.getElementById("clearBtn");
     const statsBtn = document.getElementById("statsBtn");
-    const goDailyBtn = document.getElementById("goDailyBtn");
+    const goTempsBtn = document.getElementById("goTempsBtn");
 
     const dailyModeBtn = document.getElementById("dailyModeBtn");
     const hourlyModeBtn = document.getElementById("hourlyModeBtn");
@@ -1503,8 +1503,8 @@
       applyFilters(true);
     });
 
-    goDailyBtn.addEventListener("click", () => {
-      window.location.href = "daily";
+    goTempsBtn.addEventListener("click", () => {
+      window.location.href = "temps";
     });
 
     prevPageBtn.addEventListener("click", () => {
