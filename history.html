@@ -240,12 +240,10 @@
 
     .lazy-forecast {
       color: #EC5800;
-      font-weight: 500;
     }
 
     .lazy-forecast::after {
       content: " (lazy)";
-      font-weight: 500;
     }
 
     .mode-toggle {
@@ -1257,7 +1255,7 @@
         tdForecast.textContent = formatRange(row, true);
         if (row.lazy_used) {
           tdForecast.classList.add("lazy-forecast");
-          tdForecast.title = "Lazy penalty applied to this forecast";
+          tdForecast.title = "Used Lazy Forecast for this forecast, so penalty applied";
         }
 
         const tdActual = document.createElement("td");
