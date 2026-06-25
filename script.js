@@ -2063,6 +2063,7 @@ async function handleDailySubmit(e) {
   }
 
   const payload = [...rowsByCity.values()].map(row => ({
+    _hasHigh, _hasLow,
     ...row,
     lazyUsed: row.lazyUsed,
   }));
