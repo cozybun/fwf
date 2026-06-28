@@ -1,3 +1,8 @@
+import {setStatus, isValidEmail, isInvalidRefreshTokenError, clearSupabaseAuthStorage, recoverByResettingAuth, getBackupUsernameFromMetadata, syncPublicUsersTable, 
+        claimBackupEmail, claimBackupEmail, promptAndSaveBackupEmail, promptAndSaveBackupEmail, getUserIdFromAuthPayload, getSessionFromAuthPayload,
+        createAnonymousSession, isAnonymousUser, setAuthRecoveryState, popAuthRecoveryState, sendReauthMagicLink, refreshAndRecoverSession, normalizeSessionResult,
+        ensureSessionForDailySave, ensureSession, upsertWithSessionRecovery, handleAuthCallbackFromUrl, loadUserScopedDataOrEmpty} from "./script.js";
+
 function getFinanceForecastDateISO(forecastDay = "today") {
   const nowET = new Date().toLocaleString("en-US", {
     timeZone: "America/New_York",
