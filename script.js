@@ -1237,7 +1237,6 @@ function updateCurrentDate() {
   const forecastDaySelect = document.getElementById("forecastDay");
   if (!dateDisplay || !forecastDaySelect) return;
 
-  refreshForecastDayOptions();
   const selected = forecastDaySelect.value || (shouldAutoUseTomorrowPT() ? "tomorrow" : "today");
   const iso = getDailyForecastDateISO(selected);
   dateDisplay.textContent = formatDisplayDate(iso);
@@ -2547,7 +2546,6 @@ function syncDailyDateUI(force = false) {
   const didDateUIChange = force || applyNoonAutoSelect();
   if (!isDailyPage) return didDateUIChange;
 
-  refreshForecastDayOptions();
   updateCurrentDate();
   syncLazyButtonState();  // keep Lazy button in sync with the new date
   return didDateUIChange;
@@ -2559,7 +2557,6 @@ document.addEventListener('DOMContentLoaded', async () => {  // main init
   initBindings();
   applyNoonAutoSelect();
   syncLazyButtonState();
-  refreshForecastDayOptions();
   initDateRolloverWatcher();
 
   if (typeof initDailyHelpModal === 'function') {
