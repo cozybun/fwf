@@ -9,6 +9,67 @@ function getFinanceForecastDateISO(forecastDay = "today") {
   return baseDate.toISOString().slice(0, 10);
 }
 
+function formatDisplayDate(ymd) {
+  if (!ymd) return "";
+
+  const [year, month, day] = ymd.split("-").map(Number);
+
+  const date = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));  // use a safe UTC noon for locale formatting
+
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).formatToParts(date).reduce((acc, p) => {
+    if (p.type === "day") acc.day = p.value;
+    if (p.type === "month") acc.month = p.value.replace(/\.$/, "");  // remove optional trailing dot in some locales
+    if (p.type === "year") acc.year = p.value;
+    return acc;
+  }, {});
+
+  return `${parts.day} ${parts.month} ${parts.year}`;
+}
+
+function refreshForecastDayOptions() {
+  const forecastDaySelect = document.getElementById("forecastDay");
+  if (!forecastDaySelect) return;
+
+  const todayOption = forecastDaySelect.querySelector('option[value="today"]');
+  const tomorrowOption = forecastDaySelect.querySelector('option[value="tomorrow"]');
+  if (!todayOption || !tomorrowOption) return;
+
+  todayOption.textContent = "Today";
+  tomorrowOption.textContent = "Tomorrow";
+
+  forecastDaySelect.value = shouldAutoUseTomorrowET() ? "tomorrow" : "today";  // force select to autoswitch date on refresh
+}
+
+// Determine autoswitch for date selector default
+function shouldAutoUseTomorrowET() {
+  const hour = Number(
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/New_York",
+      hour: "2-digit",
+      hour12: false,
+    })
+      .formatToParts(new Date())
+      .find((p) => p.type === "hour").value
+  );
+  return hour >= 10;  // 10AM autoswitch
+}
+
+function updateCurrentDate() {
+  const dateDisplay = document.getElementById("currentDate");
+  const forecastDaySelect = document.getElementById("forecastDay");
+  if (!dateDisplay || !forecastDaySelect) return;
+
+  refreshForecastDayOptions();
+  const selected = forecastDaySelect.value || (shouldAutoUseTomorrowET() ? "tomorrow" : "today");
+  const iso = getFinanceForecastDateISO(selected);
+  dateDisplay.textContent = formatDisplayDate(iso);
+}
+
 async function buildFinanceGrid() {
   const grid = document.getElementById("financeGrid");
   if (!grid) return;
@@ -21,7 +82,6 @@ async function buildFinanceGrid() {
   const forecastDate = getFinanceForecastDateISO(forecastDay);
   const showYesterday = forecastDay === "today";
 
-  const forecastKey = `gas_${forecastDate}`;
   const userForecasts = [];
 
   if (userId) {
@@ -109,8 +169,6 @@ async function buildFinanceGrid() {
       }
     });
   }
-
-  grid.textContent = ""; // clear loading text
 }
 
 if (document.getElementById("financeGrid")) {
