@@ -103,7 +103,7 @@ function getObsUrl(cityObj) {
   return `https://mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi?stn=K${encodeURIComponent(stationCode)}`;
 }
 
-function setStatus(html, append = false) {
+export function setStatus(html, append = false) {
   const status = document.getElementById('status');
   if (!status) return;
 
@@ -117,13 +117,13 @@ function detectPageMode() {
   isHourlyPage = !!document.getElementById('hourlyForm');
 }
 
-function isValidEmail(email) {
+export function isValidEmail(email) {
   return /^\S+@\S+\.\S+$/.test(email);
 }
 
 const PROJECT_REF = new URL(SUPABASE_URL).hostname.split('.')[0];
 
-function isInvalidRefreshTokenError(err) { 
+export function isInvalidRefreshTokenError(err) { 
   const msg = String(err?.message || err?.error_description || "");
   return (
     err?.status === 400 &&
@@ -135,7 +135,7 @@ function isInvalidRefreshTokenError(err) {
   );
 }
 
-function clearSupabaseAuthStorage() {
+export function clearSupabaseAuthStorage() {
   const collectAndRemove = (store) => {
     const keys = [];
     for (let i = 0; i < store.length; i++) {
@@ -158,7 +158,7 @@ function clearSupabaseAuthStorage() {
   } catch (_) {}
 }
 
-async function recoverByResettingAuth({ allowAnonymous = false } = {}) {    // auto recover from stale/invalid refresh token
+export async function recoverByResettingAuth({ allowAnonymous = false } = {}) {    // auto recover from stale/invalid refresh token
   try { await client.auth.signOut({ scope: "global" }); } catch (_) {}
   clearSupabaseAuthStorage();
 
@@ -169,7 +169,7 @@ async function recoverByResettingAuth({ allowAnonymous = false } = {}) {    // a
 const BACKUP_USERNAME_INPUT_HINT = "Your 5+ day streak unlocked a backup account option. " + "This helps protect your streak and score across devices.\n\n" +
   "Username: alphanumeric only, 3-16 chars.";
 
-function getBackupUsernameFromMetadata(user) {
+export function getBackupUsernameFromMetadata(user) {
   return (
     user?.user_metadata?.display_name ||
     user?.user_metadata?.public_username ||
@@ -178,7 +178,7 @@ function getBackupUsernameFromMetadata(user) {
   ).trim();
 }
 
-async function syncPublicUsersTable(uid, updates) {
+export async function syncPublicUsersTable(uid, updates) {
   if (!uid || !updates || Object.keys(updates).length === 0) return { ok: true };
 
   const payload = { id: uid, ...updates };
@@ -197,7 +197,7 @@ async function syncPublicUsersTable(uid, updates) {
   return { ok: true };
 }
 
-async function claimBackupEmail(uid, rawEmail) {
+export async function claimBackupEmail(uid, rawEmail) {
   const raw = String(rawEmail || "").trim();
   if (!raw) return { ok: false, message: "Email cannot be empty" };
 
@@ -242,7 +242,7 @@ async function claimBackupEmail(uid, rawEmail) {
   };
 }
 
-async function claimBackupUsername(uid, rawUsername) {
+export async function claimBackupUsername(uid, rawUsername) {
   const raw = String(rawUsername || "").trim();
   if (!raw) return { ok: false, message: "Username cannot be empty" };
 
@@ -316,7 +316,7 @@ async function claimBackupUsername(uid, rawUsername) {
 }
 
 // Prompt user to save email & username
-async function promptAndSaveBackupEmail(currentStreak) {
+export async function promptAndSaveBackupEmail(currentStreak) {
   if (currentStreak < BACKUP_EMAIL_STREAK) return;
 
   const {
@@ -386,16 +386,16 @@ async function promptAndSaveBackupEmail(currentStreak) {
   }
 }
 
-function getUserIdFromAuthPayload(data) {
+export function getUserIdFromAuthPayload(data) {
   return data?.user?.id || data?.session?.user?.id || null;
 }
 
-function getSessionFromAuthPayload(data) {
+export function getSessionFromAuthPayload(data) {
   return data?.session || null;
 }
 
 // Create new anon session & upsert new uid into users table before writing forecasts
-async function createAnonymousSession() {
+export async function createAnonymousSession() {
   try {
     const { data, error } = await client.auth.signInAnonymously();
     if (error) {
@@ -452,7 +452,7 @@ let ensureSessionPromiseMode = null;
 let lastMagicLinkSentAt = 0;
 let authRecoveryState = null;
 
-function isAnonymousUser(user) {
+export function isAnonymousUser(user) {
   return Boolean(
     user?.is_anonymous ||
     user?.app_metadata?.provider === "anon" ||
@@ -460,18 +460,18 @@ function isAnonymousUser(user) {
   );
 }
 
-function setAuthRecoveryState(state) {
+export function setAuthRecoveryState(state) {
   authRecoveryState = state;
   if (state?.needsReauth) userId = null;    // clear stale user id
 }
 
-function popAuthRecoveryState() {
+export function popAuthRecoveryState() {
   const s = authRecoveryState;
   authRecoveryState = null;
   return s;
 }
 
-async function sendReauthMagicLink(email) {
+export async function sendReauthMagicLink(email) {
   const now = Date.now();
 
   if (now - lastMagicLinkSentAt < MAGIC_LINK_RESEND_COOLDOWN_MS) {
@@ -506,7 +506,7 @@ async function sendReauthMagicLink(email) {
   };
 }
 
-async function refreshAndRecoverSession(currentSession = null, options = {}) {
+export async function refreshAndRecoverSession(currentSession = null, options = {}) {
   const { allowAnonymous = false } = options;
   const previousUser = currentSession?.user || null;
 
@@ -541,7 +541,7 @@ async function refreshAndRecoverSession(currentSession = null, options = {}) {
 }
 
 // Helper to normalize whatever shape createAnonymousSession() returns so it always return an object that has .user.id
-function normalizeSessionResult(sessionResult) {
+export function normalizeSessionResult(sessionResult) {
   return (
     sessionResult?.data?.session ||
     sessionResult?.session ||
@@ -551,7 +551,7 @@ function normalizeSessionResult(sessionResult) {
 }
 
 // Helper to ensure session exists for daily save; reuse current session if present, but create one anon session if not
-async function ensureSessionForDailySave() {
+export async function ensureSessionForDailySave() {
   const initialRecovery = popAuthRecoveryState();
   if (initialRecovery?.needsReauth) {
     setStatus(`<span style="color:orange;">${initialRecovery.message}</span>`);
@@ -592,7 +592,7 @@ async function ensureSessionForDailySave() {
 }
 
 // Helper to get existing user or create new anon user
-async function ensureSession(forceRefresh = false, options = {}) {
+export async function ensureSession(forceRefresh = false, options = {}) {
   const { allowAnonymous = false } = options;
 
   if (
@@ -690,7 +690,7 @@ async function ensureSession(forceRefresh = false, options = {}) {
   return ensureSessionPromise;
 }
 
-async function upsertWithSessionRecovery({
+export async function upsertWithSessionRecovery({
   rows = [],
   table = "daily_forecasts",
   onConflict = "id",
@@ -764,7 +764,7 @@ async function upsertWithSessionRecovery({
   return { data: null, error: new Error("Save failed after retries.") };
 }
 
-async function handleAuthCallbackFromUrl() {
+export async function handleAuthCallbackFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const hasCallback =
     params.has("code") || params.has("token_hash") || params.has("type");
@@ -777,7 +777,7 @@ async function handleAuthCallbackFromUrl() {
   }
 }
 
-async function loadUserScopedDataOrEmpty(queryBuilder) {
+export async function loadUserScopedDataOrEmpty(queryBuilder) {
   const session = await ensureSession();
   if (!session?.user?.id) return [];
   userId = session.user.id;
