@@ -159,7 +159,7 @@ async function buildFinanceGrid() {
             class="daily-high"
             id="gasPriceInput"
             step="0.001"
-            min="0.001"
+            min="0"
             max="10"
             value="${hasForecast ? saved.price.toFixed(2) : ""}"
             placeholder="0.000"
@@ -170,12 +170,12 @@ async function buildFinanceGrid() {
           id="gasPriceSlider"
           min="0.01"
           max="10"
-          step="0.01"
+          step="0"
           value="${hasForecast ? saved.price.toFixed(2) : 5}"
           class="mt-2 w-full"
           aria-label="Gas price slider"
         />
-        <small class="text-muted block mt-1"> Slide to choose a price between 1¢ and $10 </small>
+        <small class="text-muted block mt-1"> Slide to choose a price between 0¢ and $10 </small>
       </div>
     </div>
   `;
