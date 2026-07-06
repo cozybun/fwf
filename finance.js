@@ -1,6 +1,6 @@
 import {setStatus, isValidEmail, isInvalidRefreshTokenError, clearSupabaseAuthStorage, recoverByResettingAuth, getBackupUsernameFromMetadata, syncPublicUsersTable, 
-        claimBackupEmail, claimBackupEmail, promptAndSaveBackupEmail, promptAndSaveBackupEmail, getUserIdFromAuthPayload, getSessionFromAuthPayload,
-        createAnonymousSession, isAnonymousUser, setAuthRecoveryState, popAuthRecoveryState, sendReauthMagicLink, refreshAndRecoverSession, normalizeSessionResult,
+        claimBackupEmail, promptAndSaveBackupEmail, promptAndSaveBackupEmail, getUserIdFromAuthPayload, getSessionFromAuthPayload, createAnonymousSession,
+        isAnonymousUser, setAuthRecoveryState, popAuthRecoveryState, sendReauthMagicLink, refreshAndRecoverSession, normalizeSessionResult,
         ensureSessionForDailySave, ensureSession, upsertWithSessionRecovery, handleAuthCallbackFromUrl, loadUserScopedDataOrEmpty} from "./script.js";
 
 function getFinanceForecastDateISO(forecastDay = "today") {
@@ -93,7 +93,7 @@ async function buildFinanceGrid() {
   const grid = document.getElementById("financeGrid");
   if (!grid) return;
 
-  grid.textContent = "Loading gas forecast…";
+  grid.textContent = "Loading finance forecasts…";
 
   updateCurrentDate(); // keep the ET clock in sync if you use it elsewhere
   const forecastDaySelect = document.getElementById("forecastDay");
@@ -111,19 +111,19 @@ async function buildFinanceGrid() {
   if (userId) {
     try {
       const { data, error } = await client
-        .from("gas_forecasts")
-        .select("price")
+        .from("finance_forecasts")
+        .select("gas")
         .eq("user_id", userId)
         .eq("date", forecastDate)
         .single();
 
       if (error && error.code !== "PGRST116") {
-        console.warn("Could not load gas forecast:", error);
+        console.warn("Could not load finance forecasts:", error);
       } else if (data) {
         userForecasts.push(data);
       }
     } catch (err) {
-      console.warn("Gas forecast load failed:", err);
+      console.warn("Finance forecasts load failed:", err);
     }
   }
 
@@ -153,7 +153,7 @@ async function buildFinanceGrid() {
             min="0.001"
             max="10"
             value="${hasForecast ? saved.price.toFixed(2) : ""}"
-            placeholder="0.00"
+            placeholder="0.000"
           />
         </label>
         <input
