@@ -3,6 +3,15 @@ import {setStatus, isValidEmail, isInvalidRefreshTokenError, clearSupabaseAuthSt
         isAnonymousUser, setAuthRecoveryState, popAuthRecoveryState, sendReauthMagicLink, refreshAndRecoverSession, normalizeSessionResult,
         ensureSessionForDailySave, ensureSession, upsertWithSessionRecovery, handleAuthCallbackFromUrl, loadUserScopedDataOrEmpty} from "./script.js";
 
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+const SUPABASE_URL = 'https://ckyqknlxmjqlkqnxhgef.supabase.co';
+const SUPABASE_PUB_KEY = "sb_publishable_lQ27fzzwJf27dUWPEW8UQA_NTY7naO6";
+if (!window.__supabase_client) {
+  window.__supabase_client = createClient(SUPABASE_URL, SUPABASE_PUB_KEY);
+}
+const client = window.__supabase_client;
+
 function getFinanceForecastDateISO(forecastDay = "today") {
   const nowET = new Date().toLocaleString("en-US", {
     timeZone: "America/New_York",
