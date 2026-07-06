@@ -135,12 +135,12 @@ async function buildFinanceGrid() {
     : "Awaiting my forecast";
 
   grid.innerHTML = `
-    <div class="city-card expanded">
-      <div class="city-card-header">
-        <span class="city-title"> Gas </span>
-        <small class="city-station">(AAA ${showYesterday ? "Yesterday" : "Latest"})</small>
+    <div class="asset-card expanded">
+      <div class="asset-card-header">
+        <span class="asset-title"> Gas </span>
+        <small class="asset-name"> (National average gas price) </small>
       </div>
-      <div class="city-card-content">
+      <div class="asset-card-content">
         <p><small>Yesterday price: ${yesterdayText}</small></p>
         <p class="forecast-line"><small>${forecastText}</small></p>
         <label>
