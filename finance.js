@@ -124,7 +124,7 @@ async function buildFinanceGrid() {
         .select("gas")
         .eq("user_id", userId)
         .eq("date", forecastDate)
-        .single();
+        .maybeSingle();
 
       if (error && error.code !== "PGRST116") {
         console.warn("Could not load finance forecasts:", error);
