@@ -1,5 +1,5 @@
 import {setStatus, isValidEmail, isInvalidRefreshTokenError, clearSupabaseAuthStorage, recoverByResettingAuth, getBackupUsernameFromMetadata, syncPublicUsersTable, 
-        claimBackupEmail, promptAndSaveBackupEmail, promptAndSaveBackupEmail, getUserIdFromAuthPayload, getSessionFromAuthPayload, createAnonymousSession,
+        claimBackupEmail, promptAndSaveBackupEmail, getUserIdFromAuthPayload, getSessionFromAuthPayload, createAnonymousSession,
         isAnonymousUser, setAuthRecoveryState, popAuthRecoveryState, sendReauthMagicLink, refreshAndRecoverSession, normalizeSessionResult,
         ensureSessionForDailySave, ensureSession, upsertWithSessionRecovery, handleAuthCallbackFromUrl, loadUserScopedDataOrEmpty} from "./script.js";
 
