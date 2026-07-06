@@ -50,6 +50,20 @@ function refreshForecastDayOptions() {
   forecastDaySelect.value = shouldAutoUseTomorrowET() ? "tomorrow" : "today";  // force select to autoswitch date on refresh
 }
 
+async function resolveAuthUserId() {
+  const { data: sessionData, error: sessionError } = await client.auth.getSession();
+  if (sessionError) throw new Error(`Session check failed: ${sessionError.message}`);
+
+  if (sessionData?.session?.user?.id) return sessionData.session.user.id;
+
+  const { data: anonData, error: anonError } = await client.auth.signInAnonymously();
+  if (anonError) throw new Error(`Anonymous sign-in failed: ${anonError.message}`);
+
+  const anonUser = anonData?.user ?? anonData?.session?.user;
+  if (!anonUser?.id) throw new Error("Could not determine authenticated user after anonymous sign-in");
+  return anonUser.id;
+}
+
 // Determine autoswitch for date selector default
 function shouldAutoUseTomorrowET() {
   const hour = Number(
@@ -89,13 +103,18 @@ async function buildFinanceGrid() {
 
   const userForecasts = [];
 
+  const userId = await resolveAuthUserId().catch((error) => {
+    console.warn("Unable to resolve user ID:", error);
+    return null;
+  });
+        
   if (userId) {
     try {
       const { data, error } = await client
         .from("gas_forecasts")
         .select("price")
         .eq("user_id", userId)
-        .eq("forecast_date", forecastDate)
+        .eq("date", forecastDate)
         .single();
 
       if (error && error.code !== "PGRST116") {
