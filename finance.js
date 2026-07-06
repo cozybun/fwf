@@ -204,6 +204,66 @@ async function buildFinanceGrid() {
   }
 }
 
+// Save handler
+async function handleSubmit(event) {
+  event.preventDefault();
+
+  const priceInput = document.getElementById("gasPriceInput");
+  if (!priceInput) {
+    setStatus("Unable to find the gas price input");
+    return;
+  }
+
+  const rawPrice = priceInput.value;
+  if (!rawPrice) {
+    setStatus("Please enter a gas price before saving");
+    return;
+  }
+
+  const session = await ensureSessionForDailySave();
+  if (!session?.user?.id) {
+    setStatus(
+      "<span style='color:red;'> No active session yet. Your first daily temps save will create a guest session. </span>"
+    );
+    return;
+  }
+
+  userId = session.user.id;
+
+  const forecastDaySelect = document.getElementById("forecastDay");
+  const forecastDay = forecastDaySelect?.value || (shouldAutoUseTomorrowET() ? "tomorrow" : "today");
+  const forecastDate = getFinanceForecastDateISO(forecastDay);
+
+  const { error } = await client
+    .from("finance_forecasts")
+    .upsert({
+      user_id: userId,
+      date: forecastDate,
+      gas: Number(rawPrice),
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.warn("Finance forecast save failed:", error);
+    setStatus("<span style='color:red;'> Unable to save your forecast right now. Please try again. </span>");
+    return;
+  }
+
+  setStatus("<span style='color:green;'> Forecast saved! </span>");
+  buildFinanceGrid();
+}
+
+const financeForm = document.getElementById("financeForm");
+if (financeForm) {
+  financeForm.addEventListener("submit", handleSubmit);
+} else {
+  const saveButton = document.getElementById("saveFinanceForecast");
+  if (saveButton) {
+    saveButton.addEventListener("click", handleSubmit);
+  }
+}
+
 if (document.getElementById("financeGrid")) {
   buildFinanceGrid();
 }
