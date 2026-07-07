@@ -131,12 +131,12 @@ async function buildFinanceGrid() {
   const cached = readCachedGasForecast();  // check cache for gas
   const cachedMatches = cached && cached.date === forecastDate;
 
-  const saved = cachedMatches
-    ? { gas: cached.price }
-    : {};
+  let saved = cachedMatches ? { gas: cached.price } : {};
+  if (userForecasts[0]) {
+    saved = userForecasts[0];
+  }
 
   const hasGasForecast = saved.gas !== undefined && saved.gas !== null;
-
   const userForecasts = [];
 
   const userId = await resolveAuthUserId().catch((error) => {
@@ -156,7 +156,7 @@ async function buildFinanceGrid() {
       if (error && error.code !== "PGRST116") {
         console.warn("Could not load finance forecasts:", error);
       } else if (data) {
-        userForecasts.push(data);
+        saved = data;  // keep cache display even when DB fetch is pending/empty
         writeCachedGasForecast({ date: forecastDate, price: data.gas });
       }            
     } catch (err) {
@@ -164,11 +164,10 @@ async function buildFinanceGrid() {
     }
   }
 
-  const saved = userForecasts[0] || {};
-  const hasForecast = saved.price !== undefined && saved.price !== null;
+  const hasForecast = saved?.gas != null;
   const yesterdayText = showYesterday ? "—" : "Pending";  // AAA data pending
   const forecastText = hasForecast
-    ? `My current forecast: $${saved.price.toFixed(2)}`
+    ? `My current forecast: $${saved.gas.toFixed(2)}`
     : "Awaiting my forecast";
 
   grid.innerHTML = `
@@ -313,6 +312,5 @@ if (financeForm) {
 }
 
 if (document.getElementById("financeGrid")) {
-  writeCachedGasForecast({ date: forecastDate, price: Number(rawPrice) });
   buildFinanceGrid();
 }
