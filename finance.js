@@ -168,9 +168,9 @@ async function buildFinanceGrid() {
         <input
           type="range"
           id="gasPriceSlider"
-          min="0.01"
-          max="10"
-          step="0"
+          min="0"
+          max="11"
+          step="0.01"
           value="${hasForecast ? saved.price.toFixed(2) : 5}"
           class="mt-2 w-full"
           aria-label="Gas price slider"
