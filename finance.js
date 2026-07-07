@@ -132,12 +132,6 @@ async function buildFinanceGrid() {
   const cachedMatches = cached && cached.date === forecastDate;
   let saved = cachedMatches ? { gas: cached.price } : {};
 
-  if (userForecasts[0]) {
-    saved = userForecasts[0];
-  }
-
-  const hasGasForecast = saved.gas !== undefined && saved.gas !== null;
-
   const userId = await resolveAuthUserId().catch((error) => {
     console.warn("Unable to resolve user ID:", error);
     return null;
