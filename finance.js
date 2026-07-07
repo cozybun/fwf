@@ -12,6 +12,24 @@ if (!window.__supabase_client) {
 }
 const client = window.__supabase_client;
 
+const GAS_CACHE_KEY = "finance:latest-gas";
+
+function readCachedGasForecast() {
+  try {
+    const raw = localStorage.getItem(GAS_CACHE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedGasForecast({ date, price }) {
+  try {
+    localStorage.setItem(GAS_CACHE_KEY, JSON.stringify({ date, price }));
+  } catch {}  // ignore quota errors
+}
+
 function getFinanceForecastDateISO(forecastDay = "today") {
   const nowET = new Date().toLocaleString("en-US", {
     timeZone: "America/New_York",
@@ -110,6 +128,15 @@ async function buildFinanceGrid() {
   const forecastDate = getFinanceForecastDateISO(forecastDay);
   const showYesterday = forecastDay === "today";
 
+  const cached = readCachedGasForecast();  // check cache for gas
+  const cachedMatches = cached && cached.date === forecastDate;
+
+  const saved = cachedMatches
+    ? { gas: cached.price }
+    : {};
+
+  const hasGasForecast = saved.gas !== undefined && saved.gas !== null;
+
   const userForecasts = [];
 
   const userId = await resolveAuthUserId().catch((error) => {
@@ -130,7 +157,8 @@ async function buildFinanceGrid() {
         console.warn("Could not load finance forecasts:", error);
       } else if (data) {
         userForecasts.push(data);
-      }
+        writeCachedGasForecast({ date: forecastDate, price: data.gas });
+      }            
     } catch (err) {
       console.warn("Finance forecasts load failed:", err);
     }
@@ -169,7 +197,7 @@ async function buildFinanceGrid() {
           type="range"
           id="gasPriceSlider"
           min="0"
-          max="11"
+          max="10"
           step="0.01"
           value="${hasForecast ? saved.price.toFixed(2) : 5}"
           class="mt-2 w-full"
@@ -270,6 +298,7 @@ async function handleSubmit(event) {
   }
 
   setStatus("<span style='color:green;'> Forecasts saved! </span>");
+  writeCachedGasForecast({ date: forecastDate, price: Number(rawPrice) });
   buildFinanceGrid();
 }
 
@@ -284,5 +313,6 @@ if (financeForm) {
 }
 
 if (document.getElementById("financeGrid")) {
+  writeCachedGasForecast({ date: forecastDate, price: Number(rawPrice) });
   buildFinanceGrid();
 }
