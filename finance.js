@@ -232,9 +232,23 @@ async function handleSubmit(event) {
     console.warn("Unable to resolve user ID:", error);
     return null;
   });
-        
+
   const forecastDaySelect = document.getElementById("forecastDay");
-  const forecastDay = forecastDaySelect?.value || (shouldAutoUseTomorrowET() ? "tomorrow" : "today");
+  const needsTomorrow = shouldAutoUseTomorrowET();
+  const forecastDay =
+    forecastDaySelect?.value || (needsTomorrow ? "tomorrow" : "today");
+
+  if (forecastDay === "today" && needsTomorrow) {
+    if (forecastDaySelect) {
+      forecastDaySelect.value = "tomorrow";
+    }
+    updateCurrentDate();
+    setStatus(
+      "<span style='color:red;'>The 10 AM cutoff for today's forecast has passed. Please forecast tomorrow instead.</span>"
+    );
+    return;
+  }
+
   const forecastDate = getFinanceForecastDateISO(forecastDay);
 
   const { error } = await client
@@ -249,11 +263,13 @@ async function handleSubmit(event) {
 
   if (error) {
     console.warn("Finance forecast save failed:", error);
-    setStatus("<span style='color:red;'> Unable to save your forecast right now. Please try again. </span>");
+    setStatus(
+      "<span style='color:red;'> Unable to save your forecasts right now. Please try again. </span>"
+    );
     return;
   }
 
-  setStatus("<span style='color:green;'> Forecast saved! </span>");
+  setStatus("<span style='color:green;'> Forecasts saved! </span>");
   buildFinanceGrid();
 }
 
