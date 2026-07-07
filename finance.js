@@ -228,8 +228,11 @@ async function handleSubmit(event) {
     return;
   }
 
-  userId = session.user.id;
-
+  const userId = await resolveAuthUserId().catch((error) => {
+    console.warn("Unable to resolve user ID:", error);
+    return null;
+  });
+        
   const forecastDaySelect = document.getElementById("forecastDay");
   const forecastDay = forecastDaySelect?.value || (shouldAutoUseTomorrowET() ? "tomorrow" : "today");
   const forecastDate = getFinanceForecastDateISO(forecastDay);
