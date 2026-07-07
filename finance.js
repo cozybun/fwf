@@ -130,14 +130,13 @@ async function buildFinanceGrid() {
 
   const cached = readCachedGasForecast();  // check cache for gas
   const cachedMatches = cached && cached.date === forecastDate;
-
   let saved = cachedMatches ? { gas: cached.price } : {};
+
   if (userForecasts[0]) {
     saved = userForecasts[0];
   }
 
   const hasGasForecast = saved.gas !== undefined && saved.gas !== null;
-  const userForecasts = [];
 
   const userId = await resolveAuthUserId().catch((error) => {
     console.warn("Unable to resolve user ID:", error);
@@ -188,7 +187,7 @@ async function buildFinanceGrid() {
             step="0.001"
             min="0"
             max="10"
-            value="${hasForecast ? saved.price.toFixed(2) : ""}"
+            value="${hasForecast ? saved.gas.toFixed(2) : ""}"
             placeholder="0.000"
           />
         </label>
@@ -198,7 +197,7 @@ async function buildFinanceGrid() {
           min="0"
           max="10"
           step="0.01"
-          value="${hasForecast ? saved.price.toFixed(2) : 5}"
+          value="${hasForecast ? saved.gas.toFixed(2) : 5}"
           class="mt-2 w-full"
           aria-label="Gas price slider"
         />
