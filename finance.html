@@ -244,8 +244,8 @@
         <li> Select Today or Tomorrow from the forecast day selector. </li>
         <li> Enter your forecast for the asset price before the cutoff time. </li>
         <li> Feel free to use market data, web search, LLMs, or your own analysis to help guide forecasts. </li>
-        <li> Click <strong> Save </strong> to save your forecasts. You can edit forecasts until the cutoff times. </li>
-        <li> Click <strong> View My Score </strong> after the reveal time to see verified results and your shareable score. Good luck! </li>
+        <li> Click <strong> Save </strong> to save your forecasts. You can edit forecasts until the cutoff time for each asset. </li>
+        <li> Click <strong> View My Score </strong> after reveal time to see verified results and your shareable score. Good luck! </li>
       </ul>
 
       <div style="text-align:center; margin-top: 0.9rem;">
@@ -263,13 +263,17 @@
           <option value="tomorrow"> Tomorrow </option>
         </select>
       </label>
-      <div class="pt-info">
-        ⓘ
-        <span class="pt-tooltip"> Dates shown in Pacific Time (PT) </span>
+
+      <div id="currentDateWrapper" style="margin-top:6px;">
+        <span id="currentDate"></span>
+        <span class="pt-info">
+          ⓘ
+          <span class="pt-tooltip"> Dates shown in Pacific Time (PT) </span>
+        </span>
       </div>
     </div>
 
-    <p style="text-align:center; margin:0 0 0.5rem;">
+    <p style="text-align:center; margin:1rem 0;">
       Cutoff = Midnight PT  |  Yesterday’s price shown for reference
     </p>
 
