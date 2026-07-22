@@ -1,18 +1,17 @@
-import {setStatus, isValidEmail, isInvalidRefreshTokenError, clearSupabaseAuthStorage, recoverByResettingAuth, getBackupUsernameFromMetadata, syncPublicUsersTable, 
-        claimBackupEmail, promptAndSaveBackupEmail, getUserIdFromAuthPayload, getSessionFromAuthPayload, createAnonymousSession,
-        isAnonymousUser, setAuthRecoveryState, popAuthRecoveryState, sendReauthMagicLink, refreshAndRecoverSession, normalizeSessionResult,
-        ensureSessionForDailySave, ensureSession, upsertWithSessionRecovery, handleAuthCallbackFromUrl, loadUserScopedDataOrEmpty} from "./script.js";
+import { setStatus, ensureSessionForDailySave } from "./script.js";
 
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-const SUPABASE_URL = 'https://ckyqknlxmjqlkqnxhgef.supabase.co';
+const SUPABASE_URL = "https://ckyqknlxmjqlkqnxhgef.supabase.co";
 const SUPABASE_PUB_KEY = "sb_publishable_lQ27fzzwJf27dUWPEW8UQA_NTY7naO6";
+
 if (!window.__supabase_client) {
   window.__supabase_client = createClient(SUPABASE_URL, SUPABASE_PUB_KEY);
 }
 const client = window.__supabase_client;
 
 const GAS_CACHE_KEY = "finance:latest-gas";
+const FINANCE_TIMEZONE = "America/Los_Angeles";
 
 function readCachedGasForecast() {
   try {
@@ -27,40 +26,71 @@ function readCachedGasForecast() {
 function writeCachedGasForecast({ date, price }) {
   try {
     localStorage.setItem(GAS_CACHE_KEY, JSON.stringify({ date, price }));
-  } catch {}  // ignore quota errors
+  } catch {  // ignore quota / storage errors
+  }
+}
+
+function getYmdInTimeZone(date, timeZone) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  })
+    .formatToParts(date)
+    .filter((p) => p.type !== "literal")
+    .reduce((acc, p) => {
+      acc[p.type] = p.value;
+      return acc;
+    }, {});
+
+  return `${parts.year}-${parts.month}-${parts.day}`;
+}
+
+function addDaysYmd(ymd, deltaDays) {
+  const [year, month, day] = ymd.split("-").map(Number);
+  const utc = new Date(Date.UTC(year, month - 1, day));
+  utc.setUTCDate(utc.getUTCDate() + deltaDays);
+  return utc.toISOString().slice(0, 10);
+}
+
+function getPTTodayYmd() {
+  return getYmdInTimeZone(new Date(), FINANCE_TIMEZONE);
 }
 
 function getFinanceForecastDateISO(forecastDay = "today") {
-  const nowET = new Date().toLocaleString("en-US", {
-    timeZone: "America/New_York",
-  });
-  const baseDate = new Date(nowET);
-  if (forecastDay === "tomorrow") {
-    baseDate.setDate(baseDate.getDate() + 1);
-  }
-  return baseDate.toISOString().slice(0, 10);
+  const todayPT = getPTTodayYmd();
+  return forecastDay === "tomorrow" ? addDaysYmd(todayPT, 1) : todayPT;
 }
 
 function formatDisplayDate(ymd) {
   if (!ymd) return "";
 
   const [year, month, day] = ymd.split("-").map(Number);
-
-  const date = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));  // use a safe UTC noon for locale formatting
+  const date = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
 
   const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/New_York",
+    timeZone: FINANCE_TIMEZONE,
     day: "numeric",
     month: "short",
     year: "numeric",
-  }).formatToParts(date).reduce((acc, p) => {
-    if (p.type === "day") acc.day = p.value;
-    if (p.type === "month") acc.month = p.value.replace(/\.$/, "");  // remove optional trailing dot in some locales
-    if (p.type === "year") acc.year = p.value;
-    return acc;
-  }, {});
+  })
+    .formatToParts(date)
+    .reduce((acc, p) => {
+      if (p.type === "day") acc.day = p.value;
+      if (p.type === "month") acc.month = p.value.replace(/\.$/, "");
+      if (p.type === "year") acc.year = p.value;
+      return acc;
+    }, {});
 
   return `${parts.day} ${parts.month} ${parts.year}`;
+}
+
+function shouldAutoUseTomorrowPT() {
+  const nowPT = getPTTodayYmd();
+  const selected = document.getElementById("forecastDay")?.value || "today";
+  const selectedISO = getFinanceForecastDateISO(selected);
+  return selectedISO !== nowPT && selected === "today";
 }
 
 function refreshForecastDayOptions() {
@@ -74,7 +104,25 @@ function refreshForecastDayOptions() {
   todayOption.textContent = "Today";
   tomorrowOption.textContent = "Tomorrow";
 
-  forecastDaySelect.value = shouldAutoUseTomorrowET() ? "tomorrow" : "today";  // force select to autoswitch date on refresh
+  const todayPT = getPTTodayYmd();
+  const selected = forecastDaySelect.value || "today";
+  const selectedISO = getFinanceForecastDateISO(selected);
+
+  if (selected === "today" && selectedISO !== todayPT) {
+    forecastDaySelect.value = "tomorrow";
+  }
+}
+
+function updateCurrentDate() {
+  const dateDisplay = document.getElementById("currentDate");
+  const forecastDaySelect = document.getElementById("forecastDay");
+  if (!dateDisplay || !forecastDaySelect) return;
+
+  refreshForecastDayOptions();
+
+  const selected = forecastDaySelect.value || "today";
+  const iso = getFinanceForecastDateISO(selected);
+  dateDisplay.textContent = formatDisplayDate(iso);
 }
 
 async function resolveAuthUserId() {
@@ -91,44 +139,20 @@ async function resolveAuthUserId() {
   return anonUser.id;
 }
 
-// Determine autoswitch for date selector default
-function shouldAutoUseTomorrowET() {
-  const hour = Number(
-    new Intl.DateTimeFormat("en-US", {
-      timeZone: "America/New_York",
-      hour: "2-digit",
-      hour12: false,
-    })
-      .formatToParts(new Date())
-      .find((p) => p.type === "hour").value
-  );
-  return hour >= 10;  // 10AM autoswitch
-}
-
-function updateCurrentDate() {
-  const dateDisplay = document.getElementById("currentDate");
-  const forecastDaySelect = document.getElementById("forecastDay");
-  if (!dateDisplay || !forecastDaySelect) return;
-
-  refreshForecastDayOptions();
-  const selected = forecastDaySelect.value || (shouldAutoUseTomorrowET() ? "tomorrow" : "today");
-  const iso = getFinanceForecastDateISO(selected);
-  dateDisplay.textContent = formatDisplayDate(iso);
-}
-
 async function buildFinanceGrid() {
   const grid = document.getElementById("financeGrid");
   if (!grid) return;
 
   grid.textContent = "Loading finance forecasts…";
 
-  updateCurrentDate(); // keep the ET clock in sync if you use it elsewhere
+  updateCurrentDate();
+
   const forecastDaySelect = document.getElementById("forecastDay");
   const forecastDay = forecastDaySelect?.value || "today";
   const forecastDate = getFinanceForecastDateISO(forecastDay);
   const showYesterday = forecastDay === "today";
 
-  const cached = readCachedGasForecast();  // check cache for gas
+  const cached = readCachedGasForecast();
   const cachedMatches = cached && cached.date === forecastDate;
   let saved = cachedMatches ? { gas: cached.price } : {};
 
@@ -136,7 +160,7 @@ async function buildFinanceGrid() {
     console.warn("Unable to resolve user ID:", error);
     return null;
   });
-        
+
   if (userId) {
     try {
       const { data, error } = await client
@@ -149,18 +173,18 @@ async function buildFinanceGrid() {
       if (error && error.code !== "PGRST116") {
         console.warn("Could not load finance forecasts:", error);
       } else if (data) {
-        saved = data;  // keep cache display even when DB fetch is pending/empty
+        saved = data;
         writeCachedGasForecast({ date: forecastDate, price: data.gas });
-      }            
+      }
     } catch (err) {
       console.warn("Finance forecasts load failed:", err);
     }
   }
 
   const hasForecast = saved?.gas != null;
-  const yesterdayText = showYesterday ? "—" : "Pending";  // AAA data pending
+  const yesterdayText = showYesterday ? "—" : "Pending";
   const forecastText = hasForecast
-    ? `My current forecast: $${saved.gas.toFixed(2)}`
+    ? `My current forecast: $${Number(saved.gas).toFixed(2)}`
     : "Awaiting my forecast";
 
   grid.innerHTML = `
@@ -181,7 +205,7 @@ async function buildFinanceGrid() {
             step="0.001"
             min="0"
             max="10"
-            value="${hasForecast ? saved.gas.toFixed(2) : ""}"
+            value="${hasForecast ? Number(saved.gas).toFixed(2) : ""}"
             placeholder="0.000"
           />
         </label>
@@ -191,7 +215,7 @@ async function buildFinanceGrid() {
           min="0"
           max="10"
           step="0.01"
-          value="${hasForecast ? saved.gas.toFixed(2) : 5}"
+          value="${hasForecast ? Number(saved.gas).toFixed(2) : 5}"
           class="mt-2 w-full"
           aria-label="Gas price slider"
         />
@@ -204,8 +228,10 @@ async function buildFinanceGrid() {
   const priceSlider = document.getElementById("gasPriceSlider");
 
   const syncPrice = (value) => {
-    if (priceInput) priceInput.value = parseFloat(value).toFixed(2);
-    if (priceSlider) priceSlider.value = parseFloat(value);
+    const parsed = Number.parseFloat(value);
+    if (Number.isNaN(parsed)) return;
+    if (priceInput) priceInput.value = parsed.toFixed(2);
+    if (priceSlider) priceSlider.value = String(parsed);
   };
 
   if (priceSlider) {
@@ -216,15 +242,14 @@ async function buildFinanceGrid() {
 
   if (priceInput) {
     priceInput.addEventListener("input", (event) => {
-      const parsed = parseFloat(event.target.value);
-      if (!Number.isNaN(parsed)) {
-        priceSlider.value = parsed;
+      const parsed = Number.parseFloat(event.target.value);
+      if (!Number.isNaN(parsed) && priceSlider) {
+        priceSlider.value = String(parsed);
       }
     });
   }
 }
 
-// Save handler
 async function handleSubmit(event) {
   event.preventDefault();
 
@@ -254,21 +279,7 @@ async function handleSubmit(event) {
   });
 
   const forecastDaySelect = document.getElementById("forecastDay");
-  const needsTomorrow = shouldAutoUseTomorrowET();
-  const forecastDay =
-    forecastDaySelect?.value || (needsTomorrow ? "tomorrow" : "today");
-
-  if (forecastDay === "today" && needsTomorrow) {
-    if (forecastDaySelect) {
-      forecastDaySelect.value = "tomorrow";
-    }
-    updateCurrentDate();
-    setStatus(
-      "<span style='color:red;'>The 10 AM cutoff for today's forecast has passed. Please forecast tomorrow instead.</span>"
-    );
-    return;
-  }
-
+  const forecastDay = forecastDaySelect?.value || "today";
   const forecastDate = getFinanceForecastDateISO(forecastDay);
 
   const { error } = await client
