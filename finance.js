@@ -26,7 +26,8 @@ function readCachedGasForecast() {
 function writeCachedGasForecast({ date, price }) {
   try {
     localStorage.setItem(GAS_CACHE_KEY, JSON.stringify({ date, price }));
-  } catch {  // ignore quota / storage errors
+  } catch {
+    // ignore quota / storage errors
   }
 }
 
@@ -86,13 +87,6 @@ function formatDisplayDate(ymd) {
   return `${parts.day} ${parts.month} ${parts.year}`;
 }
 
-function shouldAutoUseTomorrowPT() {
-  const nowPT = getPTTodayYmd();
-  const selected = document.getElementById("forecastDay")?.value || "today";
-  const selectedISO = getFinanceForecastDateISO(selected);
-  return selectedISO !== nowPT && selected === "today";
-}
-
 function refreshForecastDayOptions() {
   const forecastDaySelect = document.getElementById("forecastDay");
   if (!forecastDaySelect) return;
@@ -103,14 +97,6 @@ function refreshForecastDayOptions() {
 
   todayOption.textContent = "Today";
   tomorrowOption.textContent = "Tomorrow";
-
-  const todayPT = getPTTodayYmd();
-  const selected = forecastDaySelect.value || "today";
-  const selectedISO = getFinanceForecastDateISO(selected);
-
-  if (selected === "today" && selectedISO !== todayPT) {
-    forecastDaySelect.value = "tomorrow";
-  }
 }
 
 function updateCurrentDate() {
@@ -144,7 +130,6 @@ async function buildFinanceGrid() {
   if (!grid) return;
 
   grid.textContent = "Loading finance forecasts…";
-
   updateCurrentDate();
 
   const forecastDaySelect = document.getElementById("forecastDay");
@@ -219,7 +204,7 @@ async function buildFinanceGrid() {
           class="mt-2 w-full"
           aria-label="Gas price slider"
         />
-        <small class="text-muted block mt-1"> Slide to a price between 0¢ and $10 </small>
+        <small class="text-muted block mt-1"> Slide to choose a price between 0¢ and $10 </small>
       </div>
     </div>
   `;
@@ -315,6 +300,15 @@ if (financeForm) {
   }
 }
 
+const forecastDaySelect = document.getElementById("forecastDay");
+if (forecastDaySelect) {
+  forecastDaySelect.addEventListener("change", () => {
+    updateCurrentDate();
+    buildFinanceGrid();
+  });
+}
+
 if (document.getElementById("financeGrid")) {
   buildFinanceGrid();
+  updateCurrentDate();
 }
