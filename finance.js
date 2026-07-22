@@ -12,6 +12,7 @@ const client = window.__supabase_client;
 
 const GAS_CACHE_KEY = "finance:latest-gas";
 const FINANCE_TIMEZONE = "America/Los_Angeles";
+let midnightTimer = null;
 
 function readCachedGasForecast() {
   try {
@@ -111,6 +112,37 @@ function updateCurrentDate() {
   dateDisplay.textContent = formatDisplayDate(iso);
 }
 
+function scheduleMidnightRefresh() {
+  if (midnightTimer) clearTimeout(midnightTimer);
+
+  const now = new Date();
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: FINANCE_TIMEZONE,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  })
+    .formatToParts(now)
+    .reduce((acc, p) => {
+      if (p.type !== "literal") acc[p.type] = p.value;
+      return acc;
+    }, {});
+
+  const h = Number(parts.hour || 0);
+  const m = Number(parts.minute || 0);
+  const s = Number(parts.second || 0);
+
+  const msUntilMidnight =
+    ((23 - h) * 60 * 60 + (59 - m) * 60 + (59 - s)) * 1000 + 1000;
+
+  midnightTimer = setTimeout(() => {
+    updateCurrentDate();
+    buildFinanceGrid();
+    scheduleMidnightRefresh();
+  }, msUntilMidnight);
+}
+
 async function resolveAuthUserId() {
   const { data: sessionData, error: sessionError } = await client.auth.getSession();
   if (sessionError) throw new Error(`Session check failed: ${sessionError.message}`);
@@ -176,13 +208,13 @@ async function buildFinanceGrid() {
     <div class="asset-card expanded">
       <div class="asset-card-header">
         <span class="asset-title"> Gas </span>
-        <small class="asset-name"> (US average gas price) </small>
+        <small class="asset-name"> (National average gas price) </small>
       </div>
       <div class="asset-card-content">
         <p><small>Yesterday price: ${yesterdayText}</small></p>
         <p class="forecast-line"><small>${forecastText}</small></p>
         <label>
-          Price per gallon ($)
+          Price ($)
           <input
             type="number"
             class="daily-high"
@@ -310,5 +342,5 @@ if (forecastDaySelect) {
 
 if (document.getElementById("financeGrid")) {
   buildFinanceGrid();
-  updateCurrentDate();
+  scheduleMidnightRefresh();
 }
