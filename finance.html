@@ -233,10 +233,10 @@
 
   .asset-card-header {
     display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 0.5rem;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+    text-align: center;
   }
 
   .asset-title {
@@ -418,34 +418,36 @@
 
   <form id="financeForm">
     <div class="forecast-selector">
-      <label>
+      <label for="forecastDay">
         Forecast for:
         <select id="forecastDay">
-          <option value="today"> Today </option>
-          <option value="tomorrow"> Tomorrow </option>
+          <option value="today">Today</option>
+          <option value="tomorrow">Tomorrow</option>
         </select>
       </label>
-
+  
+      <div id="currentDateWrapper">
         <span id="currentDate"></span>
         <span class="pt-info">
           ⓘ
-          <span class="pt-tooltip"> Dates shown in Pacific Time (PT) </span>
+          <span class="pt-tooltip">Dates shown in Pacific Time (PT)</span>
         </span>
       </div>
     </div>
-
+  
     <p style="text-align:center; margin:1rem 0;">
       Cutoff = Midnight PT  |  Yesterday’s price shown for reference
     </p>
-
+  
+    <div id="financeGrid" class="asset-grid">
       <!-- JS renders finance cards -->
     </div>
-
+  
     <div class="btn-row">
-      <button type="submit" id="financeSaveBtn"> 💾 Save Finance Forecasts </button>
+      <button type="submit" id="financeSaveBtn">💾 Save Finance Forecasts</button>
     </div>
   </form>
-
+  
   <div id="status" style="text-align:center; margin-top:0.8rem; min-height:1.3rem;"></div>
 
   <div style="text-align:center; margin-top:0.25rem;">
