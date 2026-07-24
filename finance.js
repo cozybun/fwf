@@ -205,10 +205,10 @@ async function buildFinanceGrid() {
     : "Awaiting my forecast";
 
   grid.innerHTML = `
-    <div class="asset-card expanded">
+    <div class="asset-card">
       <div class="asset-card-header">
-        <span class="asset-title"> Gas </span>
-        <small class="asset-name"> (National average gas price) </small>
+        <div class="asset-title">Gas</div>
+        <small class="asset-name">(National average gas price)</small>
       </div>
       <div class="asset-card-content">
         <p><small>Yesterday price: ${yesterdayText}</small></p>
@@ -233,10 +233,9 @@ async function buildFinanceGrid() {
           max="10"
           step="0.01"
           value="${hasForecast ? Number(saved.gas).toFixed(2) : 5}"
-          class="mt-2 w-full"
           aria-label="Gas price slider"
         />
-        <small class="text-muted block mt-1"> Slide to choose a price between 0¢ and $10 </small>
+        <small class="slider-help">Slide to choose a price between 0¢ and $10</small>
       </div>
     </div>
   `;
