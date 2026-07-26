@@ -166,13 +166,12 @@ async function resolveAuthUserId() {
   return anonUser.id;
 }
 
-async function fetchYesterdayGasPrice(userId) {
+async function fetchYesterdayGasPrice() {
   const yesterdayDate = getYesterdayPTYmd();
 
   const { data, error } = await client
-    .from("finance_forecasts")
+    .from("finance_actuals")
     .select("gas")
-    .eq("user_id", userId)
     .eq("date", yesterdayDate)
     .maybeSingle();
 
@@ -224,7 +223,7 @@ async function buildFinanceGrid() {
       }
 
       if (forecastDay === "today") {
-        yesterdayGas = await fetchYesterdayGasPrice(userId);
+        yesterdayGas = await fetchYesterdayGasPrice();
       }
     } catch (err) {
       console.warn("Finance forecasts load failed:", err);
@@ -247,8 +246,8 @@ async function buildFinanceGrid() {
   grid.innerHTML = `
     <div class="asset-card ${isLocked ? "is-locked" : ""}">
       <div class="asset-card-header">
-        <div class="asset-title">Gas</div>
-        <small class="asset-name">(National average gas price)</small>
+        <div class="asset-title"> Gas </div>
+        <small class="asset-name"> (US average gas price) </small>
       </div>
       <div class="asset-card-content">
         <p><small>Yesterday price: ${yesterdayText}</small></p>
@@ -270,15 +269,15 @@ async function buildFinanceGrid() {
         <input
           type="range"
           id="gasPriceSlider"
-          min="0"
+          min="1"
           max="10"
           step="0.01"
           value="${hasForecast ? Number(saved.gas).toFixed(2) : 5}"
           aria-label="Gas price slider"
           ${isLocked ? "disabled" : ""}
         />
-        <small class="slider-help">Slide to choose a price between 0¢ and $10</small>
-        ${isLocked ? "<small style='color:#b91c1c; font-weight:700;'>Locked after PT cutoff</small>" : ""}
+        <small class="slider-help">Slide to choose a price between 1¢ and $10</small>
+        ${isLocked ? "<small style='color:#b91c1c; font-weight:700;'> Past cutoff time </small>" : ""}
       </div>
     </div>
   `;
@@ -319,7 +318,7 @@ async function handleSubmit(event) {
   const forecastDate = getFinanceForecastDateISO(forecastDay);
 
   if (isForecastDateLocked(forecastDate)) {
-    setStatus("<span style='color:red;'> This forecast is locked after the PT cutoff. </span>");
+    setStatus("<span style='color:red;'> The cutoff time has passed </span>");
     return;
   }
 
