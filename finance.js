@@ -1,5 +1,4 @@
 import { setStatus, ensureSessionForDailySave } from "./script.js";
-
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
 const SUPABASE_URL = "https://ckyqknlxmjqlkqnxhgef.supabase.co";
@@ -28,7 +27,7 @@ function writeCachedGasForecast({ date, price }) {
   try {
     localStorage.setItem(GAS_CACHE_KEY, JSON.stringify({ date, price }));
   } catch {
-    // ignore quota / storage errors
+    // ignore storage errors
   }
 }
 
@@ -80,21 +79,12 @@ function formatDisplayDate(ymd) {
   const [year, month, day] = ymd.split("-").map(Number);
   const date = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
 
-  const parts = new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat("en-US", {
     timeZone: FINANCE_TIMEZONE,
     day: "numeric",
     month: "short",
     year: "numeric",
-  })
-    .formatToParts(date)
-    .reduce((acc, p) => {
-      if (p.type === "day") acc.day = p.value;
-      if (p.type === "month") acc.month = p.value.replace(/\.$/, "");
-      if (p.type === "year") acc.year = p.value;
-      return acc;
-    }, {});
-
-  return `${parts.day} ${parts.month} ${parts.year}`;
+  }).format(date);
 }
 
 function refreshForecastDayOptions() {
@@ -191,7 +181,7 @@ async function buildFinanceGrid() {
   updateCurrentDate();
 
   const forecastDaySelect = document.getElementById("forecastDay");
-  const forecastDay = forecastDaySelect?.value || "today";
+  const forecastDay = forecastDaySelect?.value || "tomorrow";
   const forecastDate = getFinanceForecastDateISO(forecastDay);
   const isLocked = isForecastDateLocked(forecastDate);
 
@@ -222,53 +212,50 @@ async function buildFinanceGrid() {
         writeCachedGasForecast({ date: forecastDate, price: data.gas });
       }
 
-      if (forecastDay === "today") {
-        yesterdayGas = await fetchYesterdayGasPrice();
-      }
+      yesterdayGas = await fetchYesterdayGasPrice();
     } catch (err) {
       console.warn("Finance forecasts load failed:", err);
     }
   }
 
   const hasForecast = saved?.gas != null;
-
   const yesterdayText =
-    forecastDay === "today" && yesterdayGas != null
-      ? `$${Number(yesterdayGas).toFixed(3)}`
-      : forecastDay === "today"
-        ? "—"
-        : "Pending";
+    yesterdayGas != null ? `$${Number(yesterdayGas).toFixed(3)}` : "—";
 
   const forecastText = hasForecast
     ? `My current forecast: $${Number(saved.gas).toFixed(2)}`
     : "Awaiting my forecast";
 
   grid.innerHTML = `
-    <div class="asset-card ${isLocked ? "is-locked" : ""}">
-      <div class="asset-card-header">
-        <div class="asset-title"> Gas </div>
-        <small class="asset-name"> (US average gas price) </small>
+    <div class="asset-card asset-card--finance ${isLocked ? "is-locked" : ""}">
+      <div class="asset-card-header asset-card-header--finance">
+        <div class="asset-title asset-title--finance"> Gas </div>
+        <small class="asset-name asset-name--finance"> (US average gas price) </small>
       </div>
-      <div class="asset-card-content">
-        <p><small>Yesterday price: ${yesterdayText}</small></p>
+
+      <div class="asset-card-content asset-card-content--finance">
+        <p class="forecast-meta"><small>Yesterday price: ${yesterdayText}</small></p>
         <p class="forecast-line"><small>${forecastText}</small></p>
-        <label>
+
+        <label class="finance-label">
           Price ($)
           <input
             type="number"
-            class="daily-high"
+            class="daily-high finance-input"
             id="gasPriceInput"
             step="0.001"
-            min="0"
+            min="1"
             max="10"
             value="${hasForecast ? Number(saved.gas).toFixed(2) : ""}"
             placeholder="0.000"
             ${isLocked ? "disabled" : ""}
           />
         </label>
+
         <input
           type="range"
           id="gasPriceSlider"
+          class="finance-slider"
           min="1"
           max="10"
           step="0.01"
@@ -276,8 +263,9 @@ async function buildFinanceGrid() {
           aria-label="Gas price slider"
           ${isLocked ? "disabled" : ""}
         />
+
         <small class="slider-help"> Slide to choose a price between 1¢ and $10 </small>
-        ${isLocked ? "<small style='color:#b91c1c; font-weight:700;'> Past cutoff time </small>" : ""}
+        ${isLocked ? "<small class='locked-note'> Past cutoff time </small>" : ""}
       </div>
     </div>
   `;
@@ -314,7 +302,7 @@ async function handleSubmit(event) {
   event.preventDefault();
 
   const forecastDaySelect = document.getElementById("forecastDay");
-  const forecastDay = forecastDaySelect?.value || "today";
+  const forecastDay = forecastDaySelect?.value || "tomorrow";
   const forecastDate = getFinanceForecastDateISO(forecastDay);
 
   if (isForecastDateLocked(forecastDate)) {
