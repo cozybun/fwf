@@ -276,7 +276,7 @@ async function buildFinanceGrid() {
           aria-label="Gas price slider"
           ${isLocked ? "disabled" : ""}
         />
-        <small class="slider-help">Slide to choose a price between 1¢ and $10</small>
+        <small class="slider-help"> Slide to choose a price between 1¢ and $10 </small>
         ${isLocked ? "<small style='color:#b91c1c; font-weight:700;'> Past cutoff time </small>" : ""}
       </div>
     </div>
@@ -318,7 +318,7 @@ async function handleSubmit(event) {
   const forecastDate = getFinanceForecastDateISO(forecastDay);
 
   if (isForecastDateLocked(forecastDate)) {
-    setStatus("<span style='color:red;'> The cutoff time has passed </span>");
+    setStatus("<span style='color:red;'> The cutoff time has passed. Forecast for tomorrow. </span>");
     return;
   }
 
