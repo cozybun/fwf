@@ -60,9 +60,18 @@ function getPTTodayYmd() {
   return getYmdInTimeZone(new Date(), FINANCE_TIMEZONE);
 }
 
+function getYesterdayPTYmd() {
+  return addDaysYmd(getPTTodayYmd(), -1);
+}
+
 function getFinanceForecastDateISO(forecastDay = "today") {
   const todayPT = getPTTodayYmd();
   return forecastDay === "tomorrow" ? addDaysYmd(todayPT, 1) : todayPT;
+}
+
+function isForecastDateLocked(forecastDate) {
+  const todayPT = getPTTodayYmd();
+  return forecastDate <= todayPT;
 }
 
 function formatDisplayDate(ymd) {
@@ -157,6 +166,24 @@ async function resolveAuthUserId() {
   return anonUser.id;
 }
 
+async function fetchYesterdayGasPrice(userId) {
+  const yesterdayDate = getYesterdayPTYmd();
+
+  const { data, error } = await client
+    .from("finance_forecasts")
+    .select("gas")
+    .eq("user_id", userId)
+    .eq("date", yesterdayDate)
+    .maybeSingle();
+
+  if (error && error.code !== "PGRST116") {
+    console.warn("Could not load yesterday gas price:", error);
+    return null;
+  }
+
+  return data?.gas ?? null;
+}
+
 async function buildFinanceGrid() {
   const grid = document.getElementById("financeGrid");
   if (!grid) return;
@@ -167,7 +194,7 @@ async function buildFinanceGrid() {
   const forecastDaySelect = document.getElementById("forecastDay");
   const forecastDay = forecastDaySelect?.value || "today";
   const forecastDate = getFinanceForecastDateISO(forecastDay);
-  const showYesterday = forecastDay === "today";
+  const isLocked = isForecastDateLocked(forecastDate);
 
   const cached = readCachedGasForecast();
   const cachedMatches = cached && cached.date === forecastDate;
@@ -177,6 +204,8 @@ async function buildFinanceGrid() {
     console.warn("Unable to resolve user ID:", error);
     return null;
   });
+
+  let yesterdayGas = null;
 
   if (userId) {
     try {
@@ -193,19 +222,30 @@ async function buildFinanceGrid() {
         saved = data;
         writeCachedGasForecast({ date: forecastDate, price: data.gas });
       }
+
+      if (forecastDay === "today") {
+        yesterdayGas = await fetchYesterdayGasPrice(userId);
+      }
     } catch (err) {
       console.warn("Finance forecasts load failed:", err);
     }
   }
 
   const hasForecast = saved?.gas != null;
-  const yesterdayText = showYesterday ? "—" : "Pending";
+
+  const yesterdayText =
+    forecastDay === "today" && yesterdayGas != null
+      ? `$${Number(yesterdayGas).toFixed(3)}`
+      : forecastDay === "today"
+        ? "—"
+        : "Pending";
+
   const forecastText = hasForecast
     ? `My current forecast: $${Number(saved.gas).toFixed(2)}`
     : "Awaiting my forecast";
 
   grid.innerHTML = `
-    <div class="asset-card">
+    <div class="asset-card ${isLocked ? "is-locked" : ""}">
       <div class="asset-card-header">
         <div class="asset-title">Gas</div>
         <small class="asset-name">(National average gas price)</small>
@@ -224,6 +264,7 @@ async function buildFinanceGrid() {
             max="10"
             value="${hasForecast ? Number(saved.gas).toFixed(2) : ""}"
             placeholder="0.000"
+            ${isLocked ? "disabled" : ""}
           />
         </label>
         <input
@@ -234,8 +275,10 @@ async function buildFinanceGrid() {
           step="0.01"
           value="${hasForecast ? Number(saved.gas).toFixed(2) : 5}"
           aria-label="Gas price slider"
+          ${isLocked ? "disabled" : ""}
         />
         <small class="slider-help">Slide to choose a price between 0¢ and $10</small>
+        ${isLocked ? "<small style='color:#b91c1c; font-weight:700;'>Locked after PT cutoff</small>" : ""}
       </div>
     </div>
   `;
@@ -250,24 +293,35 @@ async function buildFinanceGrid() {
     if (priceSlider) priceSlider.value = String(parsed);
   };
 
-  if (priceSlider) {
-    priceSlider.addEventListener("input", (event) => {
-      syncPrice(event.target.value);
-    });
-  }
+  if (!isLocked) {
+    if (priceSlider) {
+      priceSlider.addEventListener("input", (event) => {
+        syncPrice(event.target.value);
+      });
+    }
 
-  if (priceInput) {
-    priceInput.addEventListener("input", (event) => {
-      const parsed = Number.parseFloat(event.target.value);
-      if (!Number.isNaN(parsed) && priceSlider) {
-        priceSlider.value = String(parsed);
-      }
-    });
+    if (priceInput) {
+      priceInput.addEventListener("input", (event) => {
+        const parsed = Number.parseFloat(event.target.value);
+        if (!Number.isNaN(parsed) && priceSlider) {
+          priceSlider.value = String(parsed);
+        }
+      });
+    }
   }
 }
 
 async function handleSubmit(event) {
   event.preventDefault();
+
+  const forecastDaySelect = document.getElementById("forecastDay");
+  const forecastDay = forecastDaySelect?.value || "today";
+  const forecastDate = getFinanceForecastDateISO(forecastDay);
+
+  if (isForecastDateLocked(forecastDate)) {
+    setStatus("<span style='color:red;'> This forecast is locked after the PT cutoff. </span>");
+    return;
+  }
 
   const priceInput = document.getElementById("gasPriceInput");
   if (!priceInput) {
@@ -293,10 +347,6 @@ async function handleSubmit(event) {
     console.warn("Unable to resolve user ID:", error);
     return null;
   });
-
-  const forecastDaySelect = document.getElementById("forecastDay");
-  const forecastDay = forecastDaySelect?.value || "today";
-  const forecastDate = getFinanceForecastDateISO(forecastDay);
 
   const { error } = await client
     .from("finance_forecasts")
