@@ -413,27 +413,28 @@
       </ul>
 
       <div style="text-align:center; margin-top: 0.9rem;">
-        <button id="helpDoneBtn" type="button">Understood ✅</button>
+        <button id="helpDoneBtn" type="button"> Understood ✅ </button>
       </div>
     </div>
   </div>
 
-  <form id="financeForm">
-    <div class="forecast-selector">
-      <label for="forecastDay">Forecast for:</label>
+  <div style="text-align:center; margin:1rem 0;">
+    <label>
+      Forecast for:
       <select id="forecastDay">
-        <option value="today">Today</option>
-        <option value="tomorrow">Tomorrow</option>
+        <option value="today"> Today </option>
+        <option value="tomorrow"> Tomorrow </option>
       </select>
-
-      <span id="currentDateWrapper">
-        <span id="currentDate"></span>
-        <span class="pt-info">
-          ⓘ
-          <span class="pt-tooltip">Dates shown in Pacific Time (PT)</span>
-        </span>
+    </label>
+  
+    <div id="currentDateWrapper" style="margin-top:6px;">
+      <span id="currentDate"></span>
+      <span class="pt-info">
+        ⓘ
+        <span class="pt-tooltip"> Dates shown in Pacific Time (PT) </span>
       </span>
     </div>
+  </div>
 
     <p style="text-align:center; margin:1rem 0;">
       Cutoff = Midnight PT  |  Yesterday’s price shown for reference
