@@ -9,13 +9,63 @@ if (!window.__supabase_client) {
 }
 const client = window.__supabase_client;
 
-const GAS_CACHE_KEY = "finance:latest-gas";
+const FINANCE_ASSETS = [
+  {
+    key: "gas",
+    label: "Gas",
+    name: "(US average gas price)",
+    inputId: "gasPriceInput",
+    sliderId: "gasPriceSlider",
+    cacheKey: "finance:latest-gas",
+    min: 1,
+    max: 10,
+    step: 0.01,
+    sliderStep: 0.01,
+    placeholder: "5",
+    formatValue: (v) => Number(v).toFixed(2),
+    formatDisplay: (v) => `$${Number(v).toFixed(3)}`,
+    yesterdayLabel: "Yesterday price",
+  },
+  {
+    key: "btc",
+    label: "BTC",
+    name: "(Bitcoin price at 1PM)",
+    inputId: "btcPriceInput",
+    sliderId: "btcPriceSlider",
+    cacheKey: "finance:latest-btc",
+    min: 100,
+    max: 150000,
+    step: 100,
+    sliderStep: 100,
+    placeholder: "50000",
+    formatValue: (v) => Number(v).toFixed(0),
+    formatDisplay: (v) => `$${Number(v).toLocaleString()}`,
+    yesterdayLabel: "Yesterday price",
+  },
+  {
+    key: "gold",
+    label: "Gold",
+    name: "(Gold price per oz at settlement)",
+    inputId: "goldPriceInput",
+    sliderId: "goldPriceSlider",
+    cacheKey: "finance:latest-gold",
+    min: 10,
+    max: 10000,
+    step: 10,
+    sliderStep: 10,
+    placeholder: "5000",
+    formatValue: (v) => Number(v).toFixed(0),
+    formatDisplay: (v) => `$${Number(v).toLocaleString()}`,
+    yesterdayLabel: "Yesterday price",
+  },
+];
+
 const FINANCE_TIMEZONE = "America/Los_Angeles";
 let midnightTimer = null;
 
-function readCachedGasForecast() {
+function readCachedForecast(cacheKey) {
   try {
-    const raw = localStorage.getItem(GAS_CACHE_KEY);
+    const raw = localStorage.getItem(cacheKey);
     if (!raw) return null;
     return JSON.parse(raw);
   } catch {
@@ -23,11 +73,10 @@ function readCachedGasForecast() {
   }
 }
 
-function writeCachedGasForecast({ date, price }) {
+function writeCachedForecast(cacheKey, { date, price }) {
   try {
-    localStorage.setItem(GAS_CACHE_KEY, JSON.stringify({ date, price }));
-  } catch {
-    // ignore storage errors
+    localStorage.setItem(cacheKey, JSON.stringify({ date, price }));
+  } catch {  // ignore storage errors
   }
 }
 
@@ -156,6 +205,12 @@ async function resolveAuthUserId() {
   return anonUser.id;
 }
 
+async function fetchYesterdayPrice(assetKey) {
+  if (assetKey === "btc") return fetchYesterdayBtcPrice();
+  if (assetKey === "gold") return fetchYesterdayGoldPrice();
+  return fetchYesterdayGasPrice();
+}
+
 async function fetchYesterdayGasPrice() {
   const yesterdayDate = getYesterdayPTYmd();
 
@@ -173,6 +228,40 @@ async function fetchYesterdayGasPrice() {
   return data?.gas ?? null;
 }
 
+async function fetchYesterdayBTCPrice() {
+  const yesterdayDate = getYesterdayPTYmd();
+
+  const { data, error } = await client
+    .from("finance_actuals")
+    .select("btc")
+    .eq("date", yesterdayDate)
+    .maybeSingle();
+
+  if (error && error.code !== "PGRST116") {
+    console.warn("Could not load yesterday BTC price:", error);
+    return null;
+  }
+
+  return data?.btc ?? null;
+}
+
+async function fetchYesterdayGoldPrice() {
+  const yesterdayDate = getYesterdayPTYmd();
+
+  const { data, error } = await client
+    .from("finance_actuals")
+    .select("gold")
+    .eq("date", yesterdayDate)
+    .maybeSingle();
+
+  if (error && error.code !== "PGRST116") {
+    console.warn("Could not load yesterday gold price:", error);
+    return null;
+  }
+
+  return data?.gold ?? null;
+}
+
 async function buildFinanceGrid() {
   const grid = document.getElementById("financeGrid");
   if (!grid) return;
@@ -181,119 +270,127 @@ async function buildFinanceGrid() {
   updateCurrentDate();
 
   const forecastDaySelect = document.getElementById("forecastDay");
-  const forecastDay = forecastDaySelect?.value || "tomorrow";
+  const forecastDay = forecastDaySelect?.value || "today";
   const forecastDate = getFinanceForecastDateISO(forecastDay);
   const isLocked = isForecastDateLocked(forecastDate);
-
-  const cached = readCachedGasForecast();
-  const cachedMatches = cached && cached.date === forecastDate;
-  let saved = cachedMatches ? { gas: cached.price } : {};
 
   const userId = await resolveAuthUserId().catch((error) => {
     console.warn("Unable to resolve user ID:", error);
     return null;
   });
 
-  let yesterdayGas = null;
+  const cards = [];
 
-  if (userId) {
-    try {
-      const { data, error } = await client
-        .from("finance_forecasts")
-        .select("gas")
-        .eq("user_id", userId)
-        .eq("date", forecastDate)
-        .maybeSingle();
+  for (const asset of FINANCE_ASSETS) {
+    const cached = readCachedForecast(asset.cacheKey);
+    const cachedMatches = cached && cached.date === forecastDate;
+    let saved = cachedMatches ? { [asset.key]: cached.price } : {};
 
-      if (error && error.code !== "PGRST116") {
-        console.warn("Could not load finance forecasts:", error);
-      } else if (data) {
-        saved = data;
-        writeCachedGasForecast({ date: forecastDate, price: data.gas });
+    let yesterdayValue = null;
+
+    if (userId) {
+      try {
+        const { data, error } = await client
+          .from("finance_forecasts")
+          .select(asset.key)
+          .eq("user_id", userId)
+          .eq("date", forecastDate)
+          .maybeSingle();
+
+        if (error && error.code !== "PGRST116") {
+          console.warn(`Could not load ${asset.key} forecast:`, error);
+        } else if (data) {
+          saved = data;
+          writeCachedForecast(asset.cacheKey, { date: forecastDate, price: data[asset.key] });
+        }
+
+        yesterdayValue = await fetchYesterdayPrice(asset.key);
+      } catch (err) {
+        console.warn(`Finance ${asset.key} load failed:`, err);
       }
-
-      yesterdayGas = await fetchYesterdayGasPrice();
-    } catch (err) {
-      console.warn("Finance forecasts load failed:", err);
     }
-  }
 
-  const hasForecast = saved?.gas != null;
-  const yesterdayText =
-    yesterdayGas != null ? `$${Number(yesterdayGas).toFixed(3)}` : "—";
+    const hasForecast = saved?.[asset.key] != null;
+    const yesterdayText =
+      yesterdayValue != null ? asset.formatDisplay(yesterdayValue) : "—";
 
-  const forecastText = hasForecast
-    ? `My current forecast: $${Number(saved.gas).toFixed(2)}`
-    : "Awaiting my forecast";
+    const forecastText = hasForecast
+      ? `My current forecast: ${asset.formatDisplay(saved[asset.key])}`
+      : "Awaiting my forecast";
 
-  grid.innerHTML = `
-    <div class="asset-card asset-card--finance ${isLocked ? "is-locked" : ""}">
-      <div class="asset-card-header asset-card-header--finance">
-        <div class="asset-title asset-title--finance"> Gas </div>
-        <small class="asset-name asset-name--finance"> (US average gas price) </small>
-      </div>
+    cards.push(`
+      <div class="asset-card asset-card--finance ${isLocked ? "is-locked" : ""}">
+        <div class="asset-card-header asset-card-header--finance">
+          <div class="asset-title asset-title--finance"> ${asset.label} </div>
+          <small class="asset-name asset-name--finance"> ${asset.name} </small>
+        </div>
 
-      <div class="asset-card-content asset-card-content--finance">
-        <p class="forecast-meta"><small>Yesterday price: ${yesterdayText}</small></p>
-        <p class="forecast-line"><small>${forecastText}</small></p>
+        <div class="asset-card-content asset-card-content--finance">
+          <p class="forecast-meta"><small>${asset.yesterdayLabel}: ${yesterdayText}</small></p>
+          <p class="forecast-line"><small>${forecastText}</small></p>
 
-        <label class="finance-label">
-          Price ($)
+          <label class="finance-label">
+            Price ($)
+            <input
+              type="number"
+              class="finance-input"
+              id="${asset.inputId}"
+              step="${asset.step}"
+              min="${asset.min}"
+              max="${asset.max}"
+              value="${hasForecast ? asset.formatValue(saved[asset.key]) : ""}"
+              placeholder="${asset.placeholder}"
+              ${isLocked ? "disabled" : ""}
+            />
+          </label>
+
           <input
-            type="number"
-            class="daily-high finance-input"
-            id="gasPriceInput"
-            step="0.001"
-            min="1"
-            max="10"
-            value="${hasForecast ? Number(saved.gas).toFixed(2) : ""}"
-            placeholder="0.000"
+            type="range"
+            id="${asset.sliderId}"
+            class="finance-slider"
+            min="${asset.min}"
+            max="${asset.max}"
+            step="${asset.sliderStep}"
+            value="${hasForecast ? asset.formatValue(saved[asset.key]) : String((asset.min + asset.max) / 2)}"
+            aria-label="${asset.label} slider"
             ${isLocked ? "disabled" : ""}
           />
-        </label>
 
-        <input
-          type="range"
-          id="gasPriceSlider"
-          class="finance-slider"
-          min="1"
-          max="10"
-          step="0.01"
-          value="${hasForecast ? Number(saved.gas).toFixed(2) : 5}"
-          aria-label="Gas price slider"
-          ${isLocked ? "disabled" : ""}
-        />
-
-        <small class="slider-help"> Slide to choose a price between 1¢ and $10 </small>
-        ${isLocked ? "<small class='locked-note'> Past cutoff time </small>" : ""}
+          <small class="slider-help"> Use the slider to choose a price </small>
+          ${isLocked ? "<small class='locked-note'> Past cutoff time </small>" : ""}
+        </div>
       </div>
-    </div>
-  `;
+    `);
+  }
 
-  const priceInput = document.getElementById("gasPriceInput");
-  const priceSlider = document.getElementById("gasPriceSlider");
-
-  const syncPrice = (value) => {
-    const parsed = Number.parseFloat(value);
-    if (Number.isNaN(parsed)) return;
-    if (priceInput) priceInput.value = parsed.toFixed(2);
-    if (priceSlider) priceSlider.value = String(parsed);
-  };
+  grid.innerHTML = cards.join("");
 
   if (!isLocked) {
-    if (priceSlider) {
-      priceSlider.addEventListener("input", (event) => {
-        syncPrice(event.target.value);
-      });
-    }
+    for (const asset of FINANCE_ASSETS) {
+      const priceInput = document.getElementById(asset.inputId);
+      const priceSlider = document.getElementById(asset.sliderId);
 
-    if (priceInput) {
-      priceInput.addEventListener("input", (event) => {
-        const parsed = Number.parseFloat(event.target.value);
-        if (!Number.isNaN(parsed) && priceSlider) {
-          priceSlider.value = String(parsed);
-        }
-      });
+      const syncPrice = (value) => {
+        const parsed = Number.parseFloat(value);
+        if (Number.isNaN(parsed)) return;
+        if (priceInput) priceInput.value = asset.formatValue(parsed);
+        if (priceSlider) priceSlider.value = String(parsed);
+      };
+
+      if (priceSlider) {
+        priceSlider.addEventListener("input", (event) => {
+          syncPrice(event.target.value);
+        });
+      }
+
+      if (priceInput) {
+        priceInput.addEventListener("input", (event) => {
+          const parsed = Number.parseFloat(event.target.value);
+          if (!Number.isNaN(parsed) && priceSlider) {
+            priceSlider.value = String(parsed);
+          }
+        });
+      }
     }
   }
 }
@@ -302,7 +399,7 @@ async function handleSubmit(event) {
   event.preventDefault();
 
   const forecastDaySelect = document.getElementById("forecastDay");
-  const forecastDay = forecastDaySelect?.value || "tomorrow";
+  const forecastDay = forecastDaySelect?.value || "today";
   const forecastDate = getFinanceForecastDateISO(forecastDay);
 
   if (isForecastDateLocked(forecastDate)) {
@@ -310,16 +407,21 @@ async function handleSubmit(event) {
     return;
   }
 
-  const priceInput = document.getElementById("gasPriceInput");
-  if (!priceInput) {
-    setStatus("Unable to find the gas price input");
-    return;
-  }
+  const values = {};
+  for (const asset of FINANCE_ASSETS) {
+    const input = document.getElementById(asset.inputId);
+    if (!input) {
+      setStatus(`Unable to find the ${asset.key} input`);
+      return;
+    }
 
-  const rawPrice = priceInput.value;
-  if (!rawPrice) {
-    setStatus("Please enter a gas price before saving");
-    return;
+    const raw = input.value;
+    if (!raw) {
+      setStatus(`Please enter a ${asset.key} forecast before saving`);
+      return;
+    }
+
+    values[asset.key] = Number(raw);
   }
 
   const session = await ensureSessionForDailySave();
@@ -335,13 +437,15 @@ async function handleSubmit(event) {
     return null;
   });
 
+  const payload = {
+    user_id: userId,
+    date: forecastDate,
+    ...values,
+  };
+
   const { error } = await client
     .from("finance_forecasts")
-    .upsert({
-      user_id: userId,
-      date: forecastDate,
-      gas: Number(rawPrice),
-    })
+    .upsert(payload)
     .select()
     .single();
 
@@ -353,8 +457,15 @@ async function handleSubmit(event) {
     return;
   }
 
-  setStatus("<span style='color:green;'> Forecasts saved! </span>");
-  writeCachedGasForecast({ date: forecastDate, price: Number(rawPrice) });
+  setStatus("<span style='color:green;'> Forecasts saved! ✅ </span>");
+
+  for (const asset of FINANCE_ASSETS) {
+    writeCachedForecast(asset.cacheKey, {
+      date: forecastDate,
+      price: values[asset.key],
+    });
+  }
+
   buildFinanceGrid();
 }
 
