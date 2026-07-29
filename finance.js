@@ -28,8 +28,8 @@ const FINANCE_ASSETS = [
   },
   {
     key: "btc",
-    label: "BTC",
-    name: "(Bitcoin price at 1PM)",
+    label: "Bitcoin",
+    name: "(BTC price at 1PM)",
     inputId: "btcPriceInput",
     sliderId: "btcPriceSlider",
     cacheKey: "finance:latest-btc",
