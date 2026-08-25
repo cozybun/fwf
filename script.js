@@ -553,16 +553,22 @@ export function normalizeSessionResult(sessionResult) {
 // Helper to ensure session exists for daily save; reuse current session if present, but create one anon session if not
 export async function ensureSessionForDailySave() {
   const initialRecovery = popAuthRecoveryState();
+
   if (initialRecovery?.needsReauth) {
-    setStatus(`<span style="color:orange;">${initialRecovery.message}</span>`);
+    setStatus(
+      `<span style="color:orange;">${initialRecovery.message}</span>`
+    );
     return null;
   }
 
-  const session = await ensureSession(false, { allowAnonymous: false }); // get/recover session
+  const session = await ensureSession(false, { allowAnonymous: false });
 
   const recovery = popAuthRecoveryState();
+
   if (recovery?.needsReauth) {
-    setStatus(`<span style="color:orange;">${recovery.message}</span>`);
+    setStatus(
+      `<span style="color:orange;">${recovery.message}</span>`
+    );
     return null;
   }
 
@@ -571,23 +577,41 @@ export async function ensureSessionForDailySave() {
     return session;
   }
 
-  // when a guest session is created, immediately write its user.id into userId, ensuring downstream logic sees that a session already exists
+  // No authenticated session exists but known user exists
+  if (userId) {
+    console.warn(
+      "Daily save blocked: Known user exists but authenticated session is unavailable.",
+      userId
+    );
+
+    setStatus(
+      "<span style='color:orange;'> Your account session needs to be restored. Please restore your account and try again. </span>"
+    );
+
+    return null;
+  }
+
+  // No known account/session: a genuinely new guest user
   if (!createAnonSessionPromise) {
-    createAnonSessionPromise = (
-      async () => {
-        const anonResult = await createAnonymousSession();
-        const anonSession = normalizeSessionResult(anonResult);
-        if (anonSession?.user?.id) {
-          userId = anonSession.user.id;  // keep the global userId in sync for guest sessions
-        } else {
-          console.warn("Anonymous session response contained no user", anonResult);
-        }
-        return anonSession;
+    createAnonSessionPromise = (async () => {
+      const anonResult = await createAnonymousSession();
+      const anonSession = normalizeSessionResult(anonResult);
+
+      if (anonSession?.user?.id) {
+        userId = anonSession.user.id;
+      } else {
+        console.warn(
+          "Anonymous session response contained no user",
+          anonResult
+        );
       }
-    )().finally(() => {
+
+      return anonSession;
+    })().finally(() => {
       createAnonSessionPromise = null;
     });
   }
+
   return createAnonSessionPromise;
 }
 
@@ -617,18 +641,26 @@ export async function ensureSession(forceRefresh = false, options = {}) {
 
     if (error) {
       if (isInvalidRefreshTokenError(error)) {
-        console.warn("Invalid refresh token detected, attempting recovery...");
-        const recovery = await refreshAndRecoverSession(session, { allowAnonymous });
+        console.warn(
+          "Invalid refresh token detected, attempting recovery..."
+        );
+
+        const recovery = await refreshAndRecoverSession(session, {
+          allowAnonymous,
+        });
 
         if (recovery?.needsReauth) {
           setAuthRecoveryState({
             needsReauth: true,
-            message: recovery.message || "Your account link is stale. Please sign in again."
+            message:
+              recovery.message ||
+              "Your account link is stale. Please sign in again.",
           });
           return null;
         }
 
         const recoveredSession = recovery?.session || null;
+
         if (!recoveredSession?.user?.id) {
           userId = null;
           return null;
@@ -639,49 +671,41 @@ export async function ensureSession(forceRefresh = false, options = {}) {
         return recoveredSession;
       }
 
-      console.warn("Session retrieval failed:", error.message || error);
-      return null;
-    }
-
-    if (session?.user?.id) {
-      const { data: userData, error: userError } = await client.auth.getUser(
-        session.access_token
-      );
-
-      if (!userError && userData?.user?.id === session.user.id) {
-        userId = userData.user.id;
-        authRecoveryState = null;
-        return session;
-      }
-
       console.warn(
-        "Session is stale/deleted:",
-        userError?.message || "user mismatch"
+        "Session retrieval failed:",
+        error.message || error
       );
-    }
 
-    const recovery = await refreshAndRecoverSession(session, { allowAnonymous });
-
-    if (recovery?.needsReauth) {
-      setAuthRecoveryState({
-        needsReauth: true,
-        message: recovery.message || "Your account link is stale. Please sign in again."
-      });
       return null;
     }
 
-    const recoveredSession = recovery?.session || null;
-    if (!recoveredSession?.user?.id) {
+    // A session returned by getSession() is sufficient for normal use. Do not call getUser() here just to validate it
+    // because a transient getUser/network failure should not destroy an otherwise usable session.
+    if (session?.user?.id) {
+      userId = session.user.id;
+      authRecoveryState = null;
+      return session;
+    }
+
+    if (!allowAnonymous) {  // if genuinely no current session
+      return null;
+    }
+
+    const anonResult = await createAnonymousSession();
+    const anonSession = normalizeSessionResult(anonResult);
+
+    if (!anonSession?.user?.id) {
       userId = null;
       return null;
     }
 
-    userId = recoveredSession.user.id;
+    userId = anonSession.user.id;
     authRecoveryState = null;
-    return recoveredSession;
+    return anonSession;
   };
 
   ensureSessionPromiseMode = allowAnonymous;
+
   ensureSessionPromise = run().finally(() => {
     ensureSessionPromise = null;
     ensureSessionPromiseMode = null;
