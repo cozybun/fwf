@@ -398,11 +398,14 @@ async function handleSubmit(event) {
   const forecastDaySelect = document.getElementById("forecastDay");
   const forecastDay = forecastDaySelect?.value || "today";
   const forecastDate = getFinanceForecastDateISO(forecastDay);
+  console.log("random msg");
 
   if (isForecastDateLocked(forecastDate)) {
     setStatus("<span style='color:red;'> The cutoff time has passed. Forecast for tomorrow. </span>");
     return;
   }
+
+  console.log("random msg 2");
 
   const values = {};
   for (const asset of FINANCE_ASSETS) {
