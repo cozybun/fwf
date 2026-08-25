@@ -425,39 +425,59 @@ async function handleSubmit(event) {
   }
 
   const session = await ensureSessionForDailySave();
-  if (!session?.user?.id) {
-    setStatus(
-      "<span style='color:red;'> No active session yet. Your first daily temps save will create a guest session. </span>"
-    );
-    return;
-  }
 
-  const userId = await resolveAuthUserId().catch((error) => {
-    console.warn("Unable to resolve user ID:", error);
-    return null;
-  });
+console.log("finance session", session);
 
-  const payload = {
-    user_id: userId,
-    date: forecastDate,
-    ...values,
-  };
+if (!session?.user?.id) {
+  console.warn("finance save blocked: no session user id");
 
-  const { error } = await client
-    .from("finance_forecasts")
-    .upsert(payload)
-    .select()
-    .single();
+  setStatus(
+    "<span style='color:red;'> No active session yet. Your first daily temps save will create a guest session. </span>"
+  );
+  return;
+}
 
-  if (error) {
-    console.warn("Finance forecast save failed:", error);
-    setStatus(
-      "<span style='color:red;'> Unable to save your forecasts right now. Please try again. </span>"
-    );
-    return;
-  }
+const userId = await resolveAuthUserId().catch((error) => {
+  console.error("resolveAuthUserId failed", error);
+  return null;
+});
 
-  setStatus("<span style='color:green;'> Forecasts saved! ✅ </span>");
+console.log("finance userId", userId);
+
+if (!userId) {
+  setStatus(
+    "<span style='color:red;'> Unable to determine your account. Please refresh and try again. </span>"
+  );
+  return;
+}
+
+const payload = {
+  user_id: userId,
+  date: forecastDate,
+  ...values,
+};
+
+console.log("finance payload", payload);
+
+const { error } = await client
+  .from("finance_forecasts")
+  .upsert(payload)
+  .select()
+  .single();
+
+if (error) {
+  console.error("Finance forecast save failed:", error);
+
+  setStatus(
+    "<span style='color:red;'> Unable to save your forecasts right now. Please try again. </span>"
+  );
+
+  return;
+}
+
+console.log("finance save succeeded");
+
+setStatus("<span style='color:green;'> Forecasts saved! ✅ </span>");
 
   for (const asset of FINANCE_ASSETS) {
     writeCachedForecast(asset.cacheKey, {
