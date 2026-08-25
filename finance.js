@@ -192,17 +192,14 @@ function scheduleMidnightRefresh() {
 }
 
 async function resolveAuthUserId() {
-  const { data: sessionData, error: sessionError } = await client.auth.getSession();
-  if (sessionError) throw new Error(`Session check failed: ${sessionError.message}`);
+  const { data: sessionData, error: sessionError } =
+    await client.auth.getSession();
 
-  if (sessionData?.session?.user?.id) return sessionData.session.user.id;
+  if (sessionError) {
+    throw new Error(`Session check failed: ${sessionError.message}`);
+  }
 
-  const { data: anonData, error: anonError } = await client.auth.signInAnonymously();
-  if (anonError) throw new Error(`Anonymous sign-in failed: ${anonError.message}`);
-
-  const anonUser = anonData?.user ?? anonData?.session?.user;
-  if (!anonUser?.id) throw new Error("Could not determine authenticated user after anonymous sign-in");
-  return anonUser.id;
+  return sessionData?.session?.user?.id || null;
 }
 
 async function fetchYesterdayPrice(assetKey) {
@@ -437,19 +434,8 @@ if (!session?.user?.id) {
   return;
 }
 
-const userId = await resolveAuthUserId().catch((error) => {
-  console.error("resolveAuthUserId failed", error);
-  return null;
-});
-
+const userId = session.user.id;
 console.log("finance userId", userId);
-
-if (!userId) {
-  setStatus(
-    "<span style='color:red;'> Unable to determine your account. Please refresh and try again. </span>"
-  );
-  return;
-}
 
 const payload = {
   user_id: userId,
