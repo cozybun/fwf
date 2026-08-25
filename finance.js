@@ -9,6 +9,8 @@ if (!window.__supabase_client) {
 }
 const client = window.__supabase_client;
 
+console.log("[FINANCE] finance.js loaded", new Date().toISOString());
+
 const FINANCE_ASSETS = [
   {
     key: "gas",
@@ -480,6 +482,11 @@ setStatus("<span style='color:green;'> Forecasts saved! ✅ </span>");
 
   buildFinanceGrid();
 }
+
+console.log("[FINANCE] wiring", {
+  form: document.getElementById("financeForm"),
+  button: document.getElementById("saveFinanceForecast"),
+});
 
 const financeForm = document.getElementById("financeForm");
 if (financeForm) {
