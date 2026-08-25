@@ -421,8 +421,11 @@ async function handleSubmit(event) {
     values[asset.key] = Number(raw);
   }
 
-  const session = await ensureSessionForDailySave();
+console.log("[FINANCE] starting save, about to ensure session");
 
+const session = await ensureSessionForDailySave();
+
+console.log("[FINANCE] ensureSessionForDailySave returned", session);
 console.log("finance session", session);
 
 if (!session?.user?.id) {
