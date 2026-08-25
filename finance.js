@@ -400,15 +400,12 @@ async function handleSubmit(event) {
   const forecastDaySelect = document.getElementById("forecastDay");
   const forecastDay = forecastDaySelect?.value || "today";
   const forecastDate = getFinanceForecastDateISO(forecastDay);
-  console.log("random msg");
 
   if (isForecastDateLocked(forecastDate)) {
     setStatus("<span style='color:red;'> The cutoff time has passed. Forecast for tomorrow. </span>");
     return;
   }
-
-  console.log("random msg 2");
-
+  
   const values = {};
   for (const asset of FINANCE_ASSETS) {
     const input = document.getElementById(asset.inputId);
@@ -483,19 +480,24 @@ setStatus("<span style='color:green;'> Forecasts saved! ✅ </span>");
   buildFinanceGrid();
 }
 
+const financeForm = document.getElementById("financeForm");
+const saveButton = document.getElementById("saveFinanceForecast");
+
 console.log("[FINANCE] wiring", {
-  form: document.getElementById("financeForm"),
-  button: document.getElementById("saveFinanceForecast"),
+  form: financeForm,
+  button: saveButton,
 });
 
-const financeForm = document.getElementById("financeForm");
 if (financeForm) {
-  financeForm.addEventListener("submit", handleSubmit);
-} else {
-  const saveButton = document.getElementById("saveFinanceForecast");
-  if (saveButton) {
-    saveButton.addEventListener("click", handleSubmit);
-  }
+  financeForm.addEventListener("submit", (event) => {
+    console.log("[FINANCE] FORM SUBMIT FIRED");
+    handleSubmit(event);
+  });
+} else if (saveButton) {
+  saveButton.addEventListener("click", (event) => {
+    console.log("[FINANCE] BUTTON CLICK FIRED");
+    handleSubmit(event);
+  });
 }
 
 const forecastDaySelect = document.getElementById("forecastDay");
