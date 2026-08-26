@@ -481,7 +481,7 @@ setStatus("<span style='color:green;'> Forecasts saved! ✅ </span>");
 }
 
 const financeForm = document.getElementById("financeForm");
-const saveButton = document.getElementById("saveFinanceForecast");
+const saveButton = document.getElementById("financeSaveBtn");
 
 console.log("[FINANCE] wiring", {
   form: financeForm,
