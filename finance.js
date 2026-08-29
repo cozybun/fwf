@@ -488,15 +488,11 @@ console.log("[FINANCE] wiring", {
   button: saveButton,
 });
 
-if (financeForm) {
-  financeForm.addEventListener("submit", (event) => {
-    console.log("[FINANCE] FORM SUBMIT FIRED");
-    handleSubmit(event);
-  });
-} else if (saveButton) {
+
+if (saveButton) {
   saveButton.addEventListener("click", (event) => {
     console.log("[FINANCE] BUTTON CLICK FIRED");
-    handleSubmit(event);
+    await handleSubmit(event);
   });
 }
 
