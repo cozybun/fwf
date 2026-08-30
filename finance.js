@@ -488,9 +488,8 @@ console.log("[FINANCE] wiring", {
   button: saveButton,
 });
 
-
 if (saveButton) {
-  saveButton.addEventListener("click", (event) => {
+  saveButton.addEventListener("click", async (event) => {
     console.log("[FINANCE] BUTTON CLICK FIRED");
     await handleSubmit(event);
   });
