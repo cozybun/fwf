@@ -455,7 +455,9 @@ console.log("finance payload", payload);
 
 const { error } = await client
   .from("finance_forecasts")
-  .upsert(payload)
+  .upsert(payload, {
+    onConflict: "user_id,date"  // update an existing forecast day instead of creating extra rows
+  })
   .select()
   .single();
 
