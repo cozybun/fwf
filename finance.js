@@ -409,18 +409,21 @@ async function handleSubmit(event) {
   const values = {};
   for (const asset of FINANCE_ASSETS) {
     const input = document.getElementById(asset.inputId);
-    if (!input) {
-      setStatus(`Unable to find the ${asset.key} input`);
-      return;
-    }
-
-    const raw = input.value;
-    if (!raw) {
-      setStatus(`Please enter a ${asset.key} forecast before saving`);
-      return;
-    }
-
+  
+    if (!input) continue;
+  
+    const raw = input.value?.trim();
+  
+    if (!raw) continue;
+  
     values[asset.key] = Number(raw);
+  }
+  
+  if (Object.keys(values).length === 0) {
+    setStatus(
+      "<span style='color:red;'> Enter at least one forecast before saving. </span>"
+    );
+    return;
   }
 
 console.log("[FINANCE] starting save, about to ensure session");
