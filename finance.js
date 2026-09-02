@@ -119,11 +119,6 @@ function getFinanceForecastDateISO(forecastDay = "today") {
   return forecastDay === "tomorrow" ? addDaysYmd(todayPT, 1) : todayPT;
 }
 
-function isForecastDateLocked(forecastDate) {
-  const todayPT = getPTTodayYmd();
-  return forecastDate <= todayPT;
-}
-
 function formatDisplayDate(ymd) {
   if (!ymd) return "";
 
@@ -208,6 +203,36 @@ function shouldDefaultToTomorrow() {
   return Number(parts.hour) >= 14;  // 2 PM PT
 }
 
+function getCurrentPTHour() {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: FINANCE_TIMEZONE,
+    hour: "2-digit",
+    hour12: false,
+  })
+    .formatToParts(new Date())
+    .reduce((acc, p) => {
+      if (p.type !== "literal") acc[p.type] = p.value;
+      return acc;
+    }, {});
+
+  return Number(parts.hour || 0);
+}
+
+function isAssetLocked(assetKey, forecastDate) {
+  const todayPT = getPTTodayYmd();
+  const hourPT = getCurrentPTHour();
+
+  if (forecastDate > todayPT) {  // tomorrow is always editable
+    return false;
+  }
+
+  if (assetKey === "gas") {  // gas locked today
+    return true;
+  }
+
+  return hourPT >= 12;  // BTC & Gold editable until noon
+}
+
 async function resolveAuthUserId() {
   const { data: sessionData, error: sessionError } =
     await client.auth.getSession();
@@ -286,7 +311,6 @@ async function buildFinanceGrid() {
   const forecastDaySelect = document.getElementById("forecastDay");
   const forecastDay = forecastDaySelect?.value || "today";
   const forecastDate = getFinanceForecastDateISO(forecastDay);
-  const isLocked = isForecastDateLocked(forecastDate);
 
   const userId = await resolveAuthUserId().catch((error) => {
     console.warn("Unable to resolve user ID:", error);
@@ -296,6 +320,7 @@ async function buildFinanceGrid() {
   const cards = [];
 
   for (const asset of FINANCE_ASSETS) {
+    const assetLocked = isAssetLocked(asset.key, forecastDate);
     const cached = readCachedForecast(asset.cacheKey);
     const cachedMatches = cached && cached.date === forecastDate;
     let saved = cachedMatches ? { [asset.key]: cached.price } : {};
@@ -333,7 +358,7 @@ async function buildFinanceGrid() {
       : "Awaiting my forecast";
 
     cards.push(`
-      <div class="asset-card asset-card--finance ${isLocked ? "is-locked" : ""}">
+      <div class="asset-card asset-card--finance ${assetLocked ? "is-locked" : ""}">
         <div class="asset-card-header asset-card-header--finance">
           <div class="asset-title asset-title--finance"> ${asset.label} </div>
           <small class="asset-name asset-name--finance"> ${asset.name} </small>
@@ -354,7 +379,7 @@ async function buildFinanceGrid() {
               max="${asset.max}"
               value="${hasForecast ? asset.formatValue(saved[asset.key]) : ""}"
               placeholder="${asset.placeholder}"
-              ${isLocked ? "disabled" : ""}
+              ${assetLocked ? "disabled" : ""}
             />
           </label>
 
@@ -367,11 +392,11 @@ async function buildFinanceGrid() {
             step="${asset.sliderStep}"
             value="${hasForecast ? asset.formatValue(saved[asset.key]) : String((asset.min + asset.max) / 2)}"
             aria-label="${asset.label} slider"
-            ${isLocked ? "disabled" : ""}
+            ${assetLocked ? "disabled" : ""}
           />
 
           <small class="slider-help"> Use the slider to choose a price </small>
-          ${isLocked ? "<small class='locked-note'> Past cutoff time </small>" : ""}
+          ${assetLocked ? "<small class='locked-note'> Past cutoff time </small>" : ""}
         </div>
       </div>
     `);
@@ -379,8 +404,9 @@ async function buildFinanceGrid() {
 
   grid.innerHTML = cards.join("");
 
-  if (!isLocked) {
     for (const asset of FINANCE_ASSETS) {
+      const assetLocked = isAssetLocked(asset.key, forecastDate);
+      if (assetLocked) continue;
       const priceInput = document.getElementById(asset.inputId);
       const priceSlider = document.getElementById(asset.sliderId);
 
@@ -407,7 +433,6 @@ async function buildFinanceGrid() {
       }
     }
   }
-}
 
 async function handleSubmit(event) {
   event.preventDefault();
@@ -415,14 +440,10 @@ async function handleSubmit(event) {
   const forecastDaySelect = document.getElementById("forecastDay");
   const forecastDay = forecastDaySelect?.value || "today";
   const forecastDate = getFinanceForecastDateISO(forecastDay);
-
-  if (isForecastDateLocked(forecastDate)) {
-    setStatus("<span style='color:red;'> The cutoff time has passed. Forecast for tomorrow. </span>");
-    return;
-  }
   
   const values = {};
   for (const asset of FINANCE_ASSETS) {
+    if (isAssetLocked(asset.key, forecastDate)) continue;
     const input = document.getElementById(asset.inputId);
   
     if (!input) continue;
