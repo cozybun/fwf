@@ -193,6 +193,21 @@ function scheduleMidnightRefresh() {
   }, msUntilMidnight);
 }
 
+function shouldDefaultToTomorrow() {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: FINANCE_TIMEZONE,
+    hour: "2-digit",
+    hour12: false,
+  })
+    .formatToParts(new Date())
+    .reduce((acc, p) => {
+      if (p.type !== "literal") acc[p.type] = p.value;
+      return acc;
+    }, {});
+
+  return Number(parts.hour) >= 14;  // 2 PM PT
+}
+
 async function resolveAuthUserId() {
   const { data: sessionData, error: sessionError } =
     await client.auth.getSession();
@@ -502,6 +517,10 @@ if (saveButton) {
 
 const forecastDaySelect = document.getElementById("forecastDay");
 if (forecastDaySelect) {
+  if (shouldDefaultToTomorrow()) {
+    forecastDaySelect.value = "tomorrow";
+  }
+
   forecastDaySelect.addEventListener("change", () => {
     updateCurrentDate();
     buildFinanceGrid();
