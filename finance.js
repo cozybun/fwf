@@ -36,7 +36,7 @@ const FINANCE_ASSETS = [
     sliderId: "btcPriceSlider",
     cacheKey: "finance:latest-btc",
     min: 200,
-    max: 200000
+    max: 200000,
     step: 200,
     sliderStep: 200,
     placeholder: "100000",
