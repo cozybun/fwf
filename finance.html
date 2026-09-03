@@ -97,9 +97,9 @@
     }
 
     .finance-page-header {
-      max-width: 1200px
+      max-width: 1200px;
+      margin: 1rem auto 0.5rem;
       text-align: center;
-      margin-left, margin-right: auto;
     }
 
     .finance-page-header h1 {
@@ -170,8 +170,10 @@
     }
 
     .forecast-selector label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
       font-weight: 600;
-      font-size: 1.05rem;
     }
 
     .forecast-selector select {
@@ -264,7 +266,7 @@
       font-size: 0.95rem;
     }
 
-    label {
+    .finance-label {
       display: flex;
       flex-direction: column;
       gap: 0.25rem;
@@ -423,7 +425,7 @@
     </div>
   </div>
 
-  <div style="text-align:center; margin:1rem 0;">
+  <div class="forecast-selector">
     <label>
       Forecast for:
       <select id="forecastDay">
@@ -432,7 +434,7 @@
       </select>
     </label>
   
-    <div id="currentDateWrapper" style="margin-top:6px;">
+    <div id="currentDateWrapper">
       <span id="currentDate"></span>
       <span class="pt-info">
         ⓘ
@@ -442,7 +444,7 @@
   </div>
 
     <p style="text-align:center; margin:1rem 0;">
-      ⛽ cutoff: Midnight PT · ₿ & 🥇 cutoff: Noon PT  |  Yesterday’s price shown for reference
+      ⛽ closes at Midnight PT · ₿ & 🥇 close at Noon PT  |  Yesterday's prices shown for reference
     </p>
 
     <form id="financeForm">
