@@ -65,6 +65,12 @@ const FINANCE_ASSETS = [
 const FINANCE_TIMEZONE = "America/Los_Angeles";
 let midnightTimer = null;
 
+function formatThousands(value) {
+  const num = Number(value);
+  if (Number.isNaN(num)) return "";
+  return num.toLocaleString("en-US");
+}
+
 function readCachedForecast(cacheKey) {
   try {
     const raw = localStorage.getItem(cacheKey);
@@ -371,13 +377,20 @@ async function buildFinanceGrid() {
           <label class="finance-label">
             Price ($)
             <input
-              type="number"
+              type="${asset.key === "gas" ? "number" : "text"}"
+              inputmode="numeric"
               class="finance-input"
               id="${asset.inputId}"
               step="${asset.step}"
               min="${asset.min}"
               max="${asset.max}"
-              value="${hasForecast ? asset.formatValue(saved[asset.key]) : ""}"
+              value="${
+                hasForecast
+                  ? (asset.key === "gas"
+                      ? asset.formatValue(saved[asset.key])
+                      : formatThousands(saved[asset.key]))
+                  : ""
+              }"
               placeholder="${asset.placeholder}"
               ${assetLocked ? "disabled" : ""}
             />
@@ -413,7 +426,12 @@ async function buildFinanceGrid() {
       const syncPrice = (value) => {
         const parsed = Number.parseFloat(value);
         if (Number.isNaN(parsed)) return;
-        if (priceInput) priceInput.value = asset.formatValue(parsed);
+        if (priceInput) {
+          priceInput.value =
+            asset.key === "gas"
+              ? asset.formatValue(parsed)
+              : formatThousands(parsed);
+        }
         if (priceSlider) priceSlider.value = String(parsed);
       };
 
@@ -425,9 +443,23 @@ async function buildFinanceGrid() {
 
       if (priceInput) {
         priceInput.addEventListener("input", (event) => {
-          const parsed = Number.parseFloat(event.target.value);
-          if (!Number.isNaN(parsed) && priceSlider) {
-            priceSlider.value = String(parsed);
+          if (asset.key !== "gas") {
+            const raw = event.target.value.replace(/,/g, "");
+            const parsed = Number(raw);
+      
+            if (!Number.isNaN(parsed)) {
+              event.target.value = formatThousands(parsed);
+      
+              if (priceSlider) {
+                priceSlider.value = parsed;
+              }
+            }
+          } else {
+            const parsed = Number(event.target.value);
+      
+            if (!Number.isNaN(parsed) && priceSlider) {
+              priceSlider.value = parsed;
+            }
           }
         });
       }
@@ -452,7 +484,10 @@ async function handleSubmit(event) {
   
     if (!raw) continue;
   
-    values[asset.key] = Number(raw);
+    values[asset.key] =
+      asset.key === "gas"
+        ? Number(raw)
+        : Number(raw.replace(/,/g, ""));
   }
   
   if (Object.keys(values).length === 0) {
