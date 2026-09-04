@@ -124,6 +124,39 @@
       justify-content: stretch;
     }
 
+    .finance-score-grid {
+      display: grid;
+      grid-template-columns: repeat(3, auto);
+      justify-content: center;
+      column-gap: 28px;
+      row-gap: 4px;
+      text-align: center;
+    }
+    
+    .finance-score-emoji {
+      font-size: 2rem;
+      line-height: 1;
+    }
+    
+    .finance-score-circle {
+      font-size: 1.8rem;
+      line-height: 1;
+    }
+    
+    .finance-score-coins {
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-top: 0.75rem;
+    }
+    
+    .finance-score-ratio {
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-top: 0.5rem;
+    }
+    
     .score-summary {
       display: grid;
       grid-template-rows: auto auto auto;
@@ -756,10 +789,48 @@
       <a href="history" class="menu-btn"> History </a>
       <a href="leaderboard" class="menu-btn"> Leaderboard </a>
     </nav>
-    <div class="mode-switch-wrap">
-      <div id="modeSwitch" class="mode-switch" role="tablist" aria-label="Score mode">
-        <button id="modeDailyBtn" type="button" class="mode-switch-btn active" aria-pressed="true"> Daily </button>
-        <button id="modeHourlyBtn" type="button" class="mode-switch-btn" aria-pressed="false"> Hourly </button>
+    <div class="category-switch-wrap">
+      <div id="categorySwitch" class="category-switch">
+        <button
+          id="modeFinanceBtn"
+          type="button"
+          class="category-btn">
+          Finance
+        </button>
+    
+        <button
+          id="modeQuestionsBtn"
+          type="button"
+          class="category-btn">
+          Questions
+        </button>
+    
+        <button
+          id="modeTempsBtn"
+          type="button"
+          class="category-btn active">
+          Temps
+        </button>
+      </div>
+    </div>
+    
+    <div id="tempsModeWrap" class="mode-switch-wrap">
+      <div id="tempsModeSwitch" class="mode-switch">
+        <button
+          id="modeDailyBtn"
+          type="button"
+          class="mode-switch-btn active"
+          aria-pressed="true">
+          Daily
+        </button>
+    
+        <button
+          id="modeHourlyBtn"
+          type="button"
+          class="mode-switch-btn"
+          aria-pressed="false">
+          Hourly
+        </button>
       </div>
     </div>
     <button id="scoreFaqBtn" type="button" class="menu-btn score-faq-btn"> Score FAQ </button>
@@ -778,12 +849,26 @@
     </div>
   </div>
 
-  <div class="score-summary">
-    <div id="cityCircles"> ⚪ ⚪ ⚪ </div>
-    <div id="scoreRatio" class="score-ratio" aria-live="polite"></div>
-    <button id="shareBtn"> Share </button>
-    <div id="shareStatus" aria-live="polite"></div>
+  <div id="tempsSummary" class="score-summary">
+    <div id="cityCircles">⚪ ⚪ ⚪</div>
+  
+    <div id="scoreRatio"
+         class="score-ratio"
+         aria-live="polite">
+    </div>
+  
+    <button id="shareBtn">Share</button>
+  
+    <div id="shareStatus"
+         aria-live="polite">
+    </div>
   </div>
+  
+  <div id="financeSummary"
+       class="finance-summary"
+       style="display:none;">
+  </div>
+  
   <div id="scoreErrorBanner"></div>
 
   <div id="scoreFaqModal" class="score-faq-modal" aria-hidden="true" aria-labelledby="scoreFaqTitle">
@@ -793,14 +878,14 @@
         <button id="scoreFaqClose" class="score-faq-close" type="button" aria-label="Close score FAQ">✕</button>
       </div>
       <ul class="score-faq-list">
-        <li><strong> Daily Score</strong> Earn 🪙 & 💗 for each High & Low forecast based on accuracy compared to actual temps </li>
+        <li><strong> Temps Score</strong> Earn 🪙 & 💗 for each High & Low forecast based on accuracy compared to actual temps </li>
         <li><strong> Green (🟢)</strong> Perfect or awesome forecast (error of 0-1 degrees) </li>
         <li><strong> Yellow (🟡)</strong> Good or mid forecast (error of 2-3) </li>
         <li><strong> Red (🔴)</strong> Poor or bad forecast (error of ≥ 4) </li>
-        <li><strong> Coins (🪙)</strong> Earn 10🪙 for 0 error, 7🪙 for 1 error, 4🪙 for 2 error, 1🪙 for 3 error, 0🪙 for ≥ 4 error </li>
+        <li><strong> Coins (🪙)</strong> Earn 10🪙 for 0 error (9🪙 for low), 7🪙 for 1 error, 4🪙 for 2 error, 1🪙 for 3 error, 0🪙 for ≥ 4 error </li>
         <li><strong> Mood (💗)</strong> Earn +2💗 for 0 error, +1💗 for 1 error, but lose -1💗 for ≥ 4 error </li>
-        <li><strong> Share</strong> copies the score summary for you to easily share on social media or anywhere 😊 </li>
         <li><strong> Hourly Score</strong> Earn 2🪙 for 0 error, 1🪙 for 1 error </li>
+        <li><strong> Share</strong> copies the score summary for you to share on social media or anywhere 😊 </li>
         <li><strong> What does the fraction at the bottom mean?</strong> <br>
           The summary shows how many of your city High forecasts scored green or yellow accuracy. Try to score at least 1! </li>
         <li><strong> Is my score good? What is a good score?</strong> <br>
@@ -834,6 +919,16 @@
   const ydayDate = ymdToShift(todayInPT, -1);
   const ydayLabel = dateLabelFromYMD(ydayDate);
 
+  const categoryFinanceBtn = document.getElementById("categoryFinanceBtn");
+  const categoryQuestionsBtn = document.getElementById("categoryQuestionsBtn");
+  const categoryTempsBtn = document.getElementById("categoryTempsBtn");
+  
+  const tempsSummaryEl = document.getElementById("tempsSummary");
+  const financeSummaryEl = document.getElementById("financeSummary");
+  const tempsModeWrap = document.getElementById("tempsModeWrap");
+  
+  let activeCategory = "temps";
+  let activeTempsMode = "daily";
   const modeDailyBtn = document.getElementById("modeDailyBtn");
   const modeHourlyBtn = document.getElementById("modeHourlyBtn");
   const scoreDateEl = document.getElementById("scoreDate");
@@ -848,7 +943,7 @@
   const scoreFaqClose = document.getElementById("scoreFaqClose");
 
   let currentUserId = null;
-  let activeMode = "daily";
+  let activeMode = "temps";
   let totalCoins = 0;
   let totalMood = 0;
   let shareTimer = null;
@@ -866,6 +961,31 @@
 
   const { createClient } = window.supabase;
   const client = createClient(SUPABASE_URL, SUPABASE_PUB_KEY);
+
+  function setCategory(category) {
+    activeCategory = category;
+  
+    modeFinanceBtn?.classList.toggle("active", category === "finance");
+    modeQuestionsBtn?.classList.toggle("active", category === "questions");
+    modeTempsBtn?.classList.toggle("active", category === "temps");
+  
+    if (tempsModeWrap) {
+      tempsModeWrap.style.display =
+        category === "temps" ? "" : "none";
+    }
+  
+    if (tempsSummaryEl) {
+      tempsSummaryEl.style.display =
+        category === "temps" ? "" : "none";
+    }
+  
+    if (financeSummaryEl) {
+      financeSummaryEl.style.display =
+        category === "finance" ? "" : "none";
+    }
+  
+    loadScore();
+  }
 
   function showBanner(message, isError = false) {
     const banner = document.getElementById("scoreErrorBanner");
@@ -1170,6 +1290,16 @@
     return "🔴";
   }
 
+  function financeCircle(coins) {
+    if (coins === null || coins === undefined) return "⚪";
+  
+    const n = Number(coins);
+  
+    if (n >= 25) return "🟢";
+    if (n >= 10) return "🟡";
+    return "🔴";
+  }
+
   function cityCirclesFromScores(scores) {
     return CITY_ORDER
       .map((id) => resultCircle(scores.find((r) => Number(r.city_id) === id) || {}))
@@ -1240,6 +1370,60 @@
       animateSignedNumber("moodTotal", mood, 800);
       animateNumber("currentStreak", streakValue, 800);
     }, rowCount * 300);
+  }
+
+  function renderFinanceScores(scores = []) {
+    if (!scoreListEl) return;
+  
+    scoreListEl.innerHTML = "";
+  
+    const row = scores[0];
+  
+    if (!row) {
+      scoreListEl.innerHTML =
+        '<p class="msg no-score-msg">No finance score yet.</p>';
+      return;
+    }
+  
+    const gasCircle =
+      row.coins_gas == null ? "⚪" : financeCircle(row.coins_gas);
+  
+    const btcCircle =
+      row.coins_btc == null ? "⚪" : financeCircle(row.coins_btc);
+  
+    const goldCircle =
+      row.coins_gold == null ? "⚪" : financeCircle(row.coins_gold);
+  
+    const made =
+      (row.coins_gas != null ? 1 : 0) +
+      (row.coins_btc != null ? 1 : 0) +
+      (row.coins_gold != null ? 1 : 0);
+  
+    scoreListEl.innerHTML = `
+      <div class="finance-score-card">
+  
+        <div class="finance-circles">
+          <div>${gasCircle}</div>
+          <div>${btcCircle}</div>
+          <div>${goldCircle}</div>
+        </div>
+  
+        <div class="finance-coins">
+          🪙 ${row.coins || 0}
+        </div>
+  
+        <div class="finance-ratio">
+          ${made}/3
+        </div>
+  
+        <div class="finance-assets">
+          <div>⛽</div>
+          <div>₿</div>
+          <div>🥇</div>
+        </div>
+  
+      </div>
+    `;
   }
 
   function renderHourlyScores(items = []) {
@@ -1643,7 +1827,88 @@
     };
   }
 
+  async function loadFinanceScore() {
+    if (!financeSummaryEl) return;
+  
+    const { data, error } = await client
+      .from("finance_scores")
+      .select("*")
+      .eq("user_id", currentUserId)
+      .eq("date", todayInPT)
+      .maybeSingle();
+  
+    if (error) {
+      console.error("Finance Score Error:", error);
+  
+      financeSummaryEl.innerHTML = `
+        <div style="text-align:center;">
+          Could not load finance score
+        </div>
+      `;
+      return;
+    }
+  
+    if (!data) {
+      financeSummaryEl.innerHTML = `
+        <div style="text-align:center;">
+          No finance score yet today
+        </div>
+      `;
+      return;
+    }
+  
+    function financeCircle(coins) {
+      if (coins == null) return "⚪";
+  
+      const c = Number(coins);
+  
+      if (c >= 25) return "🟢";
+      if (c >= 10) return "🟡";
+      return "🔴";
+    }
+  
+    const gasCircle = financeCircle(data.coins_gas);
+    const btcCircle = financeCircle(data.coins_btc);
+    const goldCircle = financeCircle(data.coins_gold);
+  
+    const successCount = [
+      gasCircle,
+      btcCircle,
+      goldCircle
+    ].filter(c => c === "🟢" || c === "🟡").length;
+  
+    const totalCoins = Math.round(Number(data.coins || 0));
+  
+    financeSummaryEl.innerHTML = `
+      <div class="finance-score-grid">
+        <div class="finance-score-emoji">⛽</div>
+        <div class="finance-score-emoji">₿</div>
+        <div class="finance-score-emoji">🥇</div>
+  
+        <div class="finance-score-circle">${gasCircle}</div>
+        <div class="finance-score-circle">${btcCircle}</div>
+        <div class="finance-score-circle">${goldCircle}</div>
+      </div>
+  
+      <div class="finance-score-coins">
+        🪙 ${totalCoins}
+      </div>
+  
+      <div class="finance-score-ratio">
+        ${successCount}/3
+      </div>
+    `;
+  }
+  
   async function loadScore() {
+    if (activeCategory === "finance") {
+      await loadFinanceScore();
+      return;
+    }
+    if (activeCategory === "questions") {
+      return;
+    }
+    
     if (!scoreListEl) return;
 
     const scoreRatioEl =
@@ -1952,6 +2217,9 @@
     }
   
     // event wiring
+    if (categoryFinanceBtn) categoryFinanceBtn.addEventListener("click", () => setCategory("finance"));
+    if (categoryQuestionsBtn) categoryFinanceBtn.addEventListener("click", () => setCategory("questions"));
+    if (categoryTempsBtn) categoryFinanceBtn.addEventListener("click", () => setCategory("temps"));    }
     if (modeDailyBtn) modeDailyBtn.addEventListener("click", () => setMode("daily"));
     if (modeHourlyBtn) modeHourlyBtn.addEventListener("click", () => setMode("hourly"));
     if (scoreFaqBtn) scoreFaqBtn.addEventListener("click", openScoreFaqModal);
