@@ -15,6 +15,7 @@ const FINANCE_ASSETS = [
   {
     key: "gas",
     label: "Gas",
+    emoji: "⛽",
     name: "(US average gas price)",
     inputId: "gasPriceInput",
     sliderId: "gasPriceSlider",
@@ -31,6 +32,7 @@ const FINANCE_ASSETS = [
   {
     key: "btc",
     label: "Bitcoin",
+    emoji: "₿",
     name: "(BTC price at 1PM)",
     inputId: "btcPriceInput",
     sliderId: "btcPriceSlider",
@@ -39,7 +41,7 @@ const FINANCE_ASSETS = [
     max: 200000,
     step: 200,
     sliderStep: 200,
-    placeholder: "100000",
+    placeholder: "100,000",
     formatValue: (v) => Number(v).toFixed(0),
     formatDisplay: (v) => `$${Number(v).toLocaleString()}`,
     yesterdayLabel: "Yesterday price",
@@ -47,7 +49,8 @@ const FINANCE_ASSETS = [
   {
     key: "gold",
     label: "Gold",
-    name: "(Gold price per oz at settlement)",
+    emoji: "🥇",
+    name: "(1OZ price at 2PM)",
     inputId: "goldPriceInput",
     sliderId: "goldPriceSlider",
     cacheKey: "finance:latest-gold",
@@ -55,7 +58,7 @@ const FINANCE_ASSETS = [
     max: 10000,
     step: 10,
     sliderStep: 10,
-    placeholder: "5000",
+    placeholder: "5,000",
     formatValue: (v) => Number(v).toFixed(0),
     formatDisplay: (v) => `$${Number(v).toLocaleString()}`,
     yesterdayLabel: "Yesterday price",
@@ -365,9 +368,11 @@ async function buildFinanceGrid() {
 
     cards.push(`
       <div class="asset-card asset-card--finance ${assetLocked ? "is-locked" : ""}">
+
         <div class="asset-card-header asset-card-header--finance">
-          <div class="asset-title asset-title--finance"> ${asset.label} </div>
-          <small class="asset-name asset-name--finance"> ${asset.name} </small>
+          <div class="asset-emoji">${asset.emoji}</div>
+          <div class="asset-title asset-title--finance">${asset.label}</div>
+          <small class="asset-name asset-name--finance">${asset.name}</small>
         </div>
 
         <div class="asset-card-content asset-card-content--finance">
