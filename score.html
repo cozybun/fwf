@@ -1202,9 +1202,9 @@
   }
 
   function setMode(mode) {
-    activeMode = mode === "hourly" ? "hourly" : "daily";
-    if (activeMode === "hourly") scoreMusicState = "ambient";
-    updateModeUI(activeMode);
+    activeTempsMode = mode === "hourly" ? "hourly" : "daily";
+    if (activeTempsMode === "hourly") scoreMusicState = "ambient";
+    updateModeUI(activeTempsMode);
     loadScore();
   }
 
@@ -1970,7 +1970,7 @@
       scoreRatioEl.style.display = "";
     };
 
-    const isHourly = activeMode === "hourly";
+    const isHourly = activeTempsMode === "hourly";
     const scoreTable = isHourly ? "hourly_scores" : "daily_scores";
 
     scoreListEl.classList.toggle("is-hourly", isHourly);
@@ -2196,7 +2196,7 @@
   });
 
   function getMusicState() {
-    return activeMode === "hourly" ? "ambient" : scoreMusicState;
+    return activeTempsMode === "hourly" ? "ambient" : scoreMusicState;
   }
 
   function playFallbackMusic() {
