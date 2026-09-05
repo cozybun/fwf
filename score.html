@@ -962,8 +962,8 @@
   const client = createClient(SUPABASE_URL, SUPABASE_PUB_KEY);
 
   function setCategory(category) {
+    console.log("category:", category);
     activeCategory = category;
-  
     modeFinanceBtn?.classList.toggle(
       "active",
       category === "finance"
