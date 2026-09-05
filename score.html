@@ -928,7 +928,7 @@
   const tempsModeWrap = document.getElementById("tempsModeWrap");
   
   let activeCategory = "temps";
-  let activeTempsMode = "daily";
+  let activeMode = "daily";
   const modeDailyBtn = document.getElementById("modeDailyBtn");
   const modeHourlyBtn = document.getElementById("modeHourlyBtn");
   const scoreDateEl = document.getElementById("scoreDate");
@@ -1202,9 +1202,9 @@
   }
 
   function setMode(mode) {
-    activeTempsMode = mode === "hourly" ? "hourly" : "daily";
-    if (activeTempsMode === "hourly") scoreMusicState = "ambient";
-    updateModeUI(activeTempsMode);
+    activeMode = mode === "hourly" ? "hourly" : "daily";
+    if (activeMode === "hourly") scoreMusicState = "ambient";
+    updateModeUI(activeMode);
     loadScore();
   }
 
@@ -1970,7 +1970,7 @@
       scoreRatioEl.style.display = "";
     };
 
-    const isHourly = activeTempsMode === "hourly";
+    const isHourly = activeMode === "hourly";
     const scoreTable = isHourly ? "hourly_scores" : "daily_scores";
 
     scoreListEl.classList.toggle("is-hourly", isHourly);
@@ -2196,7 +2196,7 @@
   });
 
   function getMusicState() {
-    return activeTempsMode === "hourly" ? "ambient" : scoreMusicState;
+    return activeMode === "hourly" ? "ambient" : scoreMusicState;
   }
 
   function playFallbackMusic() {
