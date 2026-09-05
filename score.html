@@ -943,7 +943,6 @@
   const scoreFaqClose = document.getElementById("scoreFaqClose");
 
   let currentUserId = null;
-  let activeMode = "temps";
   let totalCoins = 0;
   let totalMood = 0;
   let shareTimer = null;
@@ -965,9 +964,20 @@
   function setCategory(category) {
     activeCategory = category;
   
-    modeFinanceBtn?.classList.toggle("active", category === "finance");
-    modeQuestionsBtn?.classList.toggle("active", category === "questions");
-    modeTempsBtn?.classList.toggle("active", category === "temps");
+    modeFinanceBtn?.classList.toggle(
+      "active",
+      category === "finance"
+    );
+  
+    modeQuestionsBtn?.classList.toggle(
+      "active",
+      category === "questions"
+    );
+  
+    modeTempsBtn?.classList.toggle(
+      "active",
+      category === "temps"
+    );
   
     if (tempsModeWrap) {
       tempsModeWrap.style.display =
@@ -982,6 +992,15 @@
     if (financeSummaryEl) {
       financeSummaryEl.style.display =
         category === "finance" ? "" : "none";
+    }
+  
+    if (category === "finance") {
+      loadFinanceScore();
+      return;
+    }
+  
+    if (category === "questions") {
+      return;
     }
   
     loadScore();
@@ -2238,6 +2257,7 @@
     });
   
     setMode(getInitialMode());
+    setCategory("temps");
   }
   
   initApp().catch((err) => {
