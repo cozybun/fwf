@@ -1847,6 +1847,7 @@
   }
 
   async function loadFinanceScore() {
+    console.log("loadFinanceScore called");
     if (!financeSummaryEl) return;
   
     const { data, error } = await client
