@@ -792,21 +792,21 @@
     <div class="category-switch-wrap">
       <div id="categorySwitch" class="category-switch">
         <button
-          id="modeFinanceBtn"
+          id="categoryFinanceBtn"
           type="button"
           class="category-btn">
           Finance
         </button>
     
         <button
-          id="modeQuestionsBtn"
+          id="categoryQuestionsBtn"
           type="button"
           class="category-btn">
           Questions
         </button>
     
         <button
-          id="modeTempsBtn"
+          id="categoryTempsBtn"
           type="button"
           class="category-btn active">
           Temps
@@ -964,7 +964,7 @@
   function setCategory(category) {
     console.log("category:", category);
     activeCategory = category;
-    modeFinanceBtn?.classList.toggle(
+    categoryFinanceBtn?.classList.toggle(
       "active",
       category === "finance"
     );
@@ -974,7 +974,7 @@
       category === "questions"
     );
   
-    modeTempsBtn?.classList.toggle(
+    categoryTempsBtn?.classList.toggle(
       "active",
       category === "temps"
     );
