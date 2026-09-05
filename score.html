@@ -2225,12 +2225,6 @@
     if (scoreFaqBtn) scoreFaqBtn.addEventListener("click", openScoreFaqModal);
     if (scoreFaqClose) scoreFaqClose.addEventListener("click", closeScoreFaqModal);
   
-    const musicBtn = document.getElementById("musicToggle");
-    if (musicBtn) {
-      musicBtn.type = "button";
-      musicBtn.addEventListener("click", handleMusicClick);
-    }
-  
     if (scoreFaqModal) {
       scoreFaqModal.addEventListener("click", (e) => {
         if (e.target === scoreFaqModal) closeScoreFaqModal();
