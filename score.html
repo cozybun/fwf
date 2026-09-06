@@ -794,7 +794,7 @@
         <button
           id="modeFinanceBtn"
           type="button"
-          class="mode=switch-btn">
+          class="mode-switch-btn">
           Finance
         </button>
     
@@ -928,6 +928,7 @@
   const tempsModeWrap = document.getElementById("tempsModeWrap");
   
   let activeCategory = "temps";
+  let activeCategory = localStorage.getItem("scoreCategory") || "temps";
   let activeMode = "daily";
   const modeDailyBtn = document.getElementById("modeDailyBtn");
   const modeHourlyBtn = document.getElementById("modeHourlyBtn");
@@ -2258,7 +2259,7 @@
     });
   
     setMode(getInitialMode());
-    setCategory("temps");
+    setCategory(activeCategory);
   }
   
   initApp().catch((err) => {
