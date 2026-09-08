@@ -125,12 +125,14 @@
     }
 
     .finance-score-grid {
-      display: grid;
+      display: flex;
       grid-template-columns: repeat(3, auto);
       justify-content: center;
       column-gap: 28px;
       row-gap: 4px;
       text-align: center;
+      flex-direction: column;
+      gap: 12px;
     }
     
     .finance-score-emoji {
@@ -1189,7 +1191,7 @@
     }
   
     if (shareBtn) {  // show/hide controls & blocks depending on mode
-      shareBtn.style.display = isDaily ? "inline-block" : "ambient";
+      shareBtn.style.display = isDaily ? "inline-block" : "none";
     }
   
     if (cityCirclesEl) {
@@ -1930,25 +1932,40 @@
   
     financeSummaryEl.innerHTML = `
       <div class="finance-score-grid">
-        <div class="finance-score-emoji"> ⛽ </div>
-        <div class="finance-score-emoji"> ₿ </div>
-        <div class="finance-score-emoji"> 🥇 </div>
-    
-        <div class="finance-score-circle">${gasCircle}</div>
-        <div class="finance-score-circle">${btcCircle}</div>
-        <div class="finance-score-circle">${goldCircle}</div>
-      </div>
-    
-      <div class="finance-score-coins">
-        🪙 ${totalCoins}
-      </div>
-    
-      <div class="finance-score-ratio">
-        ${successCount}/3
-      </div>
-    
-      <button id="financeShareBtn"> Share </button>
+        <div class="finance-icons">
+  ⛽<br>
+  ₿<br>
+  🥇
+</div>
+
+<br>
+
+<div class="finance-results">
+  ${gasCircle}<br>
+  ${btcCircle}<br>
+  ${goldCircle}
+</div>
+
+<br><br>
+
+<div class="finance-total">
+  🪙 ${totalCoins}
+</div>
+
+<br><br>
+
+<div class="finance-success">
+  ${successCount}/3
+</div>
+
+<br><br>
+
+<div id="financeShareContainer"></div>
     `;
+    const shareContainer = document.getElementById("financeShareContainer");
+    if (shareContainer && shareBtn) {
+      shareContainer.appendChild(shareBtn);
+    }
   }
   
   async function loadScore() {
