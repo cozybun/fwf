@@ -125,14 +125,12 @@
     }
 
     .finance-score-grid {
-      display: flex;
+      display: grid;
       grid-template-columns: repeat(3, auto);
       justify-content: center;
       column-gap: 28px;
       row-gap: 4px;
       text-align: center;
-      flex-direction: column;
-      gap: 12px;
     }
     
     .finance-score-emoji {
@@ -1917,7 +1915,8 @@
       if (c >= 10) return "🟡";
       return "🔴";
     }
-  
+
+    console.log("finance data", data);
     const gasCircle = financeCircle(data.coins_gas);
     const btcCircle = financeCircle(data.coins_btc);
     const goldCircle = financeCircle(data.coins_gold);
@@ -1932,18 +1931,13 @@
   
     financeSummaryEl.innerHTML = `
       <div class="finance-score-grid">
-        <div class="finance-icons">
-  ⛽<br>
-  ₿<br>
-  🥇
-</div>
+  <div>⛽</div>
+  <div>₿</div>
+  <div>🥇</div>
 
-<br>
-
-<div class="finance-results">
-  ${gasCircle}<br>
-  ${btcCircle}<br>
-  ${goldCircle}
+  <div>${gasCircle}</div>
+  <div>${btcCircle}</div>
+  <div>${goldCircle}</div>
 </div>
 
 <br><br>
