@@ -1994,20 +1994,25 @@
         <div>${goldCircle}</div>
       </div>
       
-      <br><br>
+      <br>
       
       <div class="finance-total">
         🪙 ${totalCoins}
       </div>
       
-      <br><br>
+      <br>
       
       <div class="finance-success">
         <strong>${successCount}/3</strong>
       </div>
       
-      <br><br>
+      <br>
+      <div id="financeShareContainer"></div>
     `;
+    const shareContainer = document.getElementById("financeShareContainer");
+    if (shareContainer && shareBtn) {
+      shareContainer.appendChild(shareBtn);
+    }
   }
   
   async function loadScore() {
