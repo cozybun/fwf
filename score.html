@@ -126,10 +126,11 @@
 
     .finance-score-grid {
       display: grid;
+      font-size: 1.25rem;
       grid-template-columns: repeat(3, auto);
       justify-content: center;
       column-gap: 28px;
-      row-gap: 10px;
+      row-gap: 6px;
       text-align: center;
     }
     
@@ -1853,6 +1854,44 @@
     };
   }
 
+  function buildFinanceShare(data) {
+    if (!shareBtn) return;
+  
+    const gasCircle = financeCircle(data.coins_gas);
+    const btcCircle = financeCircle(data.coins_btc);
+    const goldCircle = financeCircle(data.coins_gold);
+  
+    const successCount = [
+      gasCircle,
+      btcCircle,
+      goldCircle
+    ].filter(c => c === "🟢" || c === "🟡").length;
+  
+    const totalCoins = Number(data.coins || 0);
+  
+    const text = [
+      "Forecast With Friends 📈",
+      "",
+      `${formatShareDate(todayInPT)}    ${successCount}/3`,
+      "",
+      "⛽ ₿ 🥇",
+      `${gasCircle} ${btcCircle} ${goldCircle}`,
+      "",
+      `🪙 ${totalCoins}`
+    ].join("\n");
+  
+    shareBtn.onclick = async () => {
+      const ok = await copyText(text);
+  
+      if (typeof showShareStatus === "function") {
+        showShareStatus(
+          ok ? "✅ Score copied!" : "⚠️ Clipboard blocked.",
+          ok ? "ok" : "error"
+        );
+      }
+    };
+  }
+
   async function loadFinanceScore() {
     console.log("loadFinanceScore called");
     if (scoreListEl) { scoreListEl.innerHTML = ""; }
@@ -1905,7 +1944,7 @@
     
         <div class="finance-score-ratio"> 0/3 </div>
       `;
-    
+      buildFinanceShare(data);
       return;
     }
   
