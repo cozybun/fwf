@@ -1855,6 +1855,7 @@
 
   async function loadFinanceScore() {
     console.log("loadFinanceScore called");
+    if (scoreListEl) { scoreListEl.innerHTML = ""; }
     if (!financeSummaryEl) return;
     if (scoreDateEl) {
       scoreDateEl.textContent = dateLabelFromYMD(todayInPT);
@@ -1866,7 +1867,9 @@
     const { data, error } = await client
       .from("finance_scores")
       .select("*")
-      .eq("user_id", currentUserId);
+      .eq("user_id", currentUserId)
+      .eq("date", todayInPT)
+      .maybeSingle();
     
     console.log("finance rows", data);
   
@@ -1943,35 +1946,29 @@
   
     financeSummaryEl.innerHTML = `
       <div class="finance-score-grid">
-  <div>⛽</div>
-  <div>₿</div>
-  <div>🥇</div>
-
-  <div>${gasCircle}</div>
-  <div>${btcCircle}</div>
-  <div>${goldCircle}</div>
-</div>
-
-<br><br>
-
-<div class="finance-total">
-  🪙 ${totalCoins}
-</div>
-
-<br><br>
-
-<div class="finance-success">
-  <strong>${successCount}/3</strong>
-</div>
-
-<br><br>
-
-<div id="financeShareContainer"></div>
+        <div>⛽</div>
+        <div>₿</div>
+        <div>🥇</div>
+      
+        <div>${gasCircle}</div>
+        <div>${btcCircle}</div>
+        <div>${goldCircle}</div>
+      </div>
+      
+      <br><br>
+      
+      <div class="finance-total">
+        🪙 ${totalCoins}
+      </div>
+      
+      <br><br>
+      
+      <div class="finance-success">
+        <strong>${successCount}/3</strong>
+      </div>
+      
+      <br><br>
     `;
-    const shareContainer = document.getElementById("financeShareContainer");
-    if (shareContainer && shareBtn) {
-      shareContainer.appendChild(shareBtn);
-    }
   }
   
   async function loadScore() {
