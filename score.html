@@ -129,7 +129,7 @@
       grid-template-columns: repeat(3, auto);
       justify-content: center;
       column-gap: 28px;
-      row-gap: 4px;
+      row-gap: 10px;
       text-align: center;
     }
     
@@ -1928,6 +1928,18 @@
     ].filter(c => c === "🟢" || c === "🟡").length;
   
     const totalCoins = Math.round(Number(data.coins || 0));
+
+    console.log("coins_gas", data.coins_gas);
+    console.log("coins_btc", data.coins_btc);
+    console.log("coins_gold", data.coins_gold);
+    console.log("total coins", data.coins);
+    console.log({
+      gasCircle,
+      btcCircle,
+      goldCircle,
+      successCount,
+      totalCoins
+    });
   
     financeSummaryEl.innerHTML = `
       <div class="finance-score-grid">
@@ -1949,7 +1961,7 @@
 <br><br>
 
 <div class="finance-success">
-  ${successCount}/3
+  <strong>${successCount}/3</strong>
 </div>
 
 <br><br>
