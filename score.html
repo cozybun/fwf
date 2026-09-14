@@ -851,23 +851,16 @@
   </div>
 
   <div id="tempsSummary" class="score-summary">
-    <div id="cityCircles">⚪ ⚪ ⚪</div>
-  
-    <div id="scoreRatio"
-         class="score-ratio"
-         aria-live="polite">
-    </div>
-  
-    <button id="shareBtn">Share</button>
-  
-    <div id="shareStatus"
-         aria-live="polite">
-    </div>
+    <div id="cityCircles"> ⚪ ⚪ ⚪ </div>
+
+    <div id="scoreRatio" class="score-ratio"></div>
   </div>
-  
-  <div id="financeSummary"
-       class="finance-summary"
-       style="display:none;">
+
+  <div id="financeSummary"></div>
+
+  <div id="shareArea">
+    <button id="shareBtn"> Share </button>
+    <div id="shareStatus" aria-live="polite"></div>
   </div>
   
   <div id="scoreErrorBanner"></div>
@@ -1704,6 +1697,12 @@
     }
   }
 
+  const formatShareDate = (label) => {
+    const s = String(label || "").trim();
+    const m = s.match(/^([A-Za-z]{3,9})\s+(\d{1,2})$/);
+    return m ? `${m[2]} ${m[1]}` : s;
+  };
+
   function buildShare(scores = [], totalCoins = 0, totalMood = 0, currentStreak = 0, shareSummary = null) {
     if (!shareBtn) return;
   
@@ -1715,12 +1714,6 @@
     const formatSigned = (v) => {
       const n = toNumber(v, 0);
       return n > 0 ? `+${n}` : `${n}`;
-    };
-  
-    const formatShareDate = (label) => {
-      const s = String(label || "").trim();
-      const m = s.match(/^([A-Za-z]{3,9})\s+(\d{1,2})$/);
-      return m ? `${m[2]} ${m[1]}` : s;
     };
   
     const rows = Array.isArray(scores) ? scores : [];
@@ -1847,9 +1840,7 @@
   
     shareBtn.onclick = async () => {
       const ok = await copyText(centeredText);
-      if (typeof showShareStatus === "function") {
-        showShareStatus(ok ? "✅ Score copied!" : "⚠️ Clipboard blocked here. Use text box below.", ok ? "ok" : "error");
-      }
+      showShareStatus(ok ? "✅ Score copied!" : "⚠️ Clipboard blocked here. Use text box below.", ok ? "ok" : "error");
       if (!ok) showMonospaceFallback(centeredText);
     };
   }
@@ -1882,13 +1873,10 @@
   
     shareBtn.onclick = async () => {
       const ok = await copyText(text);
-  
-      if (typeof showShareStatus === "function") {
-        showShareStatus(
-          ok ? "✅ Score copied!" : "⚠️ Clipboard blocked.",
-          ok ? "ok" : "error"
-        );
-      }
+      showShareStatus(
+        ok ? "✅ Score copied!" : "⚠️ Clipboard blocked.",
+        ok ? "ok" : "error"
+      );
     };
   }
 
@@ -2007,12 +1995,7 @@
       </div>
       
       <br>
-      <div id="financeShareContainer"></div>
     `;
-    const shareContainer = document.getElementById("financeShareContainer");
-    if (shareContainer && shareBtn) {
-      shareContainer.appendChild(shareBtn);
-    }
   }
   
   async function loadScore() {
