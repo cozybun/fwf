@@ -39,7 +39,7 @@
     #question-progress {
       color: var(--subtle);
       font-weight: 600;
-      margin-bottom: 1.25rem;
+      margin-bottom: 1.5rem;
     }
 
     #question-card {
@@ -147,13 +147,50 @@
     }
     
     .questions-date {
-      margin-top: 0.4rem;
-      font-size: 1.05rem;
+      margin-top: 0.5rem;
+      font-size: 1.3rem;
+      font-weight: 700;
     }
     
     .date-info {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
       margin-left: 0.25rem;
+      font-size: 1rem;
+      font-weight: 400;
       cursor: help;
+    }
+    
+    .date-tooltip {
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 8px);
+      transform: translateX(-50%);
+    
+      width: max-content;
+      max-width: 220px;
+      padding: 0.5rem 0.7rem;
+    
+      background: #222;
+      color: #fff;
+      border-radius: 7px;
+    
+      font-size: 0.8rem;
+      font-weight: 400;
+      line-height: 1.3;
+    
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    
+      transition: opacity 0.15s ease;
+    }
+    
+    .date-info:hover .date-tooltip,
+    .date-info:focus .date-tooltip {
+      opacity: 1;
+      visibility: visible;
     }
     
     .date-note {
@@ -174,27 +211,22 @@
     </button>
     
     <div class="questions-date">
-      <strong id="questions-date-label"> 15 Sep 2026 </strong>
-      <span
-        class="date-info"
-        title="Dates shown in Pacific Time (PT)"
-        aria-label="Dates shown in Pacific Time"
-      >
+      <strong id="questions-date-label"> 15 Sept 2026 </strong>
+      <span class="date-info" tabindex="0" aria-label="Date information">
         ⓘ
+        <span class="date-tooltip">
+          Dates shown in Pacific Time (PT)
+        </span>
       </span>
-    </div>
-    
-    <div class="date-note">
-      Dates shown in Pacific Time (PT)
-    </div>
-
-    <div id="question-progress">
-      1 / 2
     </div>
 
     <section id="question-card">
+      <div id="question-progress">
+        1 / 2
+      </div>
+      
       <h2 id="question-text">
-        How many coins will I earn?
+        How many coins will I earn today?
       </h2>
 
       <div id="answer-area">
