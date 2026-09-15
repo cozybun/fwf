@@ -1932,7 +1932,8 @@
     
         <div class="finance-score-ratio"> 0/3 </div>
       `;
-      buildFinanceShare(data);
+      setShareEnabled(false, "Finance score not ready yet.");
+      shareBtn.onclick = null;
       return;
     }
   
@@ -1950,6 +1951,9 @@
     const gasCircle = financeCircle(data.coins_gas);
     const btcCircle = financeCircle(data.coins_btc);
     const goldCircle = financeCircle(data.coins_gold);
+
+    const allScored = data.coins_gas != null && data.coins_btc != null && data.coins_gold != null;
+    setShareEnabled(allScored, "Finance score shareable after all assets are scored.");
   
     const successCount = [
       gasCircle,
@@ -1996,6 +2000,7 @@
       
       <br>
     `;
+    buildFinanceShare(data);
   }
   
   async function loadScore() {
