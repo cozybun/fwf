@@ -155,8 +155,8 @@ function renderComplete() {
   answerAreaEl.style.display = "";
   answerAreaEl.innerHTML = `
     <div>
-      <h2>All forecasts saved ✓</h2>
-      <p>You answered all of today's questions.</p>
+      <h2> All answers saved ✅ </h2>
+      <p> I answered all of today's questions </p>
 
       <div class="completion-actions">
         <button
