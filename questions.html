@@ -43,11 +43,16 @@
     }
 
     #question-card {
-      max-width: 520px;
+      width: min(92vw, 380px);
+      min-height: 360px;
       margin: 0 auto;
-      padding: 1.5rem;
+      padding: 2rem 1.5rem;
       border: 2px solid var(--brand-purple);
       border-radius: 16px;
+    
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     #question-text {
@@ -87,11 +92,12 @@
     }
     
     .numeric-answer {
-      width: 160px;
-      padding: 0.85rem;
+      width: 150px;
+      padding: 0.8rem 0.8rem;
       border: 2px solid var(--brand-purple);
       border-radius: 10px;
       font: inherit;
+      font-size: 1.1rem;
       text-align: center;
     }
     
