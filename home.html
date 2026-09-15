@@ -14,7 +14,9 @@
       --bad: #b91c1c;
       --subtle: #64748b;
       --brand-green: #228B22;
-      --brand-green-dark: #006400;
+      --green-dark: #006400;
+      --brand-purple: #BF40BF;
+      --purple-hover: #A63BA6; 
     }
 
     * { box-sizing: border-box; }
@@ -309,36 +311,58 @@
       white-space: nowrap;
     }
 
-    .temps-button-wrap {
+    .category-buttons {
       margin: 1rem auto 0.2rem;
-      text-align: center;
-    }
-
-    #temps-button {
-      display: block;
-      margin: 0 auto;
-      width: min(92vw, 220px);
+      display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
+      gap: 0.75rem;
+    }
+    
+    .category-button {
+      display: block;
+      width: min(92vw, 220px);
+      text-align: center;
       text-decoration: none;
       font-weight: 600;
       font-size: 1.2rem;
       color: #fff;
-      background: var(--brand-green);
       border-radius: 10px;
       padding: 0.85rem 1.2rem;
       border: 0;
       line-height: 1;
-      box-shadow: 0 2px 10px rgba(16, 185, 129, 0.35);
       cursor: pointer;
     }
-
-    #temps-button:hover {
-      background: var(--brand-green-dark);
+    
+    .category-button:active {
+      transform: scale(0.98);
     }
 
-    #temps-button:active {
-      transform: scale(0.98);
+    #temps-button {
+      background: brand-blue;
+      box-shadow: 0 2px 10px rgba(79, 124, 172, 0.30);
+    }
+    
+    #temps-button:hover {
+      background: blue-dark;
+    }
+    
+    #finance-button {
+      background: brand-green;
+      box-shadow: 0 2px 10px rgba(34, 139, 34, 0.30);
+    }
+    
+    #finance-button:hover {
+      background: green-dark;
+    }
+    
+    #questions-button {
+      background: brand-purple;
+      box-shadow: 0 2px 10px rgba(124, 92, 191, 0.30);
+    }
+    
+    #questions-button:hover {
+      background: purple-dark;
     }
 
     @media (max-width: 420px) {
@@ -401,8 +425,33 @@
       <div id="restore-status" class="muted" aria-live="polite"></div>
     </div>
     
-    <div class="temps-button-wrap">
-      <a id="temps-button" href="temps" aria-label="Go to Temps"> Go to Temps </a>
+    <div class="category-buttons">
+      <a
+        id="temps-button"
+        class="category-button"
+        href="temps"
+        aria-label="Go to Temps"
+      >
+        Temps 🌞
+      </a>
+    
+      <a
+        id="finance-button"
+        class="category-button"
+        href="finance"
+        aria-label="Go to Finance"
+      >
+        Finance 📈
+      </a>
+    
+      <a
+        id="questions-button"
+        class="category-button"
+        href="questions"
+        aria-label="Go to Questions"
+      >
+        Questions 🧠
+      </a>
     </div>
   </div>
 
