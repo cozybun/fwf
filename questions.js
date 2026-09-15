@@ -2,9 +2,9 @@ const questions = [
   {
     id: 1,
     type: "numeric",
-    text: "How many coins will I earn?",
+    text: "How many coins will I earn today?",
     prefix: "🪙",
-    placeholder: "Enter coins"
+    placeholder: "Enter #"
   },
   {
     id: 2,
