@@ -107,6 +107,8 @@
     }
 
     #save-answer {
+      align-self: center;
+      width: 130px;
       margin-top: 1.25rem;
       padding: 0.85rem 1.4rem;
       border: 0;
@@ -132,16 +134,62 @@
       margin-top: 0.8rem;
       color: var(--subtle);
     }
+
+    #how-to-play {
+      margin: 0.5rem auto 1rem;
+      padding: 0.55rem 1rem;
+      border: 2px solid var(--brand-purple);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--brand-purple);
+      font-weight: 700;
+      cursor: pointer;
+    }
+    
+    .questions-date {
+      margin-top: 0.4rem;
+      font-size: 1.05rem;
+    }
+    
+    .date-info {
+      margin-left: 0.25rem;
+      cursor: help;
+    }
+    
+    .date-note {
+      margin-top: 0.2rem;
+      margin-bottom: 1rem;
+      color: var(--subtle);
+      font-size: 0.85rem;
+    }
   </style>
 </head>
 
 <body>
   <main class="page">
 
-    <h1> Questions 🧠 </h1>
+    <h1> My Questions </h1>    
+    <button id="how-to-play" type="button">
+      How To Play
+    </button>
+    
+    <div class="questions-date">
+      <strong id="questions-date-label"> 15 Sep 2026 </strong>
+      <span
+        class="date-info"
+        title="Dates shown in Pacific Time (PT)"
+        aria-label="Dates shown in Pacific Time"
+      >
+        ⓘ
+      </span>
+    </div>
+    
+    <div class="date-note">
+      Dates shown in Pacific Time (PT)
+    </div>
 
     <div id="question-progress">
-      1 / 1
+      1 / 2
     </div>
 
     <section id="question-card">
