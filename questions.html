@@ -163,14 +163,22 @@
     }
 
     #save-answer:hover {
-      background: var(--brand-purple-dark);
+      background: var(--purple-dark);
     }
 
-    #save-answer:disabled {
+    #save-answer:hover:not(:disabled) {
+      background: var(--purple-dark);
+      color: #fff;
+    }
+
+    #save-answer:disabled,
+    #save-answer:disabled:hover {
+      background: var(--brand-purple);
+      color: #fff;
       opacity: 0.5;
       cursor: not-allowed;
     }
-
+    
     #question-status {
       min-height: 1.2rem;
       margin-top: 0.8rem;
