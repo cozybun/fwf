@@ -1,1 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title> Questions | Forecast With Friends </title>
 
+  <style>
+    :root {
+      --brand-purple: #7c5cbf;
+      --purple-dark: #6849a8;
+      --text: #000000;
+      --subtle: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 1rem;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background: #fff;
+    }
+
+    .page {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 0.4rem;
+    }
+
+    #question-progress {
+      color: var(--subtle);
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+    }
+
+    #question-card {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 1.5rem;
+      border: 2px solid var(--brand-purple);
+      border-radius: 16px;
+    }
+
+    #question-text {
+      margin: 0 0 1.5rem;
+      font-size: 1.3rem;
+      line-height: 1.4;
+    }
+
+    #answer-area {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+
+    .answer-option {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      border: 2px solid var(--brand-purple);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--text);
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .answer-option.selected {
+      background: var(--brand-purple);
+      color: #fff;
+    }
+
+    #save-answer {
+      margin-top: 1.25rem;
+      padding: 0.85rem 1.4rem;
+      border: 0;
+      border-radius: 10px;
+      background: var(--brand-purple);
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    #save-answer:hover {
+      background: var(--brand-purple-dark);
+    }
+
+    #save-answer:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    #question-status {
+      min-height: 1.2rem;
+      margin-top: 0.8rem;
+      color: var(--subtle);
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+
+    <h1> Questions 🧠 </h1>
+
+    <div id="question-progress">
+      1 / 1
+    </div>
+
+    <section id="question-card">
+      <h2 id="question-text">
+        How many coins will I earn?
+      </h2>
+
+      <div id="answer-area">
+      </div>
+
+      <button id="save-answer" type="button" disabled>
+        Save
+      </button>
+
+      <div id="question-status" aria-live="polite"></div>
+    </section>
+
+  </main>
+
+  <script src="questions.js"></script>
+</body>
+</html>
