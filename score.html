@@ -157,6 +157,30 @@
       font-weight: 700;
       margin-top: 0.5rem;
     }
+
+    .finance-detail-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      text-align: center;
+      margin: 0 auto 28px;
+    }
+
+    .finance-detail-label {
+      font-weight: 700;
+      margin-top: 10px;
+    }
+
+    .finance-detail-coins {
+      font-weight: 700;
+      margin-top: 12px;
+    }
+
+    .finance-total {
+      font-weight: 700;
+      font-size: 1.35rem;
+      text-align: center;
+    }
     
     .score-summary {
       display: grid;
@@ -1880,6 +1904,17 @@
     };
   }
 
+  function formatFinanceValue(value, asset) {
+    if (value == null) return "—";
+
+    const n = Number(value);
+    if (asset === "gas") {
+      return `$${n.toFixed(3)}`;
+    }
+
+    return `$${n.toLocaleString("en-US")}`;
+  }
+
   async function loadFinanceScore() {
     console.log("loadFinanceScore called");
     if (scoreListEl) { scoreListEl.innerHTML = ""; }
@@ -1976,30 +2011,77 @@
     });
   
     financeSummaryEl.innerHTML = `
+      <div class="finance-detail-grid">
+    
+        <div>
+          <strong>⛽ Gas</strong>
+          <div class="finance-detail-label">Forecast</div>
+          <div>${formatFinanceValue(data.forecast_gas, "gas")}</div>
+    
+          <div class="finance-detail-label">Actual</div>
+          <div>${formatFinanceValue(data.actual_gas, "gas")}</div>
+    
+          <div class="finance-detail-label">Error</div>
+          <div>${formatFinanceValue(data.error_gas, "gas")}</div>
+    
+          <div class="finance-detail-coins">🪙 ${data.coins_gas ?? 0}</div>
+        </div>
+    
+        <div>
+          <strong>₿ Bitcoin</strong>
+          <div class="finance-detail-label">Forecast</div>
+          <div>${formatFinanceValue(data.forecast_btc, "btc")}</div>
+    
+          <div class="finance-detail-label">Actual</div>
+          <div>${formatFinanceValue(data.actual_btc, "btc")}</div>
+    
+          <div class="finance-detail-label">Error</div>
+          <div>${formatFinanceValue(data.error_btc, "btc")}</div>
+    
+          <div class="finance-detail-coins">🪙 ${data.coins_btc ?? 0}</div>
+        </div>
+    
+        <div>
+          <strong>🥇 Gold</strong>
+          <div class="finance-detail-label">Forecast</div>
+          <div>${formatFinanceValue(data.forecast_gold, "gold")}</div>
+    
+          <div class="finance-detail-label">Actual</div>
+          <div>${formatFinanceValue(data.actual_gold, "gold")}</div>
+    
+          <div class="finance-detail-label">Error</div>
+          <div>${formatFinanceValue(data.error_gold, "gold")}</div>
+    
+          <div class="finance-detail-coins">🪙 ${data.coins_gold ?? 0}</div>
+        </div>
+    
+      </div>
+    
       <div class="finance-score-grid">
         <div>⛽</div>
         <div>₿</div>
         <div>🥇</div>
-      
+    
         <div>${gasCircle}</div>
         <div>${btcCircle}</div>
         <div>${goldCircle}</div>
       </div>
-      
+    
       <br>
-      
+    
       <div class="finance-total">
-        🪙 ${totalCoins}
+        🪙 <strong id="financeCoinTotal">0</strong>
       </div>
-      
+    
       <br>
-      
+    
       <div class="finance-success">
         <strong>${successCount}/3</strong>
       </div>
-      
+    
       <br>
     `;
+    animateNumber("financeCoinTotal", totalCoins);
     buildFinanceShare(data);
   }
   
