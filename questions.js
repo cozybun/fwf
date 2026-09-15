@@ -15,6 +15,15 @@ const questions = [
       "Finance 📈"
     ]
   }
+  /* {
+    id: 3,
+    type: "multiple",
+    text: "Will Snake or Wolf earn more coins?",
+    options: [
+      "Snake 🐍",
+      "Wolf 🐺"
+    ]
+  } */
 ];
 
 const questionCardEl = document.getElementById("question-card");
@@ -156,7 +165,7 @@ function renderComplete() {
   answerAreaEl.innerHTML = `
     <div>
       <h2> All answers saved ✅ </h2>
-      <p> I answered all of today's questions </p>
+      <p> You answered today's questions! </p>
 
       <div class="completion-actions">
         <button
