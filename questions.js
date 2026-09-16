@@ -281,17 +281,68 @@ async function saveCoinsAnswer(value) {
   return true;
 }
 
+async function saveToughestCategory(value) {
+  if (!currentUserId) {
+    console.error("Cannot save: no current user.");
+    return false;
+  }
+
+  const categoryMap = {
+    "Temps 🌞": "temps",
+    "Finance 📈": "finance"
+  };
+
+  const databaseValue = categoryMap[value];
+
+  if (!databaseValue) {
+    console.error("Invalid toughest category:", value);
+    return false;
+  }
+
+  const { error } = await client
+    .from("questions_answers")
+    .upsert(
+      {
+        user_id: currentUserId,
+        date: todayInPT,
+        toughest_category: databaseValue,
+        updated_at: new Date().toISOString()
+      },
+      {
+        onConflict: "user_id,date"
+      }
+    );
+
+  if (error) {
+    console.error("Could not save toughest category:", error);
+    return false;
+  }
+
+  console.log("Toughest category saved.");
+  return true;
+}
+
 saveAnswerBtn.addEventListener("click", async () => {
   if (selectedAnswer == null) return;
 
   const question = questions[currentQuestionIndex];
 
-  // Q1: save coins answer to Supabase
-  if (question.id === 1) {
+  if (question.id === 1) {  // save coins answer to db
     saveAnswerBtn.disabled = true;
 
     const saved = await saveCoinsAnswer(selectedAnswer);
 
+    if (!saved) {
+      saveAnswerBtn.disabled = false;
+      questionStatusEl.textContent = "Could not save. Try again.";
+      return;
+    }
+  }
+  if (question.id === 2) {  // save toughest category answer to db
+    saveAnswerBtn.disabled = true;
+  
+    const saved = await saveToughestCategory(selectedAnswer);
+  
     if (!saved) {
       saveAnswerBtn.disabled = false;
       questionStatusEl.textContent = "Could not save. Try again.";
