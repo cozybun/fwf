@@ -252,13 +252,54 @@ function startEditing() {
   }, 220);
 }
 
-saveAnswerBtn.addEventListener("click", () => {
+async function saveCoinsAnswer(value) {
+  if (!currentUserId) {
+    console.error("Cannot save: no current user.");
+    return false;
+  }
+
+  const { error } = await client
+    .from("questions_answers")
+    .upsert(
+      {
+        user_id: currentUserId,
+        date: todayInPT,
+        coins_earned: value,
+        updated_at: new Date().toISOString()
+      },
+      {
+        onConflict: "user_id,date"
+      }
+    );
+
+  if (error) {
+    console.error("Could not save coins answer:", error);
+    return false;
+  }
+
+  console.log("Coins answer saved");
+  return true;
+}
+
+saveAnswerBtn.addEventListener("click", async () => {
   if (selectedAnswer == null) return;
 
   const question = questions[currentQuestionIndex];
 
-  savedAnswers[question.id] = selectedAnswer;
+  // Q1: save coins answer to Supabase
+  if (question.id === 1) {
+    saveAnswerBtn.disabled = true;
 
+    const saved = await saveCoinsAnswer(selectedAnswer);
+
+    if (!saved) {
+      saveAnswerBtn.disabled = false;
+      questionStatusEl.textContent = "Could not save. Try again.";
+      return;
+    }
+  }
+
+  savedAnswers[question.id] = selectedAnswer;  // temporary local storage still handles the editing UI
   transitionToNext();
 });
 
