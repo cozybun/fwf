@@ -44,6 +44,18 @@ const todayInPT = new Intl.DateTimeFormat("en-CA", {
   day: "2-digit"
 }).format(new Date());
 
+const questionsDateLabelEl =
+  document.getElementById("questions-date-label");
+
+const displayDateInPT = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "America/Los_Angeles",
+  day: "numeric",
+  month: "short",
+  year: "numeric"
+}).format(new Date());
+
+questionsDateLabelEl.textContent = displayDateInPT;
+
 let currentUserId = null;
 
 async function loadCurrentUser() {
@@ -395,6 +407,16 @@ saveAnswerBtn.addEventListener("click", async () => {
 async function initQuestions() {
   await loadCurrentUser();
   await loadSavedAnswers();
-  renderQuestion();
+
+  const allAnswered = questions.every(
+    (question) => savedAnswers[question.id] != null
+  );
+
+  if (allAnswered) {
+    renderComplete();
+  } else {
+    renderQuestion();
+  }
 }
+
 initQuestions();
