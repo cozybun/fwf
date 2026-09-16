@@ -116,20 +116,23 @@
       padding: 0.85rem 1rem;
       border: 2px solid var(--brand-purple);
       border-radius: 10px;
-      background: var(--brand-purple);
-      color: #fff;
+      background: #fff;
+      color: var(--brand-purple);
       font-size: 1rem;
+      font-weight: 700;
       cursor: pointer;
     }
     
     .answer-option:hover {
-      background: var(--purple-dark);
-      border-color: var(--purple-dark);
+      background: #f7f3ff;
+      border-color: var(--brand-purple);
+      color: var(--brand-purple);
     }
     
-    .answer-option.selected {
-      background: var(--purple-dark);
-      border-color: var(--purple-dark);
+    .answer-option.selected,
+    .answer-option.selected:hover {
+      background: var(--brand-purple);
+      border-color: var(--brand-purple);
       color: #fff;
     }
 
