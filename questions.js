@@ -26,6 +26,13 @@ const questions = [
   } */
 ];
 
+const todayInPT = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "America/Los_Angeles",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit"
+}).format(new Date());
+
 const questionCardEl = document.getElementById("question-card");
 const questionTextEl = document.getElementById("question-text");
 const answerAreaEl = document.getElementById("answer-area");
