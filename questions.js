@@ -33,6 +33,29 @@ const todayInPT = new Intl.DateTimeFormat("en-CA", {
   day: "2-digit"
 }).format(new Date());
 
+let currentUserId = null;
+
+async function loadCurrentUser() {
+  const {
+    data: { user },
+    error
+  } = await client.auth.getUser();
+
+  if (error) {
+    console.error("Could not get current user:", error);
+    return;
+  }
+
+  if (!user) {
+    console.error("No current user found.");
+    return;
+  }
+
+  currentUserId = user.id;
+
+  console.log("Questions user:", currentUserId);
+}
+
 const questionCardEl = document.getElementById("question-card");
 const questionTextEl = document.getElementById("question-text");
 const answerAreaEl = document.getElementById("answer-area");
@@ -228,4 +251,5 @@ saveAnswerBtn.addEventListener("click", () => {
   transitionToNext();
 });
 
+loadCurrentUser();
 renderQuestion();
