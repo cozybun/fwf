@@ -58,13 +58,51 @@ async function loadCurrentUser() {
   }
 
   if (!user) {
-    console.error("No current user found.");
+    console.error("No current user found");
     return;
   }
 
   currentUserId = user.id;
 
   console.log("Questions user found:", !!currentUserId);
+}
+
+async function loadSavedAnswers() {
+  if (!currentUserId) {
+    console.error("Cannot load answers: no current user");
+    return;
+  }
+
+  const { data, error } = await client
+    .from("questions_answers")
+    .select("coins_earned, toughest_category")
+    .eq("user_id", currentUserId)
+    .eq("date", todayInPT)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Could not load saved answers:", error);
+    return;
+  }
+
+  if (!data) {
+    return;
+  }
+
+  if (data.coins_earned != null) {
+    savedAnswers[1] = data.coins_earned;
+  }
+
+  const categoryMap = {
+    temps: "Temps 🌞",
+    finance: "Finance 📈"
+  };
+
+  if (data.toughest_category != null) {
+    savedAnswers[2] = categoryMap[data.toughest_category];
+  }
+
+  console.log("Saved question answers loaded");
 }
 
 const questionCardEl = document.getElementById("question-card");
@@ -354,5 +392,9 @@ saveAnswerBtn.addEventListener("click", async () => {
   transitionToNext();
 });
 
-loadCurrentUser();
-renderQuestion();
+async function initQuestions() {
+  await loadCurrentUser();
+  await loadSavedAnswers();
+  renderQuestion();
+}
+initQuestions();
