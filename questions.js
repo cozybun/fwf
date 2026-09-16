@@ -64,7 +64,7 @@ async function loadCurrentUser() {
 
   currentUserId = user.id;
 
-  console.log("Questions user:", currentUserId);
+  console.log("Questions user found:", !!currentUserId);
 }
 
 const questionCardEl = document.getElementById("question-card");
