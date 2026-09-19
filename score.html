@@ -194,6 +194,39 @@
       font-size: 1.5rem;
       text-align: center;
     }
+
+    .questions-score {
+      width: 100%;
+      max-width: 430px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    
+    .questions-score-item {
+      margin-bottom: 2rem;
+    }
+    
+    .questions-score-question {
+      margin-bottom: 0.75rem;
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+    
+    .questions-score-item > div:not(.questions-score-question):not(.questions-score-earned) {
+      line-height: 1.5;
+    }
+    
+    .questions-score-earned {
+      margin-top: 0.75rem;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    
+    .questions-score-total {
+      margin-top: 2.25rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
     
     .score-summary {
       display: grid;
@@ -725,6 +758,7 @@
       .menu-btn {
         font-size: 14px;
         padding: 0 6px;
+        text-decoration: none;
       }
       
       button {
