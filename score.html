@@ -2016,8 +2016,67 @@
     console.log("Questions answer:", answer);
     console.log("Questions actual:", actual);
     
+    const categoryLabel = (value) => {
+      if (value === "temps") return "Temps 🌞";
+      if (value === "finance") return "Finance 📈";
+      return "—";
+    };
+    
+    const coinsEarnedIcon =
+      data.coins_earned_correct === true ? "✅" :
+      data.coins_earned_correct === false ? "❌" :
+      "➖";
+    
+    const toughestCategoryIcon =
+      data.toughest_category_correct === true ? "✅" :
+      data.toughest_category_correct === false ? "❌" :
+      "➖";
+    
+    const toughestActual =
+      actual?.toughest_category == null
+        ? "Tie"
+        : categoryLabel(actual.toughest_category);
+    
     questionsSummaryEl.innerHTML = `
-      <p>Questions score loaded: 🪙 ${data.total_coins ?? 0}</p>
+      <div class="questions-score">
+    
+        <div class="questions-score-item">
+          <div class="questions-score-question">
+            How many coins will I earn today?
+          </div>
+    
+          <div>Forecast: ${answer?.coins_earned ?? "—"}</div>
+          <div>Actual: ${data.coins_earned_actual ?? "—"}</div>
+          <div>Error: ${data.coins_earned_error ?? "—"}</div>
+    
+          <div class="questions-score-earned">
+            ${coinsEarnedIcon} +${data.coins_earned_coins ?? 0} 🪙
+          </div>
+        </div>
+    
+        <div class="questions-score-item">
+          <div class="questions-score-question">
+            What was the toughest daily category?
+          </div>
+    
+          <div>
+            Forecast: ${categoryLabel(answer?.toughest_category)}
+          </div>
+    
+          <div>
+            Actual: ${toughestActual}
+          </div>
+    
+          <div class="questions-score-earned">
+            ${toughestCategoryIcon} +${data.toughest_category_coins ?? 0} 🪙
+          </div>
+        </div>
+    
+        <div class="questions-score-total">
+          🪙 ${data.total_coins ?? 0} / 10
+        </div>
+    
+      </div>
     `;
   }
   
