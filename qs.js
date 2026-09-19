@@ -281,6 +281,12 @@ function renderComplete() {
   document
     .getElementById("edit-answers")
     .addEventListener("click", startEditing);
+
+  document
+    .getElementById("view-score")
+    .addEventListener("click", () => {
+      localStorage.setItem("scoreCategory", "questions");
+    });
 }
 
 function startEditing() {
