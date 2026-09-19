@@ -29,6 +29,7 @@
     }
 
     .page {
+      width: 100%;
       max-width: 680px;
       margin: 0 auto;
       padding: 1rem;
@@ -46,7 +47,8 @@
     }
 
     #question-card {
-      width: min(92vw, 450px);
+      width: 450px;
+      max-width: 100%;
       min-height: 500px;
       margin: 0 auto;
       padding: 2rem 1.5rem;
@@ -265,7 +267,7 @@
     </button>
     
     <div class="questions-date">
-      <strong id="questions-date-label"> 15 Sept 2026 </strong>
+      <strong id="questions-date-label"></strong>
       <span class="date-info" tabindex="0" aria-label="Date information">
         ⓘ
         <span class="date-tooltip">
