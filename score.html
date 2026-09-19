@@ -151,7 +151,7 @@
       margin-top: 0.75rem;
     }
     
-    .finance-score-ratio {
+    .finance-score-fraction {
       text-align: center;
       font-size: 1.1rem;
       font-weight: 700;
@@ -166,6 +166,18 @@
       margin: 0 auto 28px;
     }
 
+    .finance-detail-grid > div {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .finance-detail-grid > div > strong:first-child {
+      min-height: 1.5em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     .finance-detail-label {
       font-weight: 700;
       margin-top: 10px;
@@ -176,9 +188,10 @@
       margin-top: 12px;
     }
 
-    .finance-total {
+    .finance-total,
+    .finance-fraction {
       font-weight: 700;
-      font-size: 1.35rem;
+      font-size: 1.5rem;
       text-align: center;
     }
     
@@ -224,7 +237,7 @@
       overflow: hidden;
     }
     
-    .score-summary #scoreRatio {
+    .score-summary #scoreFraction {
       font-size: 1.5rem;
       font-weight: 700;
       line-height: 1;
@@ -355,7 +368,7 @@
       border-radius: 10px;
       background: #f9fafb;
       color: #111827;
-      text-decoration: none;
+      text-decofractionn: none;
       box-sizing: border-box;
       text-align: center;
       white-space: nowrap;
@@ -877,7 +890,7 @@
   <div id="tempsSummary" class="score-summary">
     <div id="cityCircles"> ⚪ ⚪ ⚪ </div>
 
-    <div id="scoreRatio" class="score-ratio"></div>
+    <div id="scoreFraction" class="score-fraction"></div>
   </div>
 
   <div id="financeSummary"></div>
@@ -1046,6 +1059,8 @@
       if (scoreDateEl) {
         scoreDateEl.textContent = "";
       }
+    
+      loadQuestionsScore();
       return;
     }
   
@@ -1065,12 +1080,12 @@
     }
   }
 
-  function toggleScoreRatioIfReady(isDailyMode) {
-    const scoreRatioEl = document.getElementById("scoreRatio");
-    if (!scoreRatioEl) return;
+  function toggleScoreFractionIfReady(isDailyMode) {
+    const scorefractionEl = document.getElementById("scorefraction");
+    if (!scoreFractionEl) return;
   
-    const hasText = scoreRatioEl.textContent.trim().length > 0;
-    scoreRatioEl.style.display = isDailyMode && hasText ? "block" : "ambient";
+    const hasText = scoreFractionEl.textContent.trim().length > 0;
+    scoreFractionEl.style.display = isDailyMode && hasText ? "block" : "ambient";
   }
 
   function openScoreFaqModal() {
@@ -1235,16 +1250,16 @@
       cityCirclesEl.style.display = isDaily ? "flex" : "ambient";
     }
   
-    const scoreRatioEl = document.getElementById("scoreRatio");
-    if (scoreRatioEl) {
-      scoreRatioEl.style.display = isDaily ? "block" : "ambient";
+    const scoreFractionEl = document.getElementById("scorefraction");
+    if (scoreFractionEl) {
+      scoreFractionEl.style.display = isDaily ? "block" : "ambient";
     }
   
     const hourlyStatsRow = document.querySelector("#stats .stat-row");
     if (hourlyStatsRow) {
       hourlyStatsRow.style.display = isDaily ? "flex" : "ambient";
     }
-    toggleScoreRatioIfReady(isDaily);
+    toggleScoreFractionIfReady(isDaily);
   }
 
   function setMode(mode) {
@@ -1477,7 +1492,7 @@
           🪙 ${row.coins || 0}
         </div>
   
-        <div class="finance-ratio">
+        <div class="finance-fraction">
           ${made}/3
         </div>
   
@@ -1936,6 +1951,52 @@
     return `$${n.toLocaleString("en-US")}`;
   }
 
+  async function loadQuestionsScore() {
+    if (!questionsSummaryEl) return;
+  
+    if (scoreListEl) {
+      scoreListEl.innerHTML = "";
+    }
+  
+    const { data, error } = await client
+      .from("questions_scores")
+      .select("*")
+      .eq("user_id", currentUserId)
+      .order("date", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+  
+    console.log("latest Questions score:", data);
+  
+    if (error) {
+      console.error("Questions Score Error:", error);
+      questionsSummaryEl.innerHTML = `
+        <p class="msg no-score-msg">
+          Cannot load Questions score.
+        </p>
+      `;
+      return;
+    }
+  
+    if (!data) {
+      questionsSummaryEl.innerHTML = `
+        <p class="msg no-score-msg">
+          No Questions score yet.<br>
+          Keep forecasting & check back.
+        </p>
+      `;
+      return;
+    }
+  
+    if (scoreDateEl) {
+      scoreDateEl.textContent = dateLabelFromYMD(data.date);
+    }
+  
+    questionsSummaryEl.innerHTML = `
+      <p>Questions score loaded: 🪙 ${data.total_coins ?? 0}</p>
+    `;
+  }
+  
   async function loadFinanceScore() {
     console.log("loadFinanceScore called");
     if (scoreListEl) { scoreListEl.innerHTML = ""; }
@@ -1986,7 +2047,7 @@
     
         <div class="finance-score-coins"> 🪙 0 </div>
     
-        <div class="finance-score-ratio"> 0/3 </div>
+        <div class="finance-score-fraction"> 0/3 </div>
       `;
       setShareEnabled(false, "Finance score not ready yet.");
       shareBtn.onclick = null;
@@ -2096,7 +2157,7 @@
     
       <br>
     
-      <div class="finance-success">
+      <div class="finance-fraction">
         <strong>${successCount}/3</strong>
       </div>
     
@@ -2117,12 +2178,12 @@
     
     if (!scoreListEl) return;
 
-    const scoreRatioEl =
-      document.getElementById("scoreRatio") ||
+    const scoreFractionEl =
+      document.getElementById("scorefraction") ||
       (() => {
         const fallback = document.createElement("div");
-        fallback.id = "scoreRatio";
-        fallback.className = "score-ratio";
+        fallback.id = "scorefraction";
+        fallback.className = "score-fraction";
         if (cityCirclesEl && cityCirclesEl.parentElement) {
           cityCirclesEl.insertAdjacentElement("afterend", fallback);
         }
@@ -2134,7 +2195,7 @@
       const forecastRows = cityRows.filter((r) => hasForecast(r));
       const cityIds = Array.isArray(CITY_ORDER) && CITY_ORDER.length ? CITY_ORDER : forecastRows.map((r) => r?.city_id).filter((v, i, a) => v != null && a.indexOf(v) === i);
     
-      if (!forecastRows.length) return null;  // keep ratio hidden if no daily score text
+      if (!forecastRows.length) return null;  // keep fraction hidden if no daily score text
     
       const circlesByCity = cityIds.map((cityId) => {
         const row = forecastRows.find((r) => Number(r?.city_id) === Number(cityId)) || {};
@@ -2145,16 +2206,16 @@
       return { circlesByCity, successCount, totalCount: circlesByCity.length };
     }
 
-    const renderScoreRatioLine = (summaryOrNull, isVisible = true) => {
-      if (!scoreRatioEl) return;
+    const renderScoreFractionLine = (summaryOrNull, isVisible = true) => {
+      if (!scoreFractionEl) return;
       if (!isVisible || !summaryOrNull) {
-        scoreRatioEl.textContent = "";
-        scoreRatioEl.style.display = "none";
+        scoreFractionEl.textContent = "";
+        scoreFractionEl.style.display = "none";
         return;
       }
       const { successCount, totalCount } = summaryOrNull;
-      scoreRatioEl.textContent = `${successCount}/${totalCount}`;
-      scoreRatioEl.style.display = "";
+      scoreFractionEl.textContent = `${successCount}/${totalCount}`;
+      scoreFractionEl.style.display = "";
     };
 
     const isHourly = activeMode === "hourly";
@@ -2179,7 +2240,7 @@
       if (coinTotalEl) coinTotalEl.textContent = "0";
       if (moodTotalEl) moodTotalEl.textContent = "—";
       if (streakEl) streakEl.textContent = "—";
-      renderScoreRatioLine(null, false);
+      renderScoreFractionLine(null, false);
       disableShareForNoSession("No active session. Please sign in again.");
       return;
     }
@@ -2223,7 +2284,7 @@
       if (coinTotalEl) coinTotalEl.textContent = "0";
       if (moodTotalEl) moodTotalEl.textContent = isHourly ? "—" : "0";
       if (streakEl) streakEl.textContent = isHourly ? "—" : "0";
-      renderScoreRatioLine(null, !isHourly);
+      renderScoreFractionLine(null, !isHourly);
       return;
     }
 
@@ -2257,14 +2318,14 @@
         if (moodTotalEl) moodTotalEl.textContent = "—";
         if (streakEl) streakEl.textContent = "—";
         if (coinTotalEl) coinTotalEl.textContent = "0";
-        renderScoreRatioLine(null, false);
+        renderScoreFractionLine(null, false);
         revealRows(0, true, 0, 0, 0);
       } else {
         setMusicStateFromDaily([]);
         playFallbackMusic();
         const dailySummary = buildCitySummary([]);
         renderCityCircles([]);
-        renderScoreRatioLine(dailySummary, true);
+        renderScoreFractionLine(dailySummary, true);
 
         if (coinTotalEl) coinTotalEl.textContent = "0";
         if (moodTotalEl) moodTotalEl.textContent = "0";
@@ -2289,7 +2350,7 @@
       );
       if (moodTotalEl) moodTotalEl.textContent = "—";
       if (streakEl) streakEl.textContent = "—";
-      renderScoreRatioLine(null, false);
+      renderScoreFractionLine(null, false);
       revealRows(scores.length, true, 0, totalCoins, 0);
       return;
     }
@@ -2358,7 +2419,7 @@
     scoreListEl.dataset.cols = String(count);
 
     renderCityCircles(scores);
-    renderScoreRatioLine(dailySummary, true);
+    renderScoreFractionLine(dailySummary, true);
 
     buildShare(scores, totalCoins, totalMood, currentStreak, dailySummary);
     revealRows(scores.length, false, currentStreak, totalCoins, totalMood);
