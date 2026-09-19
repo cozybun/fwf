@@ -709,6 +709,10 @@
       grid-column: 2 !important;
       justify-self: start !important;
     }
+
+    .menu-btn {
+      text-decoration: none;
+    }
     
     .music-wrap {
       display: flex;
@@ -758,7 +762,6 @@
       .menu-btn {
         font-size: 14px;
         padding: 0 6px;
-        text-decoration: none;
       }
       
       button {
@@ -2084,13 +2087,13 @@
           <div>Error: ${data.coins_earned_error ?? "—"}</div>
     
           <div class="questions-score-earned">
-            ${coinsEarnedIcon} +${data.coins_earned_coins ?? 0} 🪙
+            ${coinsEarnedIcon} ${data.coins_earned_coins ?? 0} 🪙
           </div>
         </div>
     
         <div class="questions-score-item">
           <div class="questions-score-question">
-            What was the toughest daily category?
+            What was the toughest category?
           </div>
     
           <div>
@@ -2102,7 +2105,7 @@
           </div>
     
           <div class="questions-score-earned">
-            ${toughestCategoryIcon} +${data.toughest_category_coins ?? 0} 🪙
+            ${toughestCategoryIcon} ${data.toughest_category_coins ?? 0} 🪙
           </div>
         </div>
     
