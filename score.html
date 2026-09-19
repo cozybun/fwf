@@ -1991,7 +1991,31 @@
     if (scoreDateEl) {
       scoreDateEl.textContent = dateLabelFromYMD(data.date);
     }
-  
+    
+    const { data: answer, error: answerError } = await client
+      .from("questions_answers")
+      .select("coins_earned, toughest_category")
+      .eq("user_id", currentUserId)
+      .eq("date", data.date)
+      .maybeSingle();
+    
+    const { data: actual, error: actualError } = await client
+      .from("questions_actuals")
+      .select("toughest_category")
+      .eq("date", data.date)
+      .maybeSingle();
+    
+    if (answerError) {
+      console.error("Questions Answer Error:", answerError);
+    }
+    
+    if (actualError) {
+      console.error("Questions Actual Error:", actualError);
+    }
+    
+    console.log("Questions answer:", answer);
+    console.log("Questions actual:", actual);
+    
     questionsSummaryEl.innerHTML = `
       <p>Questions score loaded: 🪙 ${data.total_coins ?? 0}</p>
     `;
