@@ -881,7 +881,9 @@
   </div>
 
   <div id="financeSummary"></div>
-
+  
+  <div id="questionsSummary"></div>
+  
   <div id="shareArea">
     <button id="shareBtn"> Share </button>
     <div id="shareStatus" aria-live="polite"></div>
@@ -943,6 +945,7 @@
   
   const tempsSummaryEl = document.getElementById("tempsSummary");
   const financeSummaryEl = document.getElementById("financeSummary");
+  const questionsSummaryEl = document.getElementById("questionsSummary");
   const tempsModeWrap = document.getElementById("tempsModeWrap");
   
   let activeCategory = localStorage.getItem("scoreCategory") || "temps";
@@ -985,9 +988,9 @@
     const statsEl = document.getElementById("stats");
     if (statsEl) {
       statsEl.style.display =
-        category === "finance"
-          ? "none"
-          : "";
+        category === "temps"
+          ? ""
+          : "none";
     }
     categoryFinanceBtn?.classList.toggle(
       "active",
@@ -1017,6 +1020,17 @@
     if (financeSummaryEl) {
       financeSummaryEl.style.display =
         category === "finance" ? "" : "none";
+    }
+
+    if (questionsSummaryEl) {
+      questionsSummaryEl.style.display =
+        category === "questions" ? "" : "none";
+    }
+    
+    const shareAreaEl = document.getElementById("shareArea");
+    if (shareAreaEl) {
+      shareAreaEl.style.display =
+        category === "questions" ? "none" : "";
     }
   
     if (category === "finance") {
