@@ -407,6 +407,12 @@ async function saveToughestCategory(value) {
 saveAnswerBtn.addEventListener("click", async () => {
   if (selectedAnswer == null) return;
 
+  if (areQuestionsLocked()) {
+    saveAnswerBtn.disabled = true;
+    questionStatusEl.textContent = "Today's questions closed at noon";
+    return;
+  }
+
   const question = questions[currentQuestionIndex];
 
   if (question.id === 1) {  // save coins answer to db
