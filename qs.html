@@ -350,26 +350,28 @@
 </head>
 
 <body>
+
+  <header class="finance-navbar">
+    <span class="nav-spacer" aria-hidden="true"></span>
+
+    <a href="home" aria-label="Home">
+      Go to Home
+    </a>
+
+    <div class="music-wrap">
+      <audio id="bgMusic" preload="none"></audio>
+      <button id="musicToggle" type="button" aria-label="Toggle background music">🔇</button>
+      <span id="musicStatus" aria-live="polite" style="display:none;"></span>
+    </div>
+  </header>
+
   <main class="page">
 
-    <h1> My Questions </h1>    
+    <h1> My Questions </h1>
+
     <button id="how-to-play" type="button">
       How To Play
     </button>
-
-    <header class="finance-navbar">
-      <span class="nav-spacer" aria-hidden="true"></span>
-    
-      <a href="home" aria-label="Home">
-        Go to Home
-      </a>
-    
-      <div class="music-wrap">
-        <audio id="bgMusic" preload="none"></audio>
-        <button id="musicToggle" type="button" aria-label="Toggle background music">🔇</button>
-        <span id="musicStatus" aria-live="polite" style="display:none;"></span>
-      </div>
-    </header>
 
     <div
       id="questionsHelpModal"
