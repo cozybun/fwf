@@ -1156,7 +1156,7 @@
       : "bad";
   }
 
-  function setShareEnabled(canShare, reason = "No score due to no forecasts") {
+  function setShareEnabled(canShare, reason = "Temps score not ready yet") {
     if (!shareBtn) return;
   
     const disabledReason = reason && reason.trim() ? reason : "No score to copy";
@@ -2169,7 +2169,7 @@
     
         <div class="finance-score-fraction"> 0/3 </div>
       `;
-      setShareEnabled(false, "Finance score not ready yet.");
+      setShareEnabled(false, "Finance score not ready yet");
       shareBtn.onclick = null;
       return;
     }
