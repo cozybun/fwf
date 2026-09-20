@@ -44,6 +44,24 @@ const todayInPT = new Intl.DateTimeFormat("en-CA", {
   day: "2-digit"
 }).format(new Date());
 
+function areQuestionsLocked() {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Los_Angeles",
+    hour: "2-digit",
+    hour12: false
+  })
+    .formatToParts(new Date())
+    .reduce((acc, part) => {
+      if (part.type !== "literal") {
+        acc[part.type] = part.value;
+      }
+
+      return acc;
+    }, {});
+
+  return Number(parts.hour || 0) >= 12;
+}
+
 const questionsDateLabelEl = document.getElementById("questions-date-label");
 const howToPlayBtn = document.getElementById("how-to-play");
 const questionsHelpModal = document.getElementById("questionsHelpModal");
