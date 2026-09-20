@@ -44,8 +44,16 @@ const todayInPT = new Intl.DateTimeFormat("en-CA", {
   day: "2-digit"
 }).format(new Date());
 
-const questionsDateLabelEl =
-  document.getElementById("questions-date-label");
+const questionsDateLabelEl = document.getElementById("questions-date-label");
+const howToPlayBtn = document.getElementById("how-to-play");
+const questionsHelpModal = document.getElementById("questionsHelpModal");
+const questionsHelpDoneBtn = document.getElementById("questionsHelpDoneBtn");
+
+function openQuestionsHelp() { questionsHelpModal.classList.remove("hidden"); }
+function closeQuestionsHelp() { questionsHelpModal.classList.add("hidden"); }
+
+howToPlayBtn.addEventListener("click", openQuestionsHelp);
+questionsHelpDoneBtn.addEventListener("click", closeQuestionsHelp);
 
 const displayDateInPT = new Intl.DateTimeFormat("en-GB", {
   timeZone: "America/Los_Angeles",
