@@ -207,6 +207,31 @@
       font-weight: 700;
       cursor: pointer;
     }
+
+    #questionsHelpModal .help-modal-dialog {
+      box-sizing: border-box;
+      width: min(92vw, 42rem);
+      max-width: 100%;
+      padding: 1.1rem 1.25rem 1rem;
+    }
+    
+    #questionsHelpModal .questions-help-list {
+      margin: 0;
+      padding: 0 1rem 0 1.3rem;
+      list-style: disc;
+      list-style-position: outside;
+      line-height: 1.5;
+    }
+    
+    #questionsHelpModal .questions-help-list li {
+      margin: 0 0 0.6rem 0;
+      text-align: justify;
+      text-justify: inter-word;
+    }
+    
+    #questionsHelpModal .questions-help-list li:last-child {
+      margin-bottom: 0;
+    }
     
     .questions-date {
       margin-top: 0.5rem;
@@ -266,6 +291,59 @@
     <button id="how-to-play" type="button">
       How To Play
     </button>
+
+    <div
+      id="questionsHelpModal"
+      class="help-modal hidden"
+      aria-modal="true"
+      role="dialog"
+      aria-labelledby="questionsHelpTitle"
+    >
+      <div
+        id="questionsHelpBackdrop"
+        class="help-modal-backdrop"
+      ></div>
+    
+      <div class="help-modal-dialog">
+        <div class="help-modal-header">
+          <h2 id="questionsHelpTitle">
+            <strong> How to Play </strong>
+          </h2>
+        </div>
+    
+        <ul class="questions-help-list">
+          <li>
+            Answer each question and click <strong> Save </strong>.
+            You can edit your answers until the next day.
+          </li>
+    
+          <li>
+            <strong> How many coins will I earn today? </strong><br>
+            Earn <strong> 5 🪙 </strong> if your forecast is within 30 coins of your actual total for that day.
+          </li>
+    
+          <li>
+            <strong> Which will be the toughest category? </strong><br>
+            Earn <strong> 5 🪙 </strong> for forecasting the daily category where players earn the fewest total coins.
+          </li>
+    
+          <li>
+            If the daily categories tie for coins earned, no answers are correct for that question.
+          </li>
+    
+          <li>
+            Your maximum Questions score is <strong> 10 🪙 </strong>.
+            Check your score once the day's results are complete.
+          </li>
+        </ul>
+    
+        <div style="text-align: center; margin-top: 0.9rem;">
+          <button id="questionsHelpDoneBtn" type="button">
+            Understood ✅
+          </button>
+        </div>
+      </div>
+    </div>
     
     <div class="questions-date">
       <strong id="questions-date-label"></strong>
