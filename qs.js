@@ -20,7 +20,7 @@ const questions = [
   {
     id: 2,
     type: "multiple",
-    text: "What will be the toughest category?",
+    text: "Which will be the toughest category?",
     options: [
       "Temps 🌞",
       "Finance 📈"
