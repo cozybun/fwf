@@ -37,9 +37,13 @@
       text-align: center;
     }
 
-    h1 {
-      margin-top: 0;
-      margin-bottom: 0.4rem;
+    .questions-page-header {
+      margin: 1rem auto 0.5rem;
+      text-align: center;
+    }
+    
+    .questions-page-header h1 {
+      margin: 0;
     }
 
     #question-progress {
@@ -368,11 +372,13 @@
 
   <main class="page">
 
-    <h1> My Questions </h1>
-
-    <button id="how-to-play" type="button">
-      How To Play
-    </button>
+    <div class="questions-page-header">
+      <h1> My Questions </h1>
+    
+      <button id="how-to-play" type="button">
+        How To Play
+      </button>
+    </div>
 
     <div
       id="questionsHelpModal"
