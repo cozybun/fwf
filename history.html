@@ -720,6 +720,7 @@
 
     const tempsModeBtn = document.getElementById("tempsModeBtn");
     const financeModeBtn = document.getElementById("financeModeBtn");
+    const questionsModeBtn = document.getElementById("questionsModeBtn");
     const dailyModeBtn = document.getElementById("dailyModeBtn");
     const hourlyModeBtn = document.getElementById("hourlyModeBtn");
     const tempsTypeControl = document.getElementById("tempsTypeControl");
@@ -751,6 +752,13 @@
       finance: {
         table: "finance_scores",
         label: "Finance",
+        dateLabel: "Date",
+        hasHour: false,
+        select: "*"
+      },
+      questions: {
+        table: "questions_scores",
+        label: "Questions",
         dateLabel: "Date",
         hasHour: false,
         select: "*"
@@ -1222,15 +1230,16 @@
       const isDaily = state.mode === "daily";
       const isHourly = state.mode === "hourly";
       const isFinance = state.mode === "finance";
+      const isQuestions = state.mode === "questions";
     
-      tempsTypeControl.style.display = isFinance ? "none" : "";
+      tempsTypeControl.style.display = isFinance || isQuestions ? "none" : "";
       renderTableHeader();
     
       if (table) {
         table.classList.toggle("hourly-mode", isHourly);
         table.classList.toggle("daily-mode", isDaily);
       }
-      document.querySelector(".controls").classList.toggle("compact-controls", isFinance);
+      document.querySelector(".controls").classList.toggle("compact-controls", isFinance || isQuestions);
     }
 
     function applyFilters(resetPage = true) {
@@ -1562,11 +1571,14 @@
       const isHourly = state.mode === "hourly";
       const isTemps = isDaily || isHourly;
       const isFinance = state.mode === "finance";
+      const isQuestions = state.mode === "questions";
     
       tempsModeBtn.classList.toggle("active", isTemps);
       financeModeBtn.classList.toggle("active", isFinance);    
       tempsModeBtn.classList.toggle("secondary", !isTemps);
       financeModeBtn.classList.toggle("secondary", !isFinance);
+      questionsModeBtn.classList.toggle("active", isQuestions);
+      questionsModeBtn.classList.toggle("secondary", !isQuestions);
     
       dailyModeBtn.classList.toggle("active", isDaily);
       hourlyModeBtn.classList.toggle("active", isHourly);    
