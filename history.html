@@ -622,7 +622,7 @@
           <input id="searchInput" type="text" placeholder=" City or Date ">
         </div>
         
-        <div class="control">
+        <div id="cityControl" class="control">
           <label for="cityFilter">City</label>
           <select id="cityFilter">
             <option value=""> All Cities </option>
@@ -721,6 +721,7 @@
     const dailyModeBtn = document.getElementById("dailyModeBtn");
     const hourlyModeBtn = document.getElementById("hourlyModeBtn");
     const tempsTypeControl = document.getElementById("tempsTypeControl");
+    const cityControl = document.getElementById("cityControl");
 
     const prevPageBtn = document.getElementById("prevPage");
     const nextPageBtn = document.getElementById("nextPage");
@@ -1230,7 +1231,8 @@
       const isHourly = state.mode === "hourly";
       const isFinance = state.mode === "finance";
     
-      tempsTypeControl.style.display = isFinance ? "none" : "";    
+      tempsTypeControl.style.display = isFinance ? "none" : "";
+      cityControl.style.display = isFinance ? "none" : "";
       renderTableHeader();
     
       if (table) {
@@ -1304,6 +1306,121 @@
       }
     }
 
+    function formatFinanceValue(asset, value) {
+      const n = toNumber(value);
+      if (n === null) return "—";
+    
+      if (asset === "gas") {
+        return `$${n.toFixed(3)}`;
+      }
+    
+      if (asset === "btc") {
+        return `$${Math.round(n).toLocaleString("en-US")}`;
+      }
+    
+      if (asset === "gold") {
+        return `$${Math.round(n).toLocaleString("en-US")}`;
+      }
+    
+      return `${n}`;
+    }
+
+    function formatFinanceError(asset, value) {
+      const n = toNumber(value);
+      if (n === null) return "—";
+    
+      const abs = Math.abs(n);
+    
+      if (asset === "gas") {
+        return `$${abs.toFixed(3)}`;
+      }
+    
+      return `$${Math.round(abs).toLocaleString("en-US")}`;
+    }
+    
+    function financeAssetRows(row) {
+      return [
+        {
+          asset: "gas",
+          label: "Gas ⛽",
+          forecast: row.forecast_gas,
+          actual: row.actual_gas,
+          error: row.error_gas,
+          coins: row.coins_gas
+        },
+        {
+          asset: "btc",
+          label: "BTC ₿",
+          forecast: row.forecast_btc,
+          actual: row.actual_btc,
+          error: row.error_btc,
+          coins: row.coins_btc
+        },
+        {
+          asset: "gold",
+          label: "Gold 🥇",
+          forecast: row.forecast_gold,
+          actual: row.actual_gold,
+          error: row.error_gold,
+          coins: row.coins_gold
+        }
+      ];
+    }
+
+    function renderFinanceRows(pageRows) {
+      pageRows.forEach((row) => {
+        const assets = financeAssetRows(row);
+    
+        assets.forEach((assetRow, index) => {
+          const tr = document.createElement("tr");
+    
+          const tdDate = document.createElement("td");
+          tdDate.textContent = index === 0
+            ? formatDisplayDate(row, false)
+            : "";
+    
+          const tdAsset = document.createElement("td");
+          tdAsset.textContent = assetRow.label;
+    
+          const tdForecast = document.createElement("td");
+          tdForecast.textContent =
+            formatFinanceValue(assetRow.asset, assetRow.forecast);
+    
+          const tdActual = document.createElement("td");
+          tdActual.textContent =
+            formatFinanceValue(assetRow.asset, assetRow.actual);
+    
+          const tdAccuracy = document.createElement("td");
+          tdAccuracy.className = "accuracy-cell";
+          tdAccuracy.textContent =
+            formatFinanceError(assetRow.asset, assetRow.error);
+    
+          const tdColor = document.createElement("td");
+          tdColor.className = "color-cell";
+          tdColor.textContent = "—";
+    
+          const tdCoins = document.createElement("td");
+          tdCoins.className = "coins-cell";
+          tdCoins.textContent = formatInt(assetRow.coins);
+    
+          const tdAura = document.createElement("td");
+          tdAura.className = "mood-cell";
+          tdAura.textContent = "—";
+    
+          tr.appendChild(tdDate);
+          tr.appendChild(tdAsset);
+          tr.appendChild(tdForecast);
+          tr.appendChild(tdActual);
+          tr.appendChild(tdAccuracy);
+          tr.appendChild(tdColor);
+          tr.appendChild(tdCoins);
+          tr.appendChild(tdAura);
+    
+          tbody.appendChild(tr);
+        });
+      });
+    }
+    
     function renderRows() {
       tbody.innerHTML = "";
 
@@ -1324,6 +1441,10 @@
         td.textContent = total === 0 ? "No matching records found" : "No records on this page";
         tr.appendChild(td);
         tbody.appendChild(tr);
+        return;
+      }
+      if (state.mode === "finance") {
+        renderFinanceRows(pageRows);
         return;
       }
 
