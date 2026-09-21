@@ -1194,6 +1194,9 @@
     }
 
     function visibleColumnCount() {
+      if (state.mode === "finance") return 8;
+      if (state.mode === "questions") return 6;
+    
       return state.mode === "daily" ? 8 : 6;
     }
 
@@ -1210,6 +1213,18 @@
           <th> Color Score </th>
           <th> Coins 🪙 </th>
           <th> Aura 💗 </th>
+        `;
+        return;
+      }
+
+      if (state.mode === "questions") {
+        headerRow.innerHTML = `
+          <th data-sort="date"> Date <span class="sort-arrow"></span></th>
+          <th> Question </th>
+          <th> Answer </th>
+          <th> Actual </th>
+          <th> Score </th>
+          <th> Coins 🪙 </th>
         `;
         return;
       }
