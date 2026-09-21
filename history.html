@@ -784,7 +784,7 @@
       finance: [
         { name: "Gas", url: "https://gasprices.aaa.com/" },
         { name: "Bitcoin", url: "https://www.coinbase.com/price/bitcoin" },
-        { name: "Gold", url: "https://www.tradingview.com/chart/tRfD2tRg/?symbol=COMEX%3A1OZ1%21" }
+        { name: "Gold", url: "https://www.tradingview.com/chart/?symbol=COMEX%3A1OZ1%21" }
       ]
     };
 
@@ -1244,20 +1244,17 @@
 
       if (query) {
         filtered = filtered.filter((row) => {
-          const rowText = [
-            formatDisplayDate(row, modeConfigFor(state.mode).hasHour),
-            row.city_name || "",
-            formatRange(row, true),
-            formatRange(row, false),
-            formatAccuracy(row),
-            state.mode === "daily" ? formatAuraValue(row.aura) : "",
-            row.hour || "",
-            toNumber(row.coins)
-          ].join(" ").toLowerCase();
-
-          return rowText.includes(query);
+          const date = (row.date || "").toLowerCase();
+      
+          if (state.mode === "finance") {
+            const isAssetSearch = ["gas", "btc", "bitcoin", "gold"].some((term) => term.includes(query));      
+            return date.includes(query) || isAssetSearch;
+          }
+      
+          const city = (row.city_name || "").toLowerCase();
+          return city.includes(query) || date.includes(query);
         });
-      }
+    }
 
       state.filteredRows = sortRows(filtered);
       updateSortIndicators();
@@ -1354,7 +1351,26 @@
 
     function renderFinanceRows(pageRows) {
       pageRows.forEach((row) => {
-        const assets = financeAssetRows(row);
+        let assets = financeAssetRows(row);
+        const query = searchInput.value.trim().toLowerCase();
+        
+        if (query) {
+          const assetMatches = {
+            gas: ["gas", "gasoline"],
+            btc: ["btc", "bitcoin"],
+            gold: ["gold"]
+          };
+        
+          const matchingAssets = assets.filter((assetRow) =>
+            assetMatches[assetRow.asset].some((term) =>
+              term.includes(query)
+            )
+          );
+        
+          if (matchingAssets.length > 0) {
+            assets = matchingAssets;
+          }
+        }
     
         assets.forEach((assetRow, index) => {
           const tr = document.createElement("tr");
