@@ -511,15 +511,15 @@
     .history-table thead th.accuracy-col,
     .history-table thead th.color-col,
     .history-table thead th.coins-col,
-    .history-table thead th.mood-col,
+    .history-table thead th.aura-col,
     .history-table tbody td.accuracy-cell,
     .history-table tbody td.color-cell,
     .history-table tbody td.coins-col,
-    .history-table tbody td.mood-col,
+    .history-table tbody td.aura-col,
     .history-table tbody td.coins-cell,
-    .history-table tbody td.mood-cell,
+    .history-table tbody td.aura-cell,
     .history-table td.coins-col > *,
-    .history-table td.mood-col > * {
+    .history-table td.aura-col > * {
       text-align: center !important;
       vertical-align: middle !important;
     }
@@ -668,7 +668,7 @@
                 <th data-sort="accuracy" data-label="Accuracy (Error)" class="accuracy-col"> Accuracy (Error) <span class="sort-arrow"></span></th>
                 <th data-sort="color" data-label="Color" class="color-col mode-daily-col"> Color Score <span class="sort-arrow"></span></th>
                 <th data-sort="coins" data-label="Coins" class="coins-col"> Coins 🪙 <span class="sort-arrow"></span></th>
-                <th data-sort="mood" data-label="Mood" class="mood-col mode-daily-col"> Mood 💗 <span class="sort-arrow"></span></th>
+                <th data-sort="aura" data-label="Aura" class="aura-col mode-daily-col"> Aura 💗 <span class="sort-arrow"></span></th>
               </tr>
             </thead>
             <tbody id="historyBody"></tbody>
@@ -763,7 +763,7 @@
       accuracy: "desc",
       color: "asc",
       coins: "desc",
-      mood: "desc"
+      aura: "desc"
     };
 
     const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec"];
@@ -863,7 +863,7 @@
       return `${Math.abs(Math.round(n))}°`;
     }
 
-    function formatMoodValue(v) {
+    function formatAuraValue(v) {
       const n = toNumber(v);
       if (n === null) return "0";
       const rounded = Math.round(n);
@@ -1165,11 +1165,11 @@
           return (aV > bV ? 1 : -1) * dir;
         }
 
-        if (key === "mood") {
-          const aMoodRaw = toNumber(a.mood);
-          const bMoodRaw = toNumber(b.mood);
-          const aNum = aMoodRaw === null ? 0 : aMoodRaw;
-          const bNum = bMoodRaw === null ? 0 : bMoodRaw;
+        if (key === "aura") {
+          const aAuraRaw = toNumber(a.aura);
+          const bAuraRaw = toNumber(b.aura);
+          const aNum = aAuraRaw === null ? 0 : aAuraRaw;
+          const bNum = bAuraRaw === null ? 0 : bAuraRaw;
           if (aNum === bNum) return 0;
           return (aNum > bNum ? 1 : -1) * dir;
         }
@@ -1274,7 +1274,7 @@
             formatRange(row, true),
             formatRange(row, false),
             formatAccuracy(row),
-            state.mode === "daily" ? formatMoodValue(row.mood) : "",
+            state.mode === "daily" ? formatAuraValue(row.aura) : "",
             row.hour || "",
             toNumber(row.coins)
           ].join(" ").toLowerCase();
@@ -1374,10 +1374,10 @@
         tr.appendChild(tdCoins);
 
         if (state.mode === "daily") {
-          const tdMood = document.createElement("td");
-          tdMood.className = "mood-col";
-          tdMood.textContent = formatMoodValue(row.mood);
-          tr.appendChild(tdMood);
+          const tdAura = document.createElement("td");
+          tdAura.className = "aura-col";
+          tdAura.textContent = formatAuraValue(row.aura);
+          tr.appendChild(tdAura);
         }
         tbody.appendChild(tr);
       });
@@ -1553,7 +1553,7 @@
       th.addEventListener("click", () => {
         const key = th.dataset.sort;
 
-        if (state.mode === "hourly" && (key === "color" || key === "mood")) return;
+        if (state.mode === "hourly" && (key === "color" || key === "aura")) return;
 
         if (state.sortBy === key) {
           state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
