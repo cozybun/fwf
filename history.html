@@ -171,7 +171,14 @@
     
     .controls {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      grid-template-columns:
+        minmax(170px, 1.2fr)
+        minmax(150px, 1.2fr)
+        minmax(140px, 1fr)
+        minmax(140px, 1fr)
+        minmax(140px, 1fr)
+        minmax(110px, 0.8fr)
+        auto;
       gap: 10px;
       align-items: end;
       margin-bottom: 12px;
@@ -591,7 +598,6 @@
     
         <div class="btn-group mode-toggle">
           <button id="tempsModeBtn" class="button active" type="button"> Temps </button>
-          <button id="hourlyModeBtn" class="button secondary" type="button"> Hourly </button>
           <button id="financeModeBtn" class="button secondary" type="button"> Finance </button>
           <button id="questionsModeBtn" class="button secondary" type="button"> Questions </button>
         </div>
@@ -599,10 +605,23 @@
     
       <div id="status" class="status loading"> Loading my forecast history… </div>
 
+      <div class="controls">
+        <div class="control">
+          <label> Temps Type </label>
+      
+          <div class="btn-group mode-toggle">
+            <button id="dailyModeBtn" class="button active" type="button">
+              Daily
+            </button>
+      
+            <button id="hourlyModeBtn" class="button secondary" type="button">
+              Hourly
+            </button>
+          </div>
+        </div>
+      
         <div class="control">
           <label for="searchInput"> Search </label>
-          <input id="searchInput" type="text" placeholder=" City or Date ">
-        </div>
 
         <div class="control">
           <label for="cityFilter">City</label>
