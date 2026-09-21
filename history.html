@@ -621,13 +621,6 @@
           <label for="searchInput"> Search </label>
           <input id="searchInput" type="text" placeholder=" City or Date ">
         </div>
-        
-        <div id="cityControl" class="control">
-          <label for="cityFilter">City</label>
-          <select id="cityFilter">
-            <option value=""> All Cities </option>
-          </select>
-        </div>
 
         <div class="control">
           <label for="fromDate"> From date </label>
@@ -708,7 +701,6 @@
     const subtitleEl = document.querySelector(".subtitle");
 
     const searchInput = document.getElementById("searchInput");
-    const cityFilter = document.getElementById("cityFilter");
     const fromDateInput = document.getElementById("fromDate");
     const toDateInput = document.getElementById("toDate");
     const pageSizeInput = document.getElementById("pageSize");
@@ -721,7 +713,6 @@
     const dailyModeBtn = document.getElementById("dailyModeBtn");
     const hourlyModeBtn = document.getElementById("hourlyModeBtn");
     const tempsTypeControl = document.getElementById("tempsTypeControl");
-    const cityControl = document.getElementById("cityControl");
 
     const prevPageBtn = document.getElementById("prevPage");
     const nextPageBtn = document.getElementById("nextPage");
@@ -1184,20 +1175,6 @@
       });
     }
 
-    function buildCityOptions() {
-      const current = cityFilter.value;
-      const names = [...new Set(state.rows.map(r => r.city_name || "Unknown"))].sort((a, b) => a.localeCompare(b));
-      cityFilter.innerHTML = '<option value=""> All Cities </option>';
-      names.forEach((name) => {
-        const opt = document.createElement("option");
-        opt.value = name;
-        opt.textContent = name;
-        cityFilter.appendChild(opt);
-      });
-      if (names.includes(current)) cityFilter.value = current;
-      else cityFilter.value = "";
-    }
-
     function visibleColumnCount() {
       return state.mode === "daily" ? 8 : 6;
     }
@@ -1237,7 +1214,6 @@
       const isFinance = state.mode === "finance";
     
       tempsTypeControl.style.display = isFinance ? "none" : "";
-      cityControl.style.display = isFinance ? "none" : "";
       renderTableHeader();
     
       if (table) {
@@ -1248,17 +1224,10 @@
 
     function applyFilters(resetPage = true) {
       if (resetPage) state.page = 1;
-
       const query = searchInput.value.trim().toLowerCase();
-      const city = cityFilter.value;
       const fromVal = fromDateInput.value;
       const toVal = toDateInput.value;
-
       let filtered = [...state.rows];
-
-      if (city) {
-        filtered = filtered.filter((row) => (row.city_name || "Unknown") === city);
-      }
 
       if (fromVal || toVal) {
         const fromTs = fromVal ? parseFilterDate(fromVal) : null;
@@ -1576,6 +1545,14 @@
       hourlyModeBtn.classList.toggle("active", isHourly);    
       dailyModeBtn.classList.toggle("secondary", !isDaily);
       hourlyModeBtn.classList.toggle("secondary", !isHourly);
+
+      if (isTemps) {
+        searchInput.placeholder = "City or Date";
+      } else if (isFinance) {
+        searchInput.placeholder = "Asset or Date";
+      } else {
+        searchInput.placeholder = "Question or Date";
+      }
     }
 
     async function fetchDailyForecastLazyUsed(userId) {
@@ -1675,7 +1652,6 @@
         };
       });  
 
-      buildCityOptions();
       state.filteredRows = [...state.rows];
       setStatus(`Loaded ${state.rows.length} ${cfg.label.toLowerCase()} record(s)`, "default");
       state.page = 1;
@@ -1717,7 +1693,6 @@
     financeModeBtn.addEventListener("click", () => setMode("finance"));
 
     searchInput.addEventListener("input", () => applyFilters());
-    cityFilter.addEventListener("change", () => applyFilters());
     fromDateInput.addEventListener("input", (e) => {
       autoFormatDateInputValue(e.target);
       applyFilters();
@@ -1736,7 +1711,6 @@
 
     clearBtn.addEventListener("click", () => {
       searchInput.value = "";
-      cityFilter.value = "";
       fromDateInput.value = "";
       toDateInput.value = "";
       pageSizeInput.value = "50";
