@@ -789,6 +789,11 @@
         { name: "Los Angeles", url: "https://weather.gov/wrh/timeseries?site=KLAX&hourly=true" },
         { name: "Houston", url: "https://weather.gov/wrh/timeseries?site=KHOU&hourly=true" },
         { name: "New York City", url: "https://weather.gov/wrh/timeseries?site=KNYC" }
+      ],
+      finance: [
+        { name: "Gas", url: "https://gasprices.aaa.com/" },
+        { name: "Bitcoin", url: "https://www.coinbase.com/price/bitcoin" },
+        { name: "Gold", url: "https://www.tradingview.com/chart/tRfD2tRg/?symbol=COMEX%3A1OZ1%21" }
       ]
     };
 
@@ -1367,6 +1372,14 @@
       ];
     }
 
+    function financeColor(coins) {
+      const n = toNumber(coins);    
+      if (n === 25) return "green";
+      if (n === 10) return "yellow";
+      if (n === 1) return "red";    
+      return "gray";
+    }
+
     function renderFinanceRows(pageRows) {
       pageRows.forEach((row) => {
         const assets = financeAssetRows(row);
@@ -1396,8 +1409,10 @@
             formatFinanceError(assetRow.asset, assetRow.error);
     
           const tdColor = document.createElement("td");
-          tdColor.className = "color-cell";
-          tdColor.textContent = "—";
+          tdColor.className = "color-cell";          
+          const dot = document.createElement("span");
+          dot.className = `accuracy-dot ${financeColor(assetRow.coins)}`;          
+          tdColor.appendChild(dot);
     
           const tdCoins = document.createElement("td");
           tdCoins.className = "coins-cell";
@@ -1512,7 +1527,8 @@
       const links = list.map(s =>
         `<a href="${s.url}" target="_blank" rel="noopener noreferrer">${s.name}</a>`
       );
-      const label = mode === "hourly" ? "Hourly Sources:" : "Daily Sources:";
+      let label = "Daily Sources:";
+      if (mode === "hourly") { label = "Hourly Sources:"; } else if (mode === "finance") { label = "Finance Sources:"; }
       box.innerHTML = `<span class="source-label">${label}</span> ${links.join(", ") || "—"}`;
     }
 
