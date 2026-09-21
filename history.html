@@ -524,10 +524,6 @@
     }
 
     @media (max-width: 960px) {
-      .controls {
-        grid-template-columns: repeat(2, minmax(150px, 1fr));
-      }
-
       .title {
         font-size: 1.45rem;
       }
@@ -619,10 +615,12 @@
             </button>
           </div>
         </div>
-      
+
         <div class="control">
           <label for="searchInput"> Search </label>
-
+          <input id="searchInput" type="text" placeholder=" City or Date ">
+        </div>
+        
         <div class="control">
           <label for="cityFilter">City</label>
           <select id="cityFilter">
@@ -718,6 +716,7 @@
     const goTempsBtn = document.getElementById("goTempsBtn");
 
     const tempsModeBtn = document.getElementById("tempsModeBtn");
+    const dailyModeBtn = document.getElementById("dailyModeBtn");
     const hourlyModeBtn = document.getElementById("hourlyModeBtn");
 
     const prevPageBtn = document.getElementById("prevPage");
@@ -1378,9 +1377,9 @@
 
     function setModeStyles() {
       const isDaily = state.mode === "daily";
-      tempsModeBtn.classList.toggle("active", isDaily);
+      dailyModeBtn.classList.toggle("active", isDaily);
       hourlyModeBtn.classList.toggle("active", !isDaily);
-      tempsModeBtn.classList.toggle("secondary", !isDaily);
+      dailyModeBtn.classList.toggle("secondary", !isDaily);
       hourlyModeBtn.classList.toggle("secondary", isDaily);
     }
 
@@ -1517,7 +1516,7 @@
       });
     });
 
-    tempsModeBtn.addEventListener("click", () => setMode("daily"));
+    dailyModeBtn.addEventListener("click", () => setMode("daily"));
     hourlyModeBtn.addEventListener("click", () => setMode("hourly"));
 
     searchInput.addEventListener("input", () => applyFilters());
