@@ -1351,7 +1351,8 @@
           forecast: row.forecast_gas,
           actual: row.actual_gas,
           error: row.error_gas,
-          coins: row.coins_gas
+          coins: row.coins_gas,
+          aura: row.aura_gas
         },
         {
           asset: "btc",
@@ -1359,7 +1360,8 @@
           forecast: row.forecast_btc,
           actual: row.actual_btc,
           error: row.error_btc,
-          coins: row.coins_btc
+          coins: row.coins_btc,
+          aura: row.aura_btc
         },
         {
           asset: "gold",
@@ -1367,7 +1369,8 @@
           forecast: row.forecast_gold,
           actual: row.actual_gold,
           error: row.error_gold,
-          coins: row.coins_gold
+          coins: row.coins_gold,
+          aura: row.aura_gold
         }
       ];
     }
@@ -1419,8 +1422,14 @@
           tdCoins.textContent = formatInt(assetRow.coins);
     
           const tdAura = document.createElement("td");
-          tdAura.className = "mood-cell";
-          tdAura.textContent = "—";
+          tdAura.className = "aura-cell";
+          const aura = toNumber(assetRow.aura);
+          tdAura.textContent =
+            aura !== null && aura > 0
+              ? `+${formatInt(aura)}`
+              : aura === 0
+                ? "0"
+                : "—";
     
           tr.appendChild(tdDate);
           tr.appendChild(tdAsset);
@@ -1701,10 +1710,11 @@
         applyFilters(false);
       });
     });
-
-    financeModeBtn.addEventListener("click", () => setMode("finance"));
+    
+    tempsModeBtn.addEventListener("click", () => setMode("daily"));
     dailyModeBtn.addEventListener("click", () => setMode("daily"));
     hourlyModeBtn.addEventListener("click", () => setMode("hourly"));
+    financeModeBtn.addEventListener("click", () => setMode("finance"));
 
     searchInput.addEventListener("input", () => applyFilters());
     cityFilter.addEventListener("change", () => applyFilters());
