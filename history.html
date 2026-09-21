@@ -183,6 +183,15 @@
       gap: 10px;
       align-items: end;
       margin-bottom: 12px;
+    }
+
+    .controls.compact-controls {
+      grid-template-columns:
+        minmax(170px, 220px)
+        minmax(140px, 180px)
+        minmax(140px, 180px)
+        minmax(110px, 140px)
+        auto;
       justify-content: center;
     }
 
@@ -1221,6 +1230,7 @@
         table.classList.toggle("hourly-mode", isHourly);
         table.classList.toggle("daily-mode", isDaily);
       }
+      document.querySelector(".controls").classList.toggle("compact-controls", isFinance);
     }
 
     function applyFilters(resetPage = true) {
