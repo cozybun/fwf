@@ -409,7 +409,8 @@ saveAnswerBtn.addEventListener("click", async () => {
 
   if (areQuestionsLocked()) {
     saveAnswerBtn.disabled = true;
-    questionStatusEl.textContent = "Today's questions closed at noon. Please return tomorrow.";
+    questionStatusEl.innerHTML =
+      "Today's questions closed at noon <br> Please return to answer tomorrow";
     return;
   }
 
