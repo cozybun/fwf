@@ -2168,10 +2168,9 @@
           <div class="finance-score-circle"> ⚪ </div>
         </div>
       `;
-      const financeAura = Number(userStatsData?.aura) || 0;
       const currentStreak = Number(userStatsData?.current_streak) || 0;      
       animateNumber("coinTotal", 0, 800);
-      animateSignedNumber("auraTotal", financeAura, 800);
+      animateSignedNumber("auraTotal", 0, 800);
       animateNumber("currentStreak", currentStreak, 800);
       
       setShareEnabled(false, "Finance score not ready yet");
@@ -2204,7 +2203,7 @@
     ].filter(c => c === "🟢" || c === "🟡").length;
   
     const totalCoins = Number(data.coins || 0);
-    const financeAura = Number(userStatsData?.aura) || 0;
+    const financeAura = Number(data.aura || 0);
     const currentStreak = Number(userStatsData?.current_streak) || 0;
     
     animateNumber("coinTotal", totalCoins, 800);
