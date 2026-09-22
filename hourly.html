@@ -10,16 +10,15 @@
   <style>
     :root {
       --brand-purple: #BF40BF;
-      --brand-purple-hover: #A63BA6; 
+      --dark-purple: #A63BA6; 
       --brand-blue: #4169E1;
-      --brand-blue-hover: #3556CA;
+      --dark-blue: #3556CA;
       --brand-green: #228B22;
-      --brand-green-hover: #1D7A1D;
+      --dark-blue: #1D7A1D;
       
-      --brand-blue-soft: #E8EDFF;
-      --brand-blue-soft-border: #B9C7F4;
-      --brand-shadow-blue: rgba(65, 105, 225, 0.28);
-      --brand-shadow-green: rgba(34, 139, 34, 0.28);
+      --soft-blue: #E8EDFF;
+      --shadow-blue: rgba(65, 105, 225, 0.28);
+      --shadow-green: rgba(34, 139, 34, 0.28);
       --text-on-brand: #ffffff;
     }
 
@@ -41,8 +40,8 @@
     }
 
     #goToDailyBtn:hover {
-      background: var(--brand-purple-hover);
-      border-color: var(--brand-purple-hover);
+      background: var(--dark-purple);
+      border-color: var(--dark-purple);
       transform: translateY(-1px);
       box-shadow: 0 6px 14px rgba(166, 59, 166, 0.25);
     }
@@ -66,7 +65,7 @@
       height: 3rem !important;
       min-height: 3rem !important;
       padding: 0 2.2rem;
-      border-radius: 14px;
+      border-radius: 10px;
       border: 1px solid transparent;
       box-sizing: border-box;
       display: inline-flex;
@@ -100,10 +99,10 @@
     
     #hourlySaveBtn:hover:not(:disabled),
     #hourlySaveBtn:focus-visible:not(:disabled) {
-      background: var(--brand-blue-hover);
-      border-color: var(--brand-blue-hover);
+      background: var(--dark-blue);
+      border-color: var(--dark-blue);
       transform: translateY(-2px);
-      box-shadow: 0 8px 18px var(--brand-shadow-blue);
+      box-shadow: 0 8px 18px var(--shadow-blue);
     }
 
     #hourlyScoreBtn {
@@ -113,10 +112,10 @@
     }
 
     #hourlyScoreBtn:hover {
-      background: var(--brand-green-hover);
-      border-color: var(--brand-green-hover);
+      background: var(--dark-green);
+      border-color: var(--dark-green);
       transform: translateY(-2px);
-      box-shadow: 0 8px 18px var(--brand-shadow-green);
+      box-shadow: 0 8px 18px var(--shadow-green);
     }
 
     #hourSelector {
@@ -128,22 +127,23 @@
     }
     
     #hourSelector .hour-box {
-      background: var(--brand-blue-soft);
-      border: 1px solid var(--brand-blue-soft-border);
+      background: var(--soft-blue);
+      border: 1px solid var(--soft-blue);
       color: var(--brand-blue);
       border-radius: 10px;
-      padding: 0.5rem 0.85rem;
+      padding: 0.8rem 1rem;
       margin: 0.25rem;
       cursor: pointer;
       transition: all 0.2s ease;
       font-weight: 700;
+      font-size: 1.2rem;
     }
     
     #hourSelector .hour-box.selected {
       background: var(--brand-blue) !important;
-      border-color: var(--brand-blue-hover) !important;
+      border-color: var(--dark-blue) !important;
       color: var(--text-on-brand) !important;
-      box-shadow: 0 0 0 2px var(--brand-blue-hover);
+      box-shadow: 0 0 0 2px var(--dark-blue);
     }
 
     .latest-temps-caption {
@@ -238,7 +238,7 @@
 
   <h1 style="text-align:center;"> 🕰️ My Hourly Forecasts 🔮 </h1>
 
-  <p id="forecastDateLine" style="text-align:center;margin:0.5rem auto;">
+  <p id="forecastDateLine" style="text-align:center;margin:0.5rem auto 1.25rem;">
     <span>Forecast Date: </span>
     <span id="currentHourlyDateDisplay"> Forecast date loading... </span>
     <span id="currentHourlyDate" style="display:none;"> Forecast date loading... </span>
