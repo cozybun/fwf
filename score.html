@@ -2207,6 +2207,12 @@
     ].filter(c => c === "🟢" || c === "🟡").length;
   
     const totalCoins = Math.round(Number(data.coins || 0));
+    const financeAura = Number(userStatsData?.aura) || 0;
+    const currentStreak = Number(userStatsData?.current_streak) || 0;
+    
+    animateNumber("coinTotal", totalCoins, 800);
+    animateSignedNumber("moodTotal", financeAura, 800);
+    animateNumber("currentStreak", currentStreak, 800);
     if (coinTotalEl) { coinTotalEl.textContent = String(totalCoins); }
     
     if (streakEl) {
@@ -2215,7 +2221,6 @@
       );
     }
     
-    console.log("finance user stats", userStatsData);
     console.log("coins_gas", data.coins_gas);
     console.log("coins_btc", data.coins_btc);
     console.log("coins_gold", data.coins_gold);
