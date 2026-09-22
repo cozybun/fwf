@@ -581,7 +581,7 @@
       white-space: nowrap;
     }
 
-    .coin, .mood {
+    .coin, .aura {
       margin-top: 8px;
       font-weight: 600;
       width: 100%;
@@ -925,7 +925,7 @@
   <div id="stats">
     <div class="stat-item">🪙 <span id="coinTotal">0</span></div>
     <div class="stat-row">
-      <div class="stat-item">💗 <span id="moodTotal">0</span></div>
+      <div class="stat-item">💗 <span id="auraTotal">0</span></div>
       <div class="stat-item">🌟 <span id="currentStreak">0</span></div>
     </div>
   </div>
@@ -959,7 +959,7 @@
         <li><strong> Yellow (🟡)</strong> Good or mid forecast (error of 2-3) </li>
         <li><strong> Red (🔴)</strong> Poor or bad forecast (error of ≥ 4) </li>
         <li><strong> Coins (🪙)</strong> Earn 10🪙 for 0 error (9🪙 for low), 7🪙 for 1 error, 4🪙 for 2 error, 1🪙 for 3 error, 0🪙 for ≥ 4 error </li>
-        <li><strong> Mood (💗)</strong> Earn +2💗 for 0 error, +1💗 for 1 error, but lose -1💗 for ≥ 4 error </li>
+        <li><strong> Aura (💗)</strong> Earn +2💗 for 0 error, +1💗 for 1 error, but lose -1💗 for ≥ 4 error </li>
         <li><strong> Hourly Score</strong> Earn 2🪙 for 0 error, 1🪙 for 1 error </li>
         <li><strong> Share</strong> copies the score summary for you to share on social media or anywhere 😊 </li>
         <li><strong> What does the fraction at the bottom mean?</strong> <br>
@@ -1011,7 +1011,7 @@
   const scoreDateEl = document.getElementById("scoreDate");
   const scoreListEl = document.getElementById("scoreList");
   const coinTotalEl = document.getElementById("coinTotal");
-  const moodTotalEl = document.getElementById("moodTotal");
+  const auraTotalEl = document.getElementById("auraTotal");
   const streakEl = document.getElementById("currentStreak");
   const cityCirclesEl = document.getElementById("cityCircles");
   const shareBtn = document.getElementById("shareBtn");
@@ -1457,7 +1457,7 @@
         scoreListEl.innerHTML = "<p> No user session found </p>";
       }
       if (coinTotalEl) coinTotalEl.textContent = "0";
-      if (moodTotalEl) moodTotalEl.textContent = "—";
+      if (auraTotalEl) auraTotalEl.textContent = "—";
       if (streakEl) streakEl.textContent = "—";
 
       disableShareForNoSession("No active session. Save a daily forecast to create session.");
@@ -1467,7 +1467,7 @@
     return true;
   }
 
-  function revealRows(rowCount, isHourlyMode, streakValue = 0, coins = 0, mood = 0) {
+  function revealRows(rowCount, isHourlyMode, streakValue = 0, coins = 0, aura = 0) {
     const rows = document.querySelectorAll(".score-row");
     rows.forEach((row, i) => {
       setTimeout(() => row.classList.add("visible"), i * 300);
@@ -1477,12 +1477,12 @@
       animateNumber("coinTotal", coins, 800);
 
       if (isHourlyMode) {
-        if (moodTotalEl) moodTotalEl.textContent = "—";
+        if (auraTotalEl) auraTotalEl.textContent = "—";
         if (streakEl) streakEl.textContent = "—";
         return;
       }
 
-      animateSignedNumber("moodTotal", mood, 800);
+      animateSignedNumber("auraTotal", aura, 800);
       animateNumber("currentStreak", streakValue, 800);
     }, rowCount * 300);
   }
@@ -1798,7 +1798,7 @@
     return m ? `${m[2]} ${m[1]}` : s;
   };
 
-  function buildShare(scores = [], totalCoins = 0, totalMood = 0, currentStreak = 0, shareSummary = null) {
+  function buildShare(scores = [], totalCoins = 0, totalAura = 0, currentStreak = 0, shareSummary = null) {
     if (!shareBtn) return;
   
     const toNumber = (v, fallback = 0) => {
@@ -1852,7 +1852,7 @@
   
     const circles = circlesByCity.join(" ");
     const dateLine = `${formatShareDate(ydayLabel)}    ${successCount}/${totalCount}`;
-    const statsLine = `🪙 ${toNumber(totalCoins, 0)}  💗 ${formatSigned(totalMood)}  🌟 ${toNumber(currentStreak, 0)}`;
+    const statsLine = `🪙 ${toNumber(totalCoins, 0)}  💗 ${formatSigned(totalAura)}  🌟 ${toNumber(currentStreak, 0)}`;
   
     const lines = [
       { text: "Temps With Friends", isSpace: false, bias: 1 },  // +1 space
@@ -2168,6 +2168,12 @@
           <div class="finance-score-circle"> ⚪ </div>
         </div>
       `;
+      const financeAura = Number(userStatsData?.aura) || 0;
+      const currentStreak = Number(userStatsData?.current_streak) || 0;      
+      animateNumber("coinTotal", 0, 800);
+      animateSignedNumber("auraTotal", financeAura, 800);
+      animateNumber("currentStreak", currentStreak, 800);
+      
       setShareEnabled(false, "Finance score not ready yet");
       shareBtn.onclick = null;
       return;
@@ -2202,7 +2208,7 @@
     const currentStreak = Number(userStatsData?.current_streak) || 0;
     
     animateNumber("coinTotal", totalCoins, 800);
-    animateSignedNumber("moodTotal", financeAura, 800);
+    animateSignedNumber("auraTotal", financeAura, 800);
     animateNumber("currentStreak", currentStreak, 800);
     if (coinTotalEl) { coinTotalEl.textContent = String(totalCoins); }
     
@@ -2361,7 +2367,7 @@
       scoreListEl.removeAttribute("data-cols");
       scoreListEl.innerHTML = "<p> No user found. Please make a daily forecast. </p>";
       if (coinTotalEl) coinTotalEl.textContent = "0";
-      if (moodTotalEl) moodTotalEl.textContent = "—";
+      if (auraTotalEl) auraTotalEl.textContent = "—";
       if (streakEl) streakEl.textContent = "—";
       renderScoreFractionLine(null, false);
       disableShareForNoSession("No active session. Please sign in again.");
@@ -2405,7 +2411,7 @@
       );
 
       if (coinTotalEl) coinTotalEl.textContent = "0";
-      if (moodTotalEl) moodTotalEl.textContent = isHourly ? "—" : "0";
+      if (auraTotalEl) auraTotalEl.textContent = isHourly ? "—" : "0";
       if (streakEl) streakEl.textContent = isHourly ? "—" : "0";
       renderScoreFractionLine(null, !isHourly);
       return;
@@ -2438,7 +2444,7 @@
 
       if (isHourly) {
         scoreMusicState = "ambient";
-        if (moodTotalEl) moodTotalEl.textContent = "—";
+        if (auraTotalEl) auraTotalEl.textContent = "—";
         if (streakEl) streakEl.textContent = "—";
         if (coinTotalEl) coinTotalEl.textContent = "0";
         renderScoreFractionLine(null, false);
@@ -2451,7 +2457,7 @@
         renderScoreFractionLine(dailySummary, true);
 
         if (coinTotalEl) coinTotalEl.textContent = "0";
-        if (moodTotalEl) moodTotalEl.textContent = "0";
+        if (auraTotalEl) auraTotalEl.textContent = "0";
         if (streakEl) streakEl.textContent = String(currentStreak);
 
         buildShare([], 0, 0, currentStreak, dailySummary);
@@ -2471,7 +2477,7 @@
         (sum, s) => (hasHourlyForecast(s) ? sum + Number(s.coins || 0) : sum),
         0
       );
-      if (auraTotalEl) moodTotalEl.textContent = "—";
+      if (auraTotalEl) auraTotalEl.textContent = "—";
       if (streakEl) streakEl.textContent = "—";
       renderScoreFractionLine(null, false);
       revealRows(scores.length, true, 0, totalCoins, 0);
@@ -2490,7 +2496,7 @@
 
       if (forecasted) {
         totalCoins += Number(s.coins || 0);
-        totalAura += Number(s.mood || 0);
+        totalAura += Number(s.aura || 0);
       }
 
       const icon = resultCircle(s);
@@ -2504,10 +2510,10 @@
         <div class="coin"><span class="score-value ${escapeHtml(scoreValueClass(forecasted ? Number(s.coins || 0) : 0))}">
           ${escapeHtml('🪙 ' + (forecasted ? Math.round(Number(s.coins || 0)) : 0))}
         </span></div>
-        <div class="mood"><span class="score-value ${escapeHtml(scoreValueClass(
-          forecasted && s.mood !== null && s.mood !== undefined && s.mood !== "" ? Number(s.mood) : NaN
+        <div class="aura"><span class="score-value ${escapeHtml(scoreValueClass(
+          forecasted && s.aura !== null && s.aura !== undefined && s.aura !== "" ? Number(s.aura) : NaN
         ))}">
-          ${escapeHtml("💗 " + (forecasted ? formatSignedNumber(s.mood) : "—"))}
+          ${escapeHtml("💗 " + (forecasted ? formatSignedNumber(s.aura) : "—"))}
         </span></div>
       `;
 
@@ -2560,7 +2566,7 @@
         scoreListEl.innerHTML = "<p> No active session. Please sign in again. </p>";
       }
       if (coinTotalEl) coinTotalEl.textContent = "0";
-      if (moodTotalEl) moodTotalEl.textContent = "—";
+      if (auraTotalEl) auraTotalEl.textContent = "—";
       if (streakEl) streakEl.textContent = "—";
       disableShareForNoSession("No active session. Please sign in again.");
     }
