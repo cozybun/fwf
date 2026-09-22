@@ -9,10 +9,11 @@
   --brand-green: #228B22;  /* forest green */
   --dark-green: #1D7A1D;
 
-  --blue-soft: #E8EDFF;
-  --blue-soft-border: #B9C7F4;
+  --soft-blue: #E8EDFF;
+  --soft-blue-border: #B9C7F4;
   --shadow-blue: rgba(65, 105, 225, 0.28);
   --shadow-green: rgba(34, 139, 34, 0.28);
+  --text-on-brand: #ffffff;
 }
 
 body {
