@@ -1998,14 +1998,14 @@
     }
   
     if (scoreDateEl) {
-      scoreDateEl.textContent = dateLabelFromYMD(todayInPT);
+      scoreDateEl.textContent = ydayLabel;
     }
     
     const { data, error } = await client
       .from("questions_scores")
       .select("*")
       .eq("user_id", currentUserId)
-      .eq("date", todayInPT)
+      .eq("date", ydayDate)
       .maybeSingle();  
     console.log("latest Questions score:", data);
   
