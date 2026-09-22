@@ -1294,7 +1294,7 @@
   
     const hourlyStatsRow = document.querySelector("#stats .stat-row");
     if (hourlyStatsRow) {
-      hourlyStatsRow.style.display = isDaily ? "flex" : "ambient";
+      hourlyStatsRow.style.display = isDaily ? "flex" : "none";
     }
     toggleScoreFractionIfReady(isDaily);
   }
@@ -1995,14 +1995,16 @@
       scoreListEl.innerHTML = "";
     }
   
+    if (scoreDateEl) {
+      scoreDateEl.textContent = dateLabelFromYMD(todayInPT);
+    }
+    
     const { data, error } = await client
       .from("questions_scores")
       .select("*")
       .eq("user_id", currentUserId)
-      .order("date", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-  
+      .eq("date", todayInPT)
+      .maybeSingle();  
     console.log("latest Questions score:", data);
   
     if (error) {
@@ -2023,10 +2025,6 @@
         </p>
       `;
       return;
-    }
-  
-    if (scoreDateEl) {
-      scoreDateEl.textContent = dateLabelFromYMD(data.date);
     }
     
     const { data: answer, error: answerError } = await client
