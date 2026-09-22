@@ -686,7 +686,7 @@
       <div class="pager">
         <span id="pagerInfo" class="pager-info"> 0 entries </span>
         <div class="pager-bottom">
-          <button id="goTempsBtn" class="button button-brand-purple" type="button"> Go to Temps </button>
+          <button id="goHomeBtn" class="button button-brand-purple" type="button"> Go to Home </button>
           <div class="pager-actions">
             <button id="prevPage" class="button secondary" type="button"> Previous </button>
             <button id="nextPage" class="button secondary" type="button"> Next </button>
@@ -716,7 +716,7 @@
     const pageSizeInput = document.getElementById("pageSize");
     const clearBtn = document.getElementById("clearBtn");
     const statsBtn = document.getElementById("statsBtn");
-    const goTempsBtn = document.getElementById("goTempsBtn");
+    const goHomeBtn = document.getElementById("goHomeBtn");
 
     const tempsModeBtn = document.getElementById("tempsModeBtn");
     const financeModeBtn = document.getElementById("financeModeBtn");
@@ -1884,8 +1884,8 @@
       applyFilters(true);
     });
 
-    goTempsBtn.addEventListener("click", () => {
-      window.location.href = "temps";
+    goHomeBtn.addEventListener("click", () => {
+      window.location.href = "home";
     });
 
     prevPageBtn.addEventListener("click", () => {
