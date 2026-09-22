@@ -1466,6 +1466,77 @@
         });
       });
     }
+
+    function renderQuestionsRows(pageRows) {
+      pageRows.forEach((row) => {
+        const answer = state.questionAnswers.find(
+          (item) => item.date === row.date
+        );
+    
+        const actual = state.questionActuals.find(
+          (item) => item.date === row.date
+        );
+    
+        const questions = [
+          {
+            label: "Coins Earned",
+            forecast: answer?.coins_earned,
+            actual: row.coins_earned_actual,
+            correct: row.coins_earned_correct,
+            coins: row.coins_earned_coins
+          },
+          {
+            label: "Toughest Category",
+            forecast: answer?.toughest_category,
+            actual: actual?.toughest_category,
+            correct: row.toughest_category_correct,
+            coins: row.toughest_category_coins
+          }
+        ];
+    
+        questions.forEach((question, index) => {
+          const tr = document.createElement("tr");
+    
+          const tdDate = document.createElement("td");
+          tdDate.textContent =
+            index === 0 ? formatDisplayDate(row, false) : "";
+    
+          const tdQuestion = document.createElement("td");
+          tdQuestion.textContent = question.label;
+    
+          const tdForecast = document.createElement("td");
+          tdForecast.textContent =
+            question.forecast ?? "—";
+    
+          const tdActual = document.createElement("td");
+          tdActual.textContent =
+            question.actual ?? "—";
+    
+          const tdResult = document.createElement("td");
+    
+          if (question.correct === true) {
+            tdResult.textContent = "✅ Correct";
+          } else if (question.correct === false) {
+            tdResult.textContent = "❌ Incorrect";
+          } else {
+            tdResult.textContent = "—";
+          }
+    
+          const tdCoins = document.createElement("td");
+          tdCoins.className = "coins-cell";
+          tdCoins.textContent = formatInt(question.coins);
+    
+          tr.appendChild(tdDate);
+          tr.appendChild(tdQuestion);
+          tr.appendChild(tdForecast);
+          tr.appendChild(tdActual);
+          tr.appendChild(tdResult);
+          tr.appendChild(tdCoins);
+    
+          tbody.appendChild(tr);
+        });
+      });
+    }
     
     function renderRows() {
       tbody.innerHTML = "";
@@ -1491,6 +1562,10 @@
       }
       if (state.mode === "finance") {
         renderFinanceRows(pageRows);
+        return;
+      }
+      if (state.mode === "questions") {
+        renderQuestionsRows(pageRows);
         return;
       }
 
