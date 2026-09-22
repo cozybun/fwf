@@ -2052,7 +2052,7 @@ async function handleDailySubmit(e) {
   }
 
   if (!hasAnyInput) {
-    setStatus('<span style="color:red;"> Enter at least 1 valid forecast! </span>');
+    setStatus('<span style="color:red;"> Enter at least 1 forecast before saving </span>');
     return;
   }
 
@@ -2086,7 +2086,7 @@ async function handleDailySubmit(e) {
   );
 
   if (!payload.length) {
-    setStatus('<span style="color:red;"> Enter at least 1 valid forecast! </span>');
+    setStatus('<span style="color:red;"> Enter at least 1 forecast before saving </span>');
     return;
   }
 
