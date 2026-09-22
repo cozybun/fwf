@@ -381,10 +381,10 @@
     }
     
     .score-faq-tab {
-      padding: 0.4rem 0.7rem;
+      padding: 0.5rem 0.8rem;
       min-height: 0;
       width: auto;
-      font-size: 0.9rem;
+      font-size: 1rem;
       line-height: 1.2;
       white-space: nowrap;
     }
@@ -1195,6 +1195,7 @@
 
   function openScoreFaqModal() {
     if (!scoreFaqModal) return;
+    setScoreFaqCategory(activeCategory);
     scoreFaqModal.classList.add("is-open");
     scoreFaqModal.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
