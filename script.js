@@ -2142,7 +2142,7 @@ async function handleDailySubmit(e) {
       );
     }
 
-    lazyModeActive = false; // only reset lazy state and clear pending pointers after a successful save
+    lazyModeActive = false;  // only reset lazy state and clear pending pointers after a successful save
     lazyEdited = false;
     toggleLazyBadge(false);
     lazyUsed = false;
@@ -2486,9 +2486,9 @@ function initLazyForecastUI() {
       lazyUsed = true;
       await continuation();
 
-      requestAnimationFrame(() => {  // re-apply the penalty status after the continuation finishes so it cannot be overwritten
+      requestAnimationFrame(() => {  // reapply the penalty status after the continuation finishes so it cannot be overwritten
         setStatus(
-          '<span style="color:#16a34a;"> -2 Coin & -1 Aura penalty applied for using Lazy Forecast. No streak increase. Forecasts saved! </span>'
+          '<span style="color:#16a34a;"> -2 🪙 & -2 💗 penalty applied for using Lazy Forecast. No streak increase. Forecasts saved! </span>'
         );
       });
     } catch (err) {
