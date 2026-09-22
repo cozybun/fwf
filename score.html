@@ -1265,7 +1265,7 @@
     const isDaily = mode === "daily";
     const summaryblock = document.querySelector(".score-summary");
     if (!isDaily) { scoreMusicState = "ambient"; }
-    if (summaryblock) { summaryblock.style.display = isDaily ? "grid" : "ambient"; }
+    if (summaryblock) { summaryblock.style.display = isDaily ? "grid" : "none"; }
   
     if (modeDailyBtn) {
       modeDailyBtn.classList.toggle("active", isDaily);
@@ -2439,7 +2439,12 @@
     }
 
     if (!scores || scores.length === 0) {
-      scoreListEl.innerHTML = `<p class="msg no-score-msg"> No temps score yet. <br> Keep forecasting & check back. </p>`;
+      scoreListEl.innerHTML = `
+        <p class="msg no-score-msg">
+          No ${isHourly ? "hourly" : "temps"} score yet.<br>
+          Keep forecasting & check back.
+        </p>
+      `;
 
       if (isHourly) {
         scoreMusicState = "ambient";
