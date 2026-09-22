@@ -245,10 +245,10 @@
   </p>
 
   <p style="text-align:center; margin:0.5rem auto 1rem; color:#000;">
-    Cutoff = 30 mins before the hour
+    Cutoff = 1 hour before the hour
     <span class="pt-info">
       ⓘ
-      <span class="pt-tooltip"> Hours shown in Eastern Time (ET) </span>
+      <span class="pt-tooltip"> Hours shown in Pacific Time (PT) </span>
     </span>
   </p>
 
@@ -281,11 +281,10 @@
     const displayEl = document.getElementById('currentHourlyDateDisplay');  // what user sees
     if (!rawEl || !displayEl) return;
   
-    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const monthNames = ['Jan','Feb','Mar','Apr','May','June','July','Aug','Sept','Oct','Nov','Dec'];
   
     const toDDMonYYYY = (raw) => {
-      const txt = raw.trim();
-  
+      const txt = raw.trim();  
       if (/^\d{1,2}\s+[A-Za-z]{3}\s+\d{4}$/.test(txt)) return txt;
   
       const parsed = new Date(txt);
