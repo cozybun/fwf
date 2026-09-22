@@ -65,7 +65,9 @@
     #scoreList > p,
     #scoreList > .session-empty-msg,
     #scoreList > .no-score-msg,
-    #scoreList > .hourly-empty {
+    #scoreList > .hourly-empty,
+    #financeSummary .no-score-msg,
+    #questionsSummary .no-score-msg {
       grid-column: 1 / -1;
       justify-self: stretch;
       text-align: center;
@@ -672,7 +674,7 @@
     }
     
     #shareStatus {
-      margin-top: 8px;
+      margin-top: 16px;
       font-size: 14px;
       min-height: 18px;
       width: 100%;
