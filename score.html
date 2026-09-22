@@ -2140,6 +2140,14 @@
       .maybeSingle();
     
     console.log("finance rows", data);
+
+    const { data: userStatsData, error: statsError } = await client
+      .from("user_stats")
+      .select("*")
+      .eq("user_id", currentUserId)
+      .maybeSingle();
+    
+    if (statsError) { console.error("Finance User Stats Fetch Error:", statsError); }
   
     if (error) {
       console.error("Finance Score Error:", error);
@@ -2158,9 +2166,7 @@
           No finance score yet.<br>
           Keep forecasting & check back.
         </p> <br>
-    
-        <div class="finance-score-coins"> 🪙 0 </div>
-        
+            
         <div class="finance-score-grid">
           <div class="finance-score-emoji"> ⛽ </div>
           <div class="finance-score-emoji"> ₿ </div>
@@ -2201,7 +2207,15 @@
     ].filter(c => c === "🟢" || c === "🟡").length;
   
     const totalCoins = Math.round(Number(data.coins || 0));
-
+    if (coinTotalEl) { coinTotalEl.textContent = String(totalCoins); }
+    
+    if (streakEl) {
+      streakEl.textContent = String(
+        Number(userStatsData?.current_streak) || 0
+      );
+    }
+    
+    console.log("finance user stats", userStatsData);
     console.log("coins_gas", data.coins_gas);
     console.log("coins_btc", data.coins_btc);
     console.log("coins_gold", data.coins_gold);
@@ -2271,21 +2285,12 @@
         <div>${goldCircle}</div>
       </div>
     
-      <br>
-    
-      <div class="finance-total">
-        🪙 <strong id="financeCoinTotal">0</strong>
-      </div>
-    
-      <br>
-    
       <div class="finance-fraction">
         <strong>${successCount}/3</strong>
       </div>
     
       <br>
     `;
-    animateNumber("financeCoinTotal", totalCoins);
     buildFinanceShare(data);
   }
   
