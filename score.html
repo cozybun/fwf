@@ -127,7 +127,7 @@
     }
 
     #financeSummary {
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem;
     }
 
     .finance-score-grid {
@@ -1044,7 +1044,7 @@
     const statsEl = document.getElementById("stats");
     if (statsEl) {
       statsEl.style.display =
-        category === "temps"
+        category === "temps" || category === "finance"
           ? ""
           : "none";
     }
