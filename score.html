@@ -132,30 +132,30 @@
       grid-template-columns: repeat(3, auto);
       justify-content: center;
       column-gap: 28px;
-      row-gap: 6px;
+      row-gap: 16px;
       text-align: center;
     }
     
     .finance-score-emoji {
-      font-size: 2rem;
+      font-size: 1.5rem;
       line-height: 1;
     }
     
     .finance-score-circle {
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       line-height: 1;
     }
     
     .finance-score-coins {
       text-align: center;
-      font-size: 1.2rem;
+      font-size: 1.25rem;
       font-weight: 700;
       margin-top: 0.75rem;
     }
     
     .finance-score-fraction {
       text-align: center;
-      font-size: 1.1rem;
+      font-size: 1.5rem;
       font-weight: 700;
       margin-top: 0.5rem;
     }
@@ -210,7 +210,7 @@
     
     .questions-score-question {
       margin-bottom: 0.75rem;
-      font-size: 1.15rem;
+      font-size: 1.2rem;
       font-weight: 700;
     }
     
@@ -220,7 +220,7 @@
     
     .questions-score-earned {
       margin-top: 0.75rem;
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       font-weight: 700;
     }
     
@@ -591,7 +591,7 @@
     #stats {
       margin-top: 32px;
       margin-bottom: 32px;
-      font-size: 22px;
+      font-size: 1.25rem;
       font-weight: bold;
       display: flex;
       flex-direction: column;
@@ -768,7 +768,7 @@
       
       button {
         width: 100%;
-        font-size: 22px;
+        font-size: 20px;
       }
           
       #scoreList {
@@ -2155,19 +2155,17 @@
           Keep forecasting & check back.
         </p> <br>
     
+        <div class="finance-score-coins"> 🪙 0 </div>
+        
         <div class="finance-score-grid">
           <div class="finance-score-emoji"> ⛽ </div>
           <div class="finance-score-emoji"> ₿ </div>
           <div class="finance-score-emoji"> 🥇 </div>
-    
+        
           <div class="finance-score-circle"> ⚪ </div> 
           <div class="finance-score-circle"> ⚪ </div>
           <div class="finance-score-circle"> ⚪ </div>
         </div>
-    
-        <div class="finance-score-coins"> 🪙 0 </div>
-    
-        <div class="finance-score-fraction"> 0/3 </div>
       `;
       setShareEnabled(false, "Finance score not ready yet");
       shareBtn.onclick = null;
