@@ -27,23 +27,15 @@ let lazyPendingForecastDate = null;
 let lazyUsed = false;
 
 const HOURLY_LABELS = [
-  "1 PM",    // "Noon",
-  "2 PM",
-  "3 PM",
-  "4 PM",
-  "5 PM",
-  "6 PM",
-  "7 PM",
-  "8 PM"
+  "2 PM",   // 1 PM,
+  "8 PM"    // 7 PM
 ];
 const HOURLY_GAME_SWITCH_HOUR_ET = 20; // 19
-
 const MESOWEST_STATIONS_BY_CITY = {
   "Los Angeles": "KLAX",
   "Houston": "KHOU",
   "New York City": "KNYC",
 };
-
 const CITY_STREAK_THRESHOLD = Object.keys(MESOWEST_STATIONS_BY_CITY).length;  // get number of cities for streak threshold
 
 function normalizeCityKey(value) {
@@ -2496,7 +2488,7 @@ function initLazyForecastUI() {
 
       requestAnimationFrame(() => {  // re-apply the penalty status after the continuation finishes so it cannot be overwritten
         setStatus(
-          '<span style="color:#16a34a;"> -1 Coin & -1 Mood penalty applied for using Lazy Forecast. No streak increase. Forecasts saved! </span>'
+          '<span style="color:#16a34a;"> -2 Coin & -1 Aura penalty applied for using Lazy Forecast. No streak increase. Forecasts saved! </span>'
         );
       });
     } catch (err) {
