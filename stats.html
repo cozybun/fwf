@@ -56,7 +56,7 @@
       position: relative;
     }
 
-    .temos-navbar .nav-spacer {
+    .temps-navbar .nav-spacer {
       justify-self: start;
     }
 
@@ -163,10 +163,10 @@
       margin: 0;
     }
 
-    .value.mood { color: var(--brand-purple); }
-    .value.mood.happy { color: #008000; }
-    .value.mood.sad { color: #ff0000; }
-    .value.mood.neutral { color: #800080; }
+    .value.aura { color: var(--brand-purple); }
+    .value.aura.glowing { color: #008000; }
+    .value.aura.fading { color: #ff0000; }
+    .value.aura.neutral { color: #800080; }
 
     .meta {
       margin-top: 14px;
@@ -274,7 +274,7 @@
       <div id="status" class="loading"> Loading my personal stats… </div>
 
       <div id="statsPanel" style="display:none;">
-        <div id="moodLine" class="status"></div>
+        <div id="auraLine" class="status"></div>
 
         <div class="grid">
           <article class="stat">
@@ -288,8 +288,8 @@
           </article>
 
           <article class="stat">
-            <div class="label"> 💗 Mood </div>
-            <p class="value mood" id="mood">—</p>
+            <div class="label"> 💗 Aura </div>
+            <p class="value aura" id="aura">—</p>
           </article>
 
           <article class="stat">
@@ -301,7 +301,7 @@
         <p class="meta" id="lastForecast"> Last forecast: — </p>
 
         <div class="btn-row">
-          <button id="tempsBtn" class="cozy" type="button"> Go to Temps </button>
+          <button id="homeBtn" class="cozy" type="button"> Go to Home </button>
           <button class="secondary" id="historyBtn" type="button"> My History </button>
         </div>
       </div>
@@ -321,13 +321,13 @@
 
     const statusEl = document.getElementById("status");
     const panel = document.getElementById("statsPanel");
-    const moodLine = document.getElementById("moodLine");
+    const auraLine = document.getElementById("auraLine");
     const totalCoinsEl = document.getElementById("totalCoins");
     const coinsEl = document.getElementById("coins");
     const currentStreakEl = document.getElementById("currentStreak");
-    const moodEl = document.getElementById("mood");
+    const auraEl = document.getElementById("aura");
     const lastForecastEl = document.getElementById("lastForecast");
-    const tempsBtn = document.getElementById("tempsBtn");
+    const homeBtn = document.getElementById("homeBtn");
     const historyBtn = document.getElementById("historyBtn");
 
     function cleanNumber(v, fallback = 0, decimals = 2) {
@@ -339,11 +339,11 @@
       return n.toFixed(decimals);
     }
 
-    function friendlyMoodLine(mood) {
-      if (mood >= 40) return "Mood is glowing now — your forecasts are showing clarity and prescience. ✨";
-      if (mood >= 30) return "Great progress. You're keeping daily forecasts in a solid, steady place. 🌿";
-      if (mood >= 20) return "Solid rhythm. A win every day compounds into stronger scores over time. ☀️";
-      if (mood >= 10) return "You're in the learning zone. Keep consistent and the trend should improve. 🌤️";
+    function friendlyAuraLine(aura) {
+      if (aura >= 40) return "Aura is glowing perfectly — your forecasts are showing clarity and prescience. ✨";
+      if (aura >= 30) return "Strong aura. You're growing daily accuracy in a solid, steady place. 🌿";
+      if (aura >= 20) return "Great progress. A win every day compounds into stronger scores over time. ☀️";
+      if (aura >= 10) return "You're in the learning zone. Keep consistent and the trend should improve. 🌤️";
       return "Keep cozy — momentum grows with regular forecasts and calm adjustments. 🌙";
     }
 
@@ -361,14 +361,14 @@
       return `${day} ${month} ${year}`;
     }
 
-    function setMoodDisplay(mood) {
-      const moodTag = mood > 0 ? " (HAPPY)" : mood < 0 ? " (SAD)" : "";
-      moodEl.textContent = `${cleanNumber(mood, 0, 2)}${moodTag}`;
+    function setAuraDisplay(aura) {
+      const auraTag = aura > 0 ? " (GLOWING)" : aura < 0 ? " (FADING)" : "";
+      auraEl.textContent = `${cleanNumber(aura, 0, 2)}${auraTag}`;
 
-      moodEl.classList.remove("happy", "sad", "neutral");
-      if (mood > 0) moodEl.classList.add("happy");
-      else if (mood < 0) moodEl.classList.add("sad");
-      else moodEl.classList.add("neutral");
+      auraEl.classList.remove("glowing", "fading", "neutral");
+      if (aura > 0) auraEl.classList.add("glowing");
+      else if (aura < 0) auraEl.classList.add("fading");
+      else auraEl.classList.add("neutral");
     }
 
     async function getMostRecentForecastDate(userId) {
@@ -421,15 +421,15 @@
           throw error;
         }
 
-        const mood = Number(data.mood ?? 0);
+        const aura = Number(data.aura ?? 0);
         const streak = Number(data.current_streak ?? 0);
 
         totalCoinsEl.textContent = cleanNumber(Number(data.total_coins ?? 0), 0, 2);
         coinsEl.textContent = cleanNumber(Number(data.coins ?? 0), 0, 2);
         currentStreakEl.textContent = cleanNumber(streak, 0, 0);
 
-        setMoodDisplay(mood);
-        moodLine.textContent = friendlyMoodLine(mood);
+        setAuraDisplay(aura);
+        auraLine.textContent = friendlyAuraLine(aura);
 
         try {
           const lastForecastDate = await getMostRecentForecastDate(userId);
@@ -447,8 +447,8 @@
       }
     }
 
-    tempsBtn.addEventListener("click", () => {
-      window.location.href = "temps";
+    homeBtn.addEventListener("click", () => {
+      window.location.href = "home";
     });
 
     historyBtn.addEventListener("click", () => {
