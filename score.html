@@ -1021,7 +1021,7 @@
 
   let currentUserId = null;
   let totalCoins = 0;
-  let totalMood = 0;
+  let totalAura = 0;
   let shareTimer = null;
   let bannerTimer = null;
   let scoreMusicState = "ambient";
@@ -1048,36 +1048,28 @@
           ? ""
           : "none";
     }
-    categoryFinanceBtn?.classList.toggle(
-      "active",
-      category === "finance"
-    );
-  
-    categoryQuestionsBtn?.classList.toggle(
-      "active",
-      category === "questions"
-    );
-  
-    categoryTempsBtn?.classList.toggle(
-      "active",
-      category === "temps"
-    );
+    if (statsEl && category === "finance") {
+      financeSummaryEl.insertAdjacentElement("afterend", statsEl);
+    }
+    if (statsEl && category === "temps") {
+      scoreListEl.insertAdjacentElement("afterend", statsEl);
+    }
+    categoryFinanceBtn?.classList.toggle("active", category === "finance");  
+    categoryQuestionsBtn?.classList.toggle("active", category === "questions");  
+    categoryTempsBtn?.classList.toggle("active", category === "temps");
   
     if (tempsModeWrap) {
       tempsModeWrap.style.display =
         category === "temps" ? "" : "none";
-    }
-  
+    }  
     if (tempsSummaryEl) {
       tempsSummaryEl.style.display =
         category === "temps" ? "" : "none";
-    }
-  
+    }  
     if (financeSummaryEl) {
       financeSummaryEl.style.display =
         category === "finance" ? "" : "none";
     }
-
     if (questionsSummaryEl) {
       questionsSummaryEl.style.display =
         category === "questions" ? "" : "none";
@@ -1959,8 +1951,7 @@
       gasCircle,
       btcCircle,
       goldCircle
-    ].filter(c => c === "🟢" || c === "🟡").length;
-  
+    ].filter(c => c === "🟢" || c === "🟡").length;  
     const totalCoins = Number(data.coins || 0);
   
     const text = [
@@ -2143,7 +2134,7 @@
 
     const { data: userStatsData, error: statsError } = await client
       .from("user_stats")
-      .select("*")
+      .select("aura, current_streak")
       .eq("user_id", currentUserId)
       .maybeSingle();
     
@@ -2206,7 +2197,7 @@
       goldCircle
     ].filter(c => c === "🟢" || c === "🟡").length;
   
-    const totalCoins = Math.round(Number(data.coins || 0));
+    const totalCoins = Number(data.coins || 0);
     const financeAura = Number(userStatsData?.aura) || 0;
     const currentStreak = Number(userStatsData?.current_streak) || 0;
     
@@ -2472,7 +2463,7 @@
 
     scoreListEl.innerHTML = "";
     totalCoins = 0;
-    totalMood = 0;
+    totalAura = 0;
 
     if (isHourly) {
       renderHourlyScores(scores);
@@ -2480,7 +2471,7 @@
         (sum, s) => (hasHourlyForecast(s) ? sum + Number(s.coins || 0) : sum),
         0
       );
-      if (moodTotalEl) moodTotalEl.textContent = "—";
+      if (auraTotalEl) moodTotalEl.textContent = "—";
       if (streakEl) streakEl.textContent = "—";
       renderScoreFractionLine(null, false);
       revealRows(scores.length, true, 0, totalCoins, 0);
@@ -2499,7 +2490,7 @@
 
       if (forecasted) {
         totalCoins += Number(s.coins || 0);
-        totalMood += Number(s.mood || 0);
+        totalAura += Number(s.mood || 0);
       }
 
       const icon = resultCircle(s);
@@ -2553,8 +2544,8 @@
     renderCityCircles(scores);
     renderScoreFractionLine(dailySummary, true);
 
-    buildShare(scores, totalCoins, totalMood, currentStreak, dailySummary);
-    revealRows(scores.length, false, currentStreak, totalCoins, totalMood);
+    buildShare(scores, totalCoins, totalAura, currentStreak, dailySummary);
+    revealRows(scores.length, false, currentStreak, totalCoins, totalAura);
   }
 
   client.auth.onAuthStateChange(async (_event, session) => {
