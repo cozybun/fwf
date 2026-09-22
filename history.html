@@ -782,6 +782,8 @@
       mode: "daily",
       rows: [],
       filteredRows: [],
+      questionAnswers: [],
+      questionActuals: [],
       sortBy: "date",
       sortDir: "desc",
       page: 1,
@@ -1662,6 +1664,31 @@
 
       setStatus("Loading forecast history...", "loading");
       renderSourceLine(state.mode);
+
+      if (state.mode === "questions") {
+        const [answersResult, actualsResult] = await Promise.all([
+          client
+            .from("questions_answers")
+            .select("*")
+            .eq("user_id", userId),
+      
+          client
+            .from("questions_actuals")
+            .select("*")
+        ]);
+      
+        if (answersResult.error || actualsResult.error) {
+          const error = answersResult.error || actualsResult.error;
+          setStatus(`Failed to load questions history: ${error.message}`, "error");
+          return;
+        }
+      
+        state.questionAnswers = answersResult.data || [];
+        state.questionActuals = actualsResult.data || [];
+      } else {
+        state.questionAnswers = [];
+        state.questionActuals = [];
+      }
 
       const cfg = modeConfigFor(state.mode);
       state.page = 1;
