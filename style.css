@@ -1,18 +1,18 @@
 /* App-wide color palette (for all non-leaderboard pages) */
 :root {
   --brand-purple: #BF40BF;  /* bright purple */
-  --brand-purple-hover: #A63BA6; 
+  --dark-purple: #A63BA6; 
 
   --brand-blue: #4169E1;  /* royal blue */
-  --brand-blue-hover: #3556CA;
+  --dark-blue: #3556CA;
 
   --brand-green: #228B22;  /* forest green */
-  --brand-green-hover: #1D7A1D;
+  --dark-green: #1D7A1D;
 
-  --brand-blue-soft: #E8EDFF;
-  --brand-blue-soft-border: #B9C7F4;
-  --brand-shadow-blue: rgba(65, 105, 225, 0.28);
-  --brand-shadow-green: rgba(34, 139, 34, 0.28);
+  --blue-soft: #E8EDFF;
+  --blue-soft-border: #B9C7F4;
+  --shadow-blue: rgba(65, 105, 225, 0.28);
+  --shadow-green: rgba(34, 139, 34, 0.28);
 }
 
 body {
@@ -86,7 +86,7 @@ button {
 }
 
 button:hover {
-  background: var(--brand-blue-hover);
+  background: var(--dark-blue);
   transform: translateY(-2px);
   box-shadow: 0 8px 18px var(--brand-shadow-blue);
 }
@@ -119,7 +119,7 @@ button:disabled {
 }
 
 .forecast-nav-btn:hover {
-  background: var(--brand-purple-hover) !important;
+  background: var(--dark-purple) !important;
   transform: translateY(-1px);
 }
 
@@ -127,8 +127,8 @@ button:disabled {
   background: var(--brand-green);
 }
 #revealBtn:hover {
-  background: var(--brand-green-hover);
-  box-shadow: 0 8px 18px var(--brand-shadow-green);
+  background: var(--dark-green);
+  box-shadow: 0 8px 18px var(--shadow-green);
 }
 
 #status {
@@ -164,7 +164,7 @@ button:disabled {
 #hourlySaveBtn:disabled {
   background: #ffffff !important;
   color: #1d4ed8 !important;
-  border: 2px solid var(--brand-blue-soft-border) !important;
+  border: 2px solid var(--blue-soft-border) !important;
   opacity: 1 !important;
   cursor: not-allowed !important;
 }
@@ -172,8 +172,8 @@ button:disabled {
   background: var(--brand-green);
 }
 #hourlyScoreBtn:hover {
-  background: var(--brand-green-hover);
-  box-shadow: 0 8px 18px var(--brand-shadow-green);
+  background: var(--dark-green);
+  box-shadow: 0 8px 18px var(--shadow-green);
 }
 
 .city-grid {
@@ -399,7 +399,7 @@ button:disabled {
   font-size: 0.8rem;
   border-radius: 9999px;
   border: 1px solid var(--brand-blue);
-  background: var(--brand-blue-soft);
+  background: var(--blue-soft);
   color: var(--brand-blue);
   cursor: pointer;
   line-height: 1.1;
@@ -419,7 +419,7 @@ button:disabled {
   padding: 0.6rem 1rem;
   border-radius: 10px;
   border: 2px solid var(--brand-blue);
-  background: var(--brand-blue-soft);
+  background: var(--blue-soft);
   cursor: pointer;
   font-weight: 600;
   font-size: 1rem;
