@@ -1504,13 +1504,22 @@
           const tdQuestion = document.createElement("td");
           tdQuestion.textContent = question.label;
     
+          const formatQuestionValue = (value) => {
+            if (question.label === "Toughest Category") {
+              if (value === null || value === undefined || value === "") {
+                return "Tie";
+              }          
+              const text = String(value);
+              return text.charAt(0).toUpperCase() + text.slice(1);
+            }          
+            return value ?? "—";
+          };
+          
           const tdForecast = document.createElement("td");
-          tdForecast.textContent =
-            question.forecast ?? "—";
-    
+          tdForecast.textContent = formatQuestionValue(question.forecast);
+          
           const tdActual = document.createElement("td");
-          tdActual.textContent =
-            question.actual ?? "—";
+          tdActual.textContent = formatQuestionValue(question.actual);
     
           const tdResult = document.createElement("td");
     
