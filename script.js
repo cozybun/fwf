@@ -1348,7 +1348,6 @@ function isPastCutoffForHour(etNow, useTomorrow, hourValue) {
 // Fixed hourly forecast date switch at last hourly using actual PT wall-clock hour
 function getHourlyGameDate() {
   const ptParts = getDatePartsInTZ(TIMEZONE_PT);
-
   const etParts = getDatePartsInTZ(TIMEZONE_ET);
   const etNow = new Date(
     Date.UTC(
@@ -1357,8 +1356,7 @@ function getHourlyGameDate() {
     )
   );
 
-  const useTomorrow = ptParts.hour >= HOURLY_GAME_SWITCH_HOUR_PT;
-
+  const useTomorrow = ptParts.hour >= HOURLY_GAME_SWITCH_HOUR;
   const gameDateObj = new Date(
     Date.UTC(ptParts.year, ptParts.month - 1, ptParts.day, 12)
   );
