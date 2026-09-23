@@ -2254,8 +2254,11 @@
           <div class="finance-score-circle"> ⚪ </div>
         </div>
       `;
+      const financeGridSlot = document.getElementById("financeGridSlot");
       const financeGrid = financeSummaryEl.querySelector(".finance-score-grid");
-      if (financeGrid) { document.getElementById("financeGridSlot").appendChild(financeGrid); }
+      financeGridSlot.replaceChildren();      
+      if (financeGrid) { financeGridSlot.appendChild(financeGrid); }
+      
       const currentStreak = Number(userStatsData?.current_streak) || 0;      
       animateNumber("coinTotal", 0, 800);
       animateSignedNumber("auraTotal", 0, 800);
@@ -2380,8 +2383,10 @@
     
       <br>
     `;
+    const financeGridSlot = document.getElementById("financeGridSlot");
     const financeGrid = financeSummaryEl.querySelector(".finance-score-grid");
     const financeFraction = financeSummaryEl.querySelector(".finance-fraction");
+    financeGridSlot.replaceChildren();    
     if (financeGrid) { financeGridSlot.appendChild(financeGrid); }
     if (financeFraction) { financeGridSlot.appendChild(financeFraction); }
     buildFinanceShare(data);
