@@ -2240,11 +2240,7 @@
           <div class="finance-score-circle"> ⚪ </div>
           <div class="finance-score-circle"> ⚪ </div>
         </div>
-      `;
-      const statsEl = document.getElementById("stats");
-      const financeGrid = financeSummaryEl.querySelector(".finance-score-grid");
-      if (statsEl && financeGrid && activeCategory === "finance") { financeGrid.insertAdjacentElement("beforebegin", statsEl); }
-      
+      `;   
       const currentStreak = Number(userStatsData?.current_streak) || 0;      
       animateNumber("coinTotal", 0, 800);
       animateSignedNumber("auraTotal", 0, 800);
@@ -2369,9 +2365,6 @@
     
       <br>
     `;
-    const statsEl = document.getElementById("stats");
-    const financeGrid = financeSummaryEl.querySelector(".finance-score-grid");
-    if (statsEl && financeGrid && activeCategory === "finance") { financeGrid.insertAdjacentElement("beforebegin", statsEl); }
     buildFinanceShare(data);
   }
   
