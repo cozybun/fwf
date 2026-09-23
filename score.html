@@ -948,12 +948,12 @@
 
   <div id="tempsSummary" class="score-summary">
     <div id="cityCircles"> ⚪ ⚪ ⚪ </div>
-
     <div id="scoreFraction" class="score-fraction"></div>
   </div>
 
   <div id="financeSummary"></div>
-  
+  <div id="financeStatsSlot"></div>
+  <div id="financeGridSlot"></div>
   <div id="questionsSummary"></div>
   
   <div id="shareArea">
@@ -1098,7 +1098,7 @@
           : "none";
     }
     if (statsEl && category === "finance") {
-      financeSummaryEl.insertAdjacentElement("afterend", statsEl);
+      document.getElementById("financeStatsSlot").appendChild(statsEl);
     }
     if (statsEl && category === "temps") {
       scoreListEl.insertAdjacentElement("afterend", statsEl);
@@ -1114,11 +1114,23 @@
     if (tempsSummaryEl) {
       tempsSummaryEl.style.display =
         category === "temps" ? "" : "none";
-    }  
+    }
+    
     if (financeSummaryEl) {
       financeSummaryEl.style.display =
         category === "finance" ? "" : "none";
     }
+    const financeStatsSlot = document.getElementById("financeStatsSlot");
+    const financeGridSlot = document.getElementById("financeGridSlot");
+    if (financeStatsSlot) {
+      financeStatsSlot.style.display =
+        category === "finance" ? "" : "none";
+    }    
+    if (financeGridSlot) {
+      financeGridSlot.style.display =
+        category === "finance" ? "" : "none";
+    }
+    
     if (questionsSummaryEl) {
       questionsSummaryEl.style.display =
         category === "questions" ? "" : "none";
@@ -1147,7 +1159,6 @@
       loadQuestionsScore();
       return;
     }
-  
     loadScore();
   }
 
@@ -2189,6 +2200,8 @@
     console.log("loadFinanceScore called");
     if (scoreListEl) { scoreListEl.innerHTML = ""; }
     if (!financeSummaryEl) return;
+    const financeGridSlot = document.getElementById("financeGridSlot");
+    financeGridSlot.replaceChildren();
     if (scoreDateEl) {
       scoreDateEl.textContent = dateLabelFromYMD(todayInPT);
     }
@@ -2240,7 +2253,9 @@
           <div class="finance-score-circle"> ⚪ </div>
           <div class="finance-score-circle"> ⚪ </div>
         </div>
-      `;   
+      `;
+      const financeGrid = financeSummaryEl.querySelector(".finance-score-grid");
+      if (financeGrid) { document.getElementById("financeGridSlot").appendChild(financeGrid); }
       const currentStreak = Number(userStatsData?.current_streak) || 0;      
       animateNumber("coinTotal", 0, 800);
       animateSignedNumber("auraTotal", 0, 800);
@@ -2365,6 +2380,10 @@
     
       <br>
     `;
+    const financeGrid = financeSummaryEl.querySelector(".finance-score-grid");
+    const financeFraction = financeSummaryEl.querySelector(".finance-fraction");
+    if (financeGrid) { financeGridSlot.appendChild(financeGrid); }
+    if (financeFraction) { financeGridSlot.appendChild(financeFraction); }
     buildFinanceShare(data);
   }
   
