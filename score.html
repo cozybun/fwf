@@ -131,7 +131,7 @@
     }
     
     #financeStatsSlot #stats {
-      margin-top: 32px;
+      margin-top: 40px;
       margin-bottom: 32px;
     }
     
@@ -1641,7 +1641,7 @@
     scoreListEl.innerHTML = "";
 
     if (!items.length) {
-      scoreListEl.innerHTML = '<p class="hourly-empty"> No hourly scores yet. Keep forecasting & check back. </p>';
+      scoreListEl.innerHTML = '<p class="hourly-empty"> No Hourly scores yet. Keep forecasting & check back. </p>';
       return;
     }
 
@@ -2242,7 +2242,7 @@
   
       financeSummaryEl.innerHTML = `
         <p class="msg no-score-msg">
-          Cannot load finance score
+          Cannot load Finance score
         </p>
       `;
       return;
@@ -2251,7 +2251,7 @@
     if (!data) {
       financeSummaryEl.innerHTML = `
         <p class="msg no-score-msg">
-          No finance score yet.<br>
+          No Finance score yet.<br>
           Keep forecasting & check back.
         </p>
             
@@ -2548,7 +2548,7 @@
     if (!scores || scores.length === 0) {
       scoreListEl.innerHTML = `
         <p class="msg no-score-msg">
-          No ${isHourly ? "hourly" : "temps"} score yet.<br>
+          No ${isHourly ? "Hourly" : "Temps"} score yet.<br>
           Keep forecasting & check back.
         </p>
       `;
