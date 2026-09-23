@@ -1,5 +1,5 @@
-🐰 Forecast With Friends 🔮
+🐰 Glean 🔮
 
-A fun social forecasting app 😊
+A cozy social forecasting game 😊
 
 Guess Stuff, Help Buns, Cozy Up 👯
