@@ -447,7 +447,7 @@ button:disabled {
   align-items: center;
   text-align: center;
   gap: 0.8rem;                 /* controls space between title and button */
-  margin: 0.6rem 0 0.85rem;     /* controls space after header */
+  margin: 0.6rem 0 0.8rem;     /* controls space after header */
 }
 
 .daily-page-header h1,
