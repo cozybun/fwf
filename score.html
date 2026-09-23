@@ -1593,14 +1593,9 @@
       return;
     }
   
-    const gasCircle =
-      row.coins_gas == null ? "⚪" : financeCircle(row.coins_gas);
-  
-    const btcCircle =
-      row.coins_btc == null ? "⚪" : financeCircle(row.coins_btc);
-  
-    const goldCircle =
-      row.coins_gold == null ? "⚪" : financeCircle(row.coins_gold);
+    const gasCircle = row.coins_gas == null ? "⚪" : financeCircle(row.coins_gas);
+    const btcCircle = row.coins_btc == null ? "⚪" : financeCircle(row.coins_btc);
+    const goldCircle = row.coins_gold == null ? "⚪" : financeCircle(row.coins_gold);
   
     const made =
       (row.coins_gas != null ? 1 : 0) +
@@ -1629,7 +1624,6 @@
           <div>₿</div>
           <div>🥇</div>
         </div>
-  
       </div>
     `;
   }
@@ -2251,7 +2245,7 @@
         <p class="msg no-score-msg">
           No finance score yet.<br>
           Keep forecasting & check back.
-        </p> <br>
+        </p>
             
         <div class="finance-score-grid">
           <div class="finance-score-emoji"> ⛽ </div>
