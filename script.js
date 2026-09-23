@@ -1335,7 +1335,7 @@ function getHourlyCutoff(etNow, hourValue) {
   const minuteMark = Number.isInteger(hourValue) ? 0 : 30;
 
   cutoff.setUTCHours(wholeHour, minuteMark, 0, 0);
-  cutoff.setUTCMinutes(cutoff.getUTCMinutes() - 30);
+  cutoff.setUTCMinutes(cutoff.getUTCMinutes() - 60);
 
   return cutoff;
 }
