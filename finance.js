@@ -380,7 +380,9 @@ async function buildFinanceGrid() {
         </div>
 
         <div class="asset-card-content asset-card-content--finance">
-          <p class="forecast-meta"><small>${asset.yesterdayLabel}: ${yesterdayText}</small></p>
+          ${forecastDay === "today"
+            ? `<p class="forecast-meta"><small>${asset.yesterdayLabel}: ${yesterdayText}</small></p>`
+            : ""}
           <p class="forecast-line"><small>${forecastText}</small></p>
 
           <label class="finance-label">
