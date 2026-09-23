@@ -27,10 +27,10 @@ let lazyPendingForecastDate = null;
 let lazyUsed = false;
 
 const HOURLY_LABELS = [
-  "2 PM",   // 1 PM,
-  "8 PM"    // 7 PM
+  "11 AM",   // 10 AM,
+  "5 PM"    // 4 PM
 ];
-const HOURLY_GAME_SWITCH_HOUR_ET = 20; // 19
+const HOURLY_GAME_SWITCH_HOUR = 17; // 16
 const MESOWEST_STATIONS_BY_CITY = {
   "Los Angeles": "KLAX",
   "Houston": "KHOU",
@@ -1345,29 +1345,34 @@ function isPastCutoffForHour(etNow, useTomorrow, hourValue) {
   return etNow >= getHourlyCutoff(etNow, hourValue);
 }
 
-// Fixed hourly forecast date switch at last hourly using actual ET wall-clock hour
-function getHourlyGameDateMeta() {
+// Fixed hourly forecast date switch at last hourly using actual PT wall-clock hour
+function getHourlyGameDate() {
+  const ptParts = getDatePartsInTZ(TIMEZONE_PT);
+
   const etParts = getDatePartsInTZ(TIMEZONE_ET);
   const etNow = new Date(
-    Date.UTC(etParts.year, etParts.month - 1, etParts.day, etParts.hour, etParts.minute, etParts.second)
+    Date.UTC(
+      etParts.year, etParts.month - 1, etParts.day,
+      etParts.hour, etParts.minute, etParts.second
+    )
   );
 
-  const useTomorrow = etParts.hour >= HOURLY_GAME_SWITCH_HOUR_ET;
+  const useTomorrow = ptParts.hour >= HOURLY_GAME_SWITCH_HOUR_PT;
 
-  const gameDateObj = new Date(Date.UTC(etParts.year, etParts.month - 1, etParts.day, 12, 0, 0));
+  const gameDateObj = new Date(
+    Date.UTC(ptParts.year, ptParts.month - 1, ptParts.day, 12)
+  );
+
   if (useTomorrow) {
     gameDateObj.setUTCDate(gameDateObj.getUTCDate() + 1);
   }
 
   const gameDate = toYMD(gameDateObj);
-  const gameDateLabel = `${MONTH_ABBR[gameDateObj.getUTCMonth()]} ${gameDateObj.getUTCDate()}, ${gameDateObj.getUTCFullYear()}`;
+  const gameDateLabel =
+    `${MONTH_ABBR[gameDateObj.getUTCMonth()]} ` +
+    `${gameDateObj.getUTCDate()}, ${gameDateObj.getUTCFullYear()}`;
 
-  return {
-    etNow,
-    useTomorrow,
-    gameDate,
-    gameDateLabel
-  };
+  return { etNow, useTomorrow, gameDate, gameDateLabel };
 }
 
 function updateHourlyButton() {
@@ -1391,9 +1396,9 @@ function updateHourlyButton() {
 
 function updateHourlyCurrentDate() {
   const el = document.getElementById('currentHourlyDate');
-  if (!el) return getHourlyGameDateMeta().gameDate;
+  if (!el) return getHourlyGameDate().gameDate;
 
-  const state = getHourlyGameDateMeta();
+  const state = getHourlyGameDate();
   el.textContent = `Forecast date: ${state.gameDateLabel}`;
   return state.gameDate;
 }
@@ -1776,7 +1781,7 @@ async function buildHourlyGrid() {
   const grid = document.getElementById("hourlyGrid");
   if (!grid || !selectedHour) return;
 
-  const hourlyState = getHourlyGameDateMeta();
+  const hourlyState = getHourlyGameDate();
   const { guesses: hourlyGuesses = [] } = await loadForecastData({
     date: hourlyState.gameDate,
     userIdValue: userId,
@@ -1865,9 +1870,9 @@ async function buildHourlyGrid() {
 }
 
 function convertHourLabel(label) {
-  let num = parseInt(label);
-  if (label.includes("PM") && num !== 12) num += 12;
-  return num;
+  if (label === "11 AM") return 14;
+  if (label === "5 PM") return 20;
+  return NaN;
 }
 
 function getTimeZoneOffsetMs(timeZone, at = new Date()) {
@@ -2210,7 +2215,7 @@ async function handleHourlySubmit(e) {
   document.querySelectorAll(".hourly-validation-msg").forEach(el => el.remove());
   document.querySelectorAll(".hourly-input").forEach(clearInput);
 
-  const hourlyState = getHourlyGameDateMeta();
+  const hourlyState = getHourlyGameDate();
   const etNow = hourlyState.etNow;
   const useTomorrow = hourlyState.useTomorrow;
   const selectedForecastDate = hourlyState.gameDate;
