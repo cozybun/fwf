@@ -273,6 +273,11 @@ async function fetchYesterdayGasPrice() {
     return null;
   }
 
+  console.log("GAS ACTUALS DEBUG", {
+    yesterdayDate,
+    data,
+    error
+  });
   return data?.gas ?? null;
 }
 
