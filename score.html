@@ -1002,8 +1002,7 @@
         <li><strong> Green (🟢)</strong> Perfect or awesome forecast (great accuracy) </li>
         <li><strong> Yellow (🟡)</strong> Good or decent forecast (medium accuracy) </li>
         <li><strong> Red (🔴)</strong> Bad or subpar forecast (poor accuracy) </li>
-        <li><strong> Coins (🪙)</strong> Earn 25🪙 for accuracy within 0.5¢ for gas, $100 for BTC, and $10 for gold </li>
-        <li><strong> Coins (🪙)</strong> Earn 10🪙 for accuracy within 2¢ for gas, $300 for BTC, and $30 for gold </li>
+        <li><strong> Coins (🪙)</strong> Earn 25🪙 for accuracy within 0.5¢ for gas, $100 for BTC, and $10 for gold. Earn 10🪙 for accuracy within 2¢ for gas, $300 for BTC, and $30 for gold </li>
         <li><strong> Aura (💗)</strong> Earn +2💗 for 🟢 accuracy and +1💗 for 🟡 accuracy </li>
         <li><strong> Share</strong> copies the Finance score summary for you to share anywhere 😊 </li>
         <li><strong> What does the fraction at the bottom mean?</strong> <br>
@@ -2242,6 +2241,10 @@
           <div class="finance-score-circle"> ⚪ </div>
         </div>
       `;
+      const statsEl = document.getElementById("stats");
+      const financeGrid = financeSummaryEl.querySelector(".finance-score-grid");
+      if (statsEl && financeGrid && activeCategory === "finance") { financeGrid.insertAdjacentElement("beforebegin", statsEl); }
+      
       const currentStreak = Number(userStatsData?.current_streak) || 0;      
       animateNumber("coinTotal", 0, 800);
       animateSignedNumber("auraTotal", 0, 800);
@@ -2366,6 +2369,9 @@
     
       <br>
     `;
+    const statsEl = document.getElementById("stats");
+    const financeGrid = financeSummaryEl.querySelector(".finance-score-grid");
+    if (statsEl && financeGrid && activeCategory === "finance") { financeGrid.insertAdjacentElement("beforebegin", statsEl); }
     buildFinanceShare(data);
   }
   
