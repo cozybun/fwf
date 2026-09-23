@@ -276,7 +276,7 @@ async function fetchYesterdayGasPrice() {
   return data?.gas ?? null;
 }
 
-async function fetchYesterdayBTCPrice() {
+async function fetchYesterdayBtcPrice() {
   const yesterdayDate = getYesterdayPTYmd();
 
   const { data, error } = await client
@@ -333,8 +333,13 @@ async function buildFinanceGrid() {
     const cached = readCachedForecast(asset.cacheKey);
     const cachedMatches = cached && cached.date === forecastDate;
     let saved = cachedMatches ? { [asset.key]: cached.price } : {};
-
     let yesterdayValue = null;
+    
+    try {
+      yesterdayValue = await fetchYesterdayPrice(asset.key);
+    } catch (err) {
+      console.warn(`Could not load yesterday's ${asset.key} price:`, err);
+    }
 
     if (userId) {
       try {
@@ -351,8 +356,6 @@ async function buildFinanceGrid() {
           saved = data;
           writeCachedForecast(asset.cacheKey, { date: forecastDate, price: data[asset.key] });
         }
-
-        yesterdayValue = await fetchYesterdayPrice(asset.key);
       } catch (err) {
         console.warn(`Finance ${asset.key} load failed:`, err);
       }
