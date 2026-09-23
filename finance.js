@@ -334,10 +334,12 @@ async function buildFinanceGrid() {
     let saved = cachedMatches ? { [asset.key]: cached.price } : {};
     let yesterdayValue = null;
     
-    try {
-      yesterdayValue = await fetchYesterdayPrice(asset.key);
-    } catch (err) {
-      console.warn(`Could not load yesterday's ${asset.key} price:`, err);
+    if (forecastDay === "today") {
+      try {
+        yesterdayValue = await fetchYesterdayPrice(asset.key);
+      } catch (err) {
+        console.warn(`Could not load yesterday's ${asset.key} price:`, err);
+      }
     }
 
     if (userId) {
