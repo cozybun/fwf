@@ -272,12 +272,6 @@ async function fetchYesterdayGasPrice() {
     console.warn("Could not load yesterday gas price:", error);
     return null;
   }
-
-  console.log("GAS ACTUALS DEBUG", {
-    yesterdayDate,
-    data,
-    error
-  });
   return data?.gas ?? null;
 }
 
