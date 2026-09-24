@@ -126,27 +126,19 @@
       justify-content: stretch;
     }
 
-    #financeSummary {
+    #financeSummary .finance-detail-grid { margin: 32px auto 0; }  /* Date → Assets */
+    
+    #financeStatsSlot #stats {  /* Assets → Stats */
+      margin-top: 32px;
       margin-bottom: 0;
     }
     
-    #financeStatsSlot #stats {
-      margin-top: 10px;
-      margin-bottom: 8px;
-    }
+    #financeGridSlot .finance-score-grid { margin-top: 32px; }  /* Stats → Circles */
     
-    #financeGridSlot {
-      margin-bottom: 10px;
-    }
-
-    #financeGridSlot .finance-fraction {
-      margin-top: 10px;
-    }
-
-    #financeGridSlot:has(.finance-fraction) {
-      margin-bottom: 0;
-    }
-
+    #financeGridSlot .finance-fraction { margin-top: 32px; }  /* Circles → Fraction */
+    
+    #financeGridSlot { margin-bottom: 32px; }  /* Fraction → Share */
+    
     .finance-score-grid {
       display: grid;
       font-size: 1.25rem;
@@ -174,7 +166,7 @@
       margin: 1rem 0 2rem;
     }
     
-    .finance-score-fraction {
+    .finance-fraction {
       text-align: center;
       font-size: 1.5rem;
       font-weight: 700;
@@ -680,8 +672,6 @@
       background: var(--brand-blue-hover);
       border-color: var(--brand-blue-hover);
     }
-
-    #shareArea { margin-top: 0; }
     
     #shareBtn {
       background: var(--brand-green);
