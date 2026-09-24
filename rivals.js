@@ -1,165 +1,183 @@
-// Phase 1: NWS observations for NYC. No database writes yet
-
-const RIVAL_STATIONS = {
+const CITIES = {
   "New York City": {
     station: "KNYC",
-    standardUtcOffset: -5, // EST all year
+    standardUtcOffset: -5,
   },
-  "Houston": {
+  Houston: {
     station: "KHOU",
-    standardUtcOffset: -6, // CST all year
+    standardUtcOffset: -6,
   },
   "Los Angeles": {
     station: "KLAX",
-    standardUtcOffset: -8, // PST all year
+    standardUtcOffset: -8,
   },
 };
 
-function getStandardTimeDay(offsetHours, now = new Date()) {
-  // Shift UTC into the city's fixed standard time.
-  const shifted = new Date(
-    now.getTime() + offsetHours * 60 * 60 * 1000
+function getReportingDay(offset, now = new Date()) {
+  const localStandard = new Date(
+    now.getTime() + offset * 3600000
   );
 
-  const date = shifted.toISOString().slice(0, 10);
+  const date = localStandard.toISOString().slice(0, 10);
 
-  // Midnight standard time, expressed in UTC.
   const start = new Date(
-    `${date}T00:00:00Z`
+    Date.parse(`${date}T00:00:00Z`) -
+    offset * 3600000
   );
 
-  start.setUTCHours(
-    start.getUTCHours() - offsetHours
-  );
-
-  const end = new Date(
-    start.getTime() + 24 * 60 * 60 * 1000
-  );
+  const end = new Date(start.getTime() + 86400000);
 
   return { date, start, end };
 }
 
-function celsiusToFahrenheit(celsius) {
-  return celsius * 9 / 5 + 32;
-}
-
-async function fetchObservedTemperatures(cityName) {
-  const city = RIVAL_STATIONS[cityName];
-
-  if (!city) {
-    throw new Error(`Unknown city: ${cityName}`);
-  }
-
-  const { date, start, end } = getStandardTimeDay(
-    city.standardUtcOffset
-  );
-
-  const now = new Date();
-
-  const url = new URL(
-    `https://api.weather.gov/stations/${city.station}/observations`
-  );
-
-  url.searchParams.set("start", start.toISOString());
-  url.searchParams.set(
-    "end",
-    new Date(Math.min(end.getTime(), now.getTime()))
-      .toISOString()
-  );
-
+async function fetchText(url) {
   const response = await fetch(url, {
-    headers: {
-      Accept: "application/geo+json",
-    },
+    cache: "no-store",
   });
 
   if (!response.ok) {
     throw new Error(
-      `NWS request failed: ${response.status}`
+      `${response.status} ${response.statusText}: ${url}`
     );
   }
 
-  const data = await response.json();
+  return response.text();
+}
 
-  const readings = (data.features || [])
-    .map(feature => {
-      const p = feature.properties;
-      const celsius = p?.temperature?.value;
-      const timestamp = p?.timestamp;
+function parseNwsCurrentPage(html) {
+  const doc = new DOMParser().parseFromString(
+    html,
+    "text/html"
+  );
 
-      if (
-        !Number.isFinite(celsius) ||
-        !timestamp
-      ) {
-        return null;
-      }
+  const text = doc.body.innerText || doc.body.textContent;
 
-      const time = new Date(timestamp);
-
-      // Only observations inside today's
-      // local-standard-time calendar day.
-      if (time < start || time >= end || time > now) {
-        return null;
-      }
-
-      return {
-        time: timestamp,
-        fahrenheit: celsiusToFahrenheit(celsius),
-      };
-    })
-    .filter(Boolean)
-    .sort((a, b) => a.time.localeCompare(b.time));
-
-  const temperatures = readings.map(
-    reading => reading.fahrenheit
+  // This is an inspection parser, NOT yet a final
+  // six-hour-extrema calculator.
+  //
+  // The six-hour reports must be checked against
+  // the exact standard-time reporting window.
+  const section = text.match(
+    /Maximum and Minimum Temperatures([\s\S]*?)24 Hour Summary/i
   );
 
   return {
-    city: cityName,
-    station: city.station,
-    date,
-    collectedAt: now.toISOString(),
-    readingCount: readings.length,
-    observedHigh: temperatures.length
-      ? Math.max(...temperatures)
+    sixHourSection: section
+      ? section[1].trim()
       : null,
-    observedLow: temperatures.length
-      ? Math.min(...temperatures)
-      : null,
-    readings,
+    pageText: text,
   };
 }
 
-// Temporary test: NYC only.
-async function testRivals() {
-  console.log("🐍🐺 Testing NYC observations...");
+async function fetchNwsObservations(cityName) {
+  const city = RIVAL_CITIES[cityName];
+  if (!city) throw new Error(`Unknown city: ${cityName}`);
 
-  try {
-    const result = await fetchObservedTemperatures(
-      "New York City"
-    );
+  const url =
+    `https://tgftp.nws.noaa.gov/weather/current/` +
+    `${city.station}.html`;
 
-    console.log("Station:", result.station);
-    console.log("Date:", result.date);
-    console.log("Readings:", result.readingCount);
+  const html = await fetchText(url);
 
+  return {
+    source: "NWS current conditions",
+    city: cityName,
+    station: city.station,
+    url,
+    collectedAt: new Date().toISOString(),
+    ...parseNwsCurrentPage(html),
+  };
+}
+
+async function fetchLamp(cityName) {
+  const city = RIVAL_CITIES[cityName];
+  if (!city) throw new Error(`Unknown city: ${cityName}`);
+  
+  // Inspect its actual response before writing a temperature parser
+  const url = new URL(
+    "https://lamp.mdl.nws.noaa.gov/lamp/meteo/bullpop.php"
+  );
+
+  url.searchParams.set(
+    "sta",
+    city.station.toLowerCase()
+  );
+
+  url.searchParams.set("forecast_time", "22");
+
+  const html = await fetchText(url.toString());
+
+  const doc = new DOMParser().parseFromString(
+    html,
+    "text/html"
+  );
+
+  const text = doc.body.innerText || doc.body.textContent;
+
+  return {
+    source: "NOAA LAMP",
+    city: cityName,
+    station: city.station,
+    url: url.toString(),
+    collectedAt: new Date().toISOString(),
+    text,
+  };
+}
+
+async function testRivals(cityName = "New York City") {
+  const city = RIVAL_CITIES[cityName];
+
+  if (!city) {
+    console.error("Unknown city:", cityName);
+    return;
+  }
+
+  const reportingDay = getReportingDay(
+    city.standardUtcOffset
+  );
+
+  console.log("🐍🐺 RIVALS TEST");
+  console.log("City:", cityName);
+  console.log("Station:", city.station);
+  console.log("Reporting date:", reportingDay.date);
+  console.log(
+    "Reporting window:",
+    reportingDay.start.toISOString(),
+    "to",
+    reportingDay.end.toISOString()
+  );
+
+  const results = await Promise.allSettled([
+    fetchNwsObservations(cityName),
+    fetchLamp(cityName),
+  ]);
+
+  const [nws, lamp] = results;
+
+  if (nws.status === "fulfilled") {
+    console.log("🌡️ NWS:", nws.value);
     console.log(
-      "Observed high so far:",
-      result.observedHigh === null
-        ? "Unavailable"
-        : `${result.observedHigh.toFixed(1)}°F`
+      "Six-hour reports:",
+      nws.value.sixHourSection
     );
+  } else {
+    console.error(
+      "NWS fetch failed:",
+      nws.reason
+    );
+  }
 
+  if (lamp.status === "fulfilled") {
+    console.log("💡 LAMP:", lamp.value);
     console.log(
-      "Observed low so far:",
-      result.observedLow === null
-        ? "Unavailable"
-        : `${result.observedLow.toFixed(1)}°F`
+      "LAMP response preview:",
+      lamp.value.text.slice(0, 3000)
     );
-
-    console.table(result.readings);
-  } catch (error) {
-    console.error("Rivals test failed:", error);
+  } else {
+    console.error(
+      "LAMP fetch failed:",
+      lamp.reason
+    );
   }
 }
 
