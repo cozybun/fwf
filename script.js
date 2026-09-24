@@ -874,7 +874,7 @@ async function checkIncrementDailyStreak(payload, forecastDate, explicitUserId =
   };
 }
 
-// Update user's current mood & streak
+// Update user's current aura & streak
 async function incrementDailyStreak(client, userId, forecastDate = null) {
   if (!client || typeof client.from !== "function") {
     return { ok: false, reason: "NO_CLIENT", error: "Invalid Supabase client." };
@@ -955,7 +955,7 @@ async function incrementDailyStreak(client, userId, forecastDate = null) {
 
     const statsRes = await client
       .from("user_stats")
-      .select("current_streak, record_streak, mood")
+      .select("current_streak, record_streak, aura")
       .eq("user_id", userId)
       .maybeSingle();
 
@@ -968,7 +968,7 @@ async function incrementDailyStreak(client, userId, forecastDate = null) {
 
     const currentStreak = statsRes.data ? Number(statsRes.data.current_streak || 0) : 0;
     const recordStreak = statsRes.data ? Number(statsRes.data.record_streak || 0) : 0;
-    const currentMood = statsRes.data ? Number(statsRes.data.mood || 0) : 0;
+    const currentAura = statsRes.data ? Number(statsRes.data.aura || 0) : 0;
 
     const sameDayRes = await client
       .from("daily_forecasts")
@@ -998,7 +998,7 @@ async function incrementDailyStreak(client, userId, forecastDate = null) {
         data: {
           current_streak: currentStreak,
           record_streak: recordStreak,
-          mood: currentMood,
+          aura: currentAura,
           forecasted_cities_for_date: sameDayCityCount,
           latest_forecast_date: targetYMD,
         },
@@ -1015,7 +1015,7 @@ async function incrementDailyStreak(client, userId, forecastDate = null) {
         data: {
           current_streak: currentStreak,
           record_streak: recordStreak,
-          mood: currentMood,
+          aura: currentAura,
           forecasted_cities_for_date: sameDayCityCount,
           latest_forecast_date: targetYMD,
         },
@@ -1059,7 +1059,7 @@ async function incrementDailyStreak(client, userId, forecastDate = null) {
           data: {
             current_streak: currentStreak,
             record_streak: recordStreak,
-            mood: currentMood,
+            aura: currentAura,
             latest_forecast_date: latest ? toYMD(latest) : null,
           },
         };
@@ -1076,7 +1076,7 @@ async function incrementDailyStreak(client, userId, forecastDate = null) {
     }
 
     if (nextReason === "INCREMENT" || nextReason === "RESET" || nextReason === "INIT") {
-      payload.mood = currentMood + 1;
+      payload.aura = currentAura + 1;
     }
 
     const upRes = await client
@@ -1092,14 +1092,14 @@ async function incrementDailyStreak(client, userId, forecastDate = null) {
       reason: nextReason,
       message:
         nextReason === "INCREMENT"
-          ? `Streak increased +1 to ${nextStreak}, mood +1.`
+          ? `Streak grew +1 to ${nextStreak}, aura +1.`
           : nextReason === "RESET"
-          ? `Streak reset to 1, mood +1.`
-          : `Streak initialized to 1, mood +1.`,
+          ? `Streak reset to 1, aura +1.`
+          : `Streak started at 1, aura +1.`,
       data: {
         current_streak: nextStreak,
         record_streak: payload.record_streak !== undefined ? payload.record_streak : recordStreak,
-        mood: currentMood + 1,
+        aura: currentAura + 1,
         selected_forecast_date: targetYMD,
         previous_forecast_date: prevDate ? toYMD(prevDate) : null,
       },
