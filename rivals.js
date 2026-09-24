@@ -52,11 +52,7 @@ function parseNwsCurrentPage(html) {
 
   const text = doc.body.innerText || doc.body.textContent;
 
-  // This is an inspection parser, NOT yet a final
-  // six-hour-extrema calculator.
-  //
-  // The six-hour reports must be checked against
-  // the exact standard-time reporting window.
+  // An inspection parser, not yet a final six-hour-extrema calculator
   const section = text.match(
     /Maximum and Minimum Temperatures([\s\S]*?)24 Hour Summary/i
   );
@@ -70,7 +66,7 @@ function parseNwsCurrentPage(html) {
 }
 
 async function fetchNwsObservations(cityName) {
-  const city = RIVAL_CITIES[cityName];
+  const city = CITIES[cityName];
   if (!city) throw new Error(`Unknown city: ${cityName}`);
 
   const url =
@@ -90,7 +86,7 @@ async function fetchNwsObservations(cityName) {
 }
 
 async function fetchLamp(cityName) {
-  const city = RIVAL_CITIES[cityName];
+  const city = CITIES[cityName];
   if (!city) throw new Error(`Unknown city: ${cityName}`);
   
   // Inspect its actual response before writing a temperature parser
@@ -125,7 +121,7 @@ async function fetchLamp(cityName) {
 }
 
 async function testRivals(cityName = "New York City") {
-  const city = RIVAL_CITIES[cityName];
+  const city = CITIES[cityName];
 
   if (!city) {
     console.error("Unknown city:", cityName);
