@@ -510,7 +510,7 @@
       cursor: pointer;
     }
 
-    .mode-switch-btn:hover { background: #2F4F4F; color: white; filter: none; }
+    .mode-switch-btn:hover { background: #708090; color: white; filter: none; }
 
     .mode-switch-btn.active {
       background: #f8fafc;
@@ -2682,9 +2682,7 @@
     }
   });
 
-  function getMusicState() {
-    return activeMode === "hourly" ? "ambient" : scoreMusicState;
-  }
+  function getMusicState() { return activeMode === "hourly" ? "ambient" : scoreMusicState; }
 
   function playFallbackMusic() {
     console.log("[score] playFallbackMusic called");
@@ -2741,8 +2739,7 @@
       if (e.key === "Escape" && scoreFaqModal?.classList.contains("is-open")) {
         closeScoreFaqModal();
       }
-    });
-  
+    });  
     setMode(getInitialMode());
     setCategory(activeCategory);
   }
