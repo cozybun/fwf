@@ -2295,7 +2295,7 @@
     const goldCircle = financeCircle(data.coins_gold);
 
     const allScored = data.coins_gas != null && data.coins_btc != null && data.coins_gold != null;
-    setShareEnabled(allScored, "Finance score shareable after all assets are scored.");
+    setShareEnabled(allScored, "Score shareable once all assets are scored");
   
     const successCount = [
       gasCircle,
