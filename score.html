@@ -145,7 +145,7 @@
       grid-template-columns: repeat(3, auto);
       justify-content: center;
       column-gap: 16px;
-      row-gap: 16px;
+      row-gap: 8px;
       text-align: center;
     }
     
@@ -2336,7 +2336,12 @@
           <div>${formatFinanceValue(data.actual_gas, "gas")}</div>
     
           <div class="finance-detail-label">Error</div>
-          <div>${formatFinanceValue(data.error_gas, "gas")}</div>
+          <div>${data.error_gas == null
+            ? "—"
+            : Number(data.error_gas) < 1
+              ? `${(Number(data.error_gas) * 100).toFixed(1)}¢`
+              : formatFinanceValue(data.error_gas, "gas")
+          }</div>
     
           <div class="finance-detail-coins">🪙 ${data.coins_gas ?? 0}</div>
         </div>
