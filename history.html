@@ -1319,7 +1319,9 @@
       if (n === null) return "—";
     
       if (asset === "gas") {
-        return `$${n.toFixed(3)}`;
+        return abs < 1
+          ? `${(abs * 100).toFixed(1)}¢`
+          : `$${abs.toFixed(3)}`;
       }
     
       if (asset === "btc") {
@@ -1380,9 +1382,9 @@
 
     function financeColor(coins) {
       const n = toNumber(coins);    
-      if (n === 25) return "green";
-      if (n === 10) return "yellow";
-      if (n === 1) return "red";    
+      if (n >= 30) return "green";
+      if (n >= 12) return "yellow";
+      if (n >= 1) return "red";    
       return "gray";
     }
 
