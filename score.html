@@ -293,9 +293,9 @@
     }
     
     .score-summary #scoreFraction {
-      font-size: 1.8rem;
-      font-weight: 900;
-      line-height: 1.1;
+      font-size: 1.5rem;
+      font-weight: 800;
+      line-height: 1;
       white-space: nowrap;
     }
     
@@ -1885,9 +1885,7 @@
     }
   }
 
-  const formatShareDate = (label) => {
-    return String(label || "").trim();
-  };
+  const formatShareDate = (label) => String(label || "").trim().replace(/^([A-Za-z]{3,9})\s+(\d{1,2})$/, "$2 $1");
 
   function buildShare(scores = [], totalCoins = 0, totalAura = 0, currentStreak = 0, shareSummary = null) {
     if (!shareBtn) return;
