@@ -360,6 +360,14 @@
       transform: translateY(-1px);
       box-shadow: 0 8px 18px rgba(34, 139, 34, 0.28);
     }
+    
+    #financeSaveBtn, #dailyScoreBtn {
+      width: 15rem;
+      text-align: center;
+      font-family: inherit;
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
 
     @media (max-width: 560px) {
       .finance-navbar {
@@ -371,9 +379,9 @@
       .finance-page-header button,
       #financeSaveBtn,
       #dailyScoreBtn {
-        font-size: 1.05rem;
+        font-size: 1.1rem;
         padding: 0.7rem 1rem;
-        min-height: 2.75rem;
+        min-height: 2.8rem;
       }
 
       .finance-page-header h1 {
@@ -381,7 +389,7 @@
       }
 
       .asset-card {
-        padding: 1rem 1.05rem;
+        padding: 1rem 1.1rem;
         max-width: 100%;
       }
 
@@ -393,7 +401,7 @@
       #musicToggle {
         width: 1.75rem;
         height: 1.75rem;
-        font-size: 0.95rem;
+        font-size: 1rem;
       }
     }
   </style>
@@ -408,7 +416,7 @@
 
     <div class="music-wrap">
       <audio id="bgMusic" preload="none"></audio>
-      <button id="musicToggle" type="button" aria-label="Toggle background music">🔇</button>
+      <button id="musicToggle" type="button" aria-label="Toggle background music"> 🔇 </button>
       <span id="musicStatus" aria-live="polite" style="display:none;"></span>
     </div>
   </header>
@@ -429,7 +437,7 @@
 
       <ul class="daily-help-list">
         <li> Choose <strong> Today </strong> or <strong> Tomorrow </strong> from the forecast day selector. </li>
-        <li> Enter your forecast for the asset price before the cutoff time. </li>
+        <li> Enter your forecast for each asset price before the cutoff time. </li>
         <li> Feel free to use market data, web search, LLMs, current prices, or your own analysis to help guide forecasts. </li>
         <li> Click <strong> Save </strong> to save your forecasts. You can edit forecasts until the cutoff time for each asset. Good luck! </li>
         <li> Click <strong> View My Score </strong> after reveal time to see verified results and your shareable score. Have fun 😊 </li>
