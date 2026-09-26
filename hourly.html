@@ -255,7 +255,7 @@
   <div style="text-align:center;margin:1rem 0 0.5rem;">
     <a href="score?mode=hourly">
       <button type="button" id="hourlyScoreBtn" class="hourly-action-btn">
-        🎯 View My Scores
+        🎯 View My Score
       </button>
     </a>
   </div>
@@ -267,7 +267,7 @@
     const displayEl = document.getElementById('currentHourlyDateDisplay');  // what user sees
     if (!rawEl || !displayEl) return;
   
-    const monthNames = ['Jan','Feb','Mar','Apr','May','June','July','Aug','Sept','Oct','Nov','Dec'];
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
   
     const toDDMonYYYY = (raw) => {
       const txt = raw.trim();  
